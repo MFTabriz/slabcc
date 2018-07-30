@@ -5,7 +5,7 @@
 * think this stuff is worth it, you can buy me a beer in return.
 https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/
 
-Code has been converted to Armadillo data type to use in kpcc by https://github.com/MFTabriz
+Code has been converted to Armadillo data type to use in slabcc by https://github.com/MFTabriz
 
 */
 #include <vector>

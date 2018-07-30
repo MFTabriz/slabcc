@@ -68,10 +68,10 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 	auto cli = clara::Help(showHelp) |
 		clara::Opt(input_file, "input_file")
 		["-i"]["--input"]
-		("kpcc input file name") |
+		("slabcc input file name") |
 		clara::Opt(output_file, "input_file")
 		["-o"]["--output"]
-		("kpcc output file name") |
+		("slabcc output file name") |
 		clara::Opt(showManual)
 		["-m"]["--man"]
 		("show quick start guide") |

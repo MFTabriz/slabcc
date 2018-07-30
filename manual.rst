@@ -170,7 +170,7 @@ You can run slabcc without any additional options. Or you can use the following 
 ======================
 Input parameters
 ======================
-Kpcc reads all its parameters from the input file (by default: `slabcc.in`) You can change the input file's name using the `command-line parameters`_.
+slabcc reads all its parameters from the input file (by default: `slabcc.in`) You can change the input file's name using the `command-line parameters`_.
 The input file is processed as follows:
 
 - Lines starting with # will be treated as comments. Inline comments are also allowed.
