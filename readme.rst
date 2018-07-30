@@ -91,7 +91,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output **here**!
+You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323559>`_!
 
 ============
 Installation 
