@@ -35,7 +35,7 @@ void INIReader::dump_parsed(std::ofstream& out_file) const {
 	});
 
 	if (is_active(verbosity::steps)) {
-		cout << timing() << "-------------kpcc parameters-------------" << endl;
+		cout << timing() << "-------------slabcc parameters-------------" << endl;
 		for (const auto &i : _parsed) {
 			std::cout << timing() << i.at(0) << " = " << i.at(1) << std::endl;
 		}
