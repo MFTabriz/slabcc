@@ -1,4 +1,4 @@
-**Note**: github does not support the math in reStructuredText format. Please check the "manual.html" for proper rendering!
+**Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
 :Last updated: 29 July 2018
 :version: 0.3
