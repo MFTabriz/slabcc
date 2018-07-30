@@ -47,7 +47,7 @@ Input parameters file for a slab should minimally include (all in relative scale
 
 Example
 --------
-The following examples list the `input parameters`_ to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory.
+The following examples list the input parameters to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory. Please read the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for complete list of the input parameters.
 
 1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside of the slab is assumed to be isotropic (``diel_in = 4.8``)::
 
@@ -84,7 +84,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     CHGCAR_neutral = UNCHARGED_CHGCAR
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
-	diel_out = 4.8
+    diel_out = 4.8
     optimize_interface = no
 
 	
@@ -108,18 +108,6 @@ Installation
     make STATIC=1
 
  (You will need static version of the compiled libraries for static linking) 
-
-=======================
-Command-line parameters
-=======================
-You can run slabcc without any additional options. Or you can use the following options to modify its behavior:
-
--h, --help						Display usage information (this list)
--i, --input <input_file>		slabcc input file name
--o, --output <input_file>		slabcc output file name
--m, --manual					Show quick start guide
--v, --version					Show version and compilation date
--c, --copyright					Show copyright information and the attributions
 
 ==================================
 Known issues and limitations
