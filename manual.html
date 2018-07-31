@@ -1076,7 +1076,7 @@ span.boxed, span.framebox {
 <col class="docinfo-name" />
 <col class="docinfo-content" />
 <tbody valign="top">
-<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">29 July 2018</td>
+<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">31 July 2018</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
 <td>0.3</td></tr>
@@ -1119,12 +1119,12 @@ span.boxed, span.framebox {
 <blockquote>
 Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: <a class="reference external" href="https://doi.org/10.1103/PhysRevLett.110.095505">10.1103/PhysRevLett.110.095505</a> <a class="reference external" href="https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf">(Supplements)</a></blockquote>
 <p>This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using a simple Gaussian model.
-The model charge is assumed to be embedded in a medium with dielectric-tensor profile depending only on one space axis ε(k) orthogonal to the slab.
+The model charge is assumed to be embedded in a medium with dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) which is orthogonal to the slab.
 The energy correction is calculated as:</p>
 <blockquote>
 E<sub>corr</sub>  = E<sub>isolated</sub> - E<sub>periodic</sub> - qΔV</blockquote>
 <p>where, E<sub>corr</sub> is the total energy correction for the model,
-E<sub>periodic</sub> is the energy of the model charge, calculated by solving the periodic Poisson equation. E<sub>isolated</sub> is the energy of the model charge embedded in the dielectric profile and is either determined by extrapolation or analytic (for simple cases).
+E<sub>periodic</sub> is the energy of the model charge, calculated by solving the periodic Poisson equation. E<sub>isolated</sub> is the energy of the model charge embedded in the dielectric medium and is determined by extrapolation.
 q is the total extra charge and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.</p>
 <div class="line-block">
 <div class="line">The code have been initially developed for <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
@@ -1132,8 +1132,8 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <div class="section" id="algorithm">
 <h2><a class="toc-backref" href="#id12">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
 <ul class="simple">
-<li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
-<li>Extra charge is modeled by a Gaussian charge distribution as:</li>
+<li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
+<li>The extra charge is modeled by a Gaussian charge distribution as:</li>
 </ul>
 <div class="formula">
 <i>ρ</i>(<i>r</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><sup>3</sup>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><sup>2</sup></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><sup>2</sup></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
@@ -1145,7 +1145,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <div class="formula">
 <i>ϵ</i>(<i>k</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> − <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="text"> erf</span><span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>k</i> − <i>k</i><sub>0</sub></span><span class="ignored">)/(</span><span class="denominator"><i>β</i></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> + <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span>
 </div>
-<p>where k<sub>0</sub> is the interface position in k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotrope dielectric tensor as:</p>
+<p>where k<sub>0</sub> is the interface position in Cartesian k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotrope dielectric tensor as:</p>
 <div class="formula">
 <i>ϵ</i> = <span class="array"><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span></span><span class="environment"><span class="arrayrow">
 <span class="arraycell align-l">
@@ -1216,7 +1216,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <i>ϵ</i>(<i>k</i>)∇<sup>2</sup><i>V</i>(<i>r</i>) + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>ϵ</i>(<i>k</i>)<span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>V</i>(<i>r</i>) =  − <i>ρ</i>(<i>r</i>)
 </div>
 <ul class="simple">
-<li>If the <tt class="docutils literal">optimize</tt> parameter is set, a non-linear optimization routine will minimize difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
+<li>If the <tt class="docutils literal">optimize</tt> parameter is set, a non-linear optimization routine will minimize the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
 <li>The E<sub>periodic</sub> is calculated as:</li>
 </ul>
 <div class="formula">
@@ -1299,7 +1299,7 @@ optimize_interface = no
 </div>
 <div class="section" id="test-set">
 <h2><a class="toc-backref" href="#id15">2.2&nbsp;&nbsp;&nbsp;Test set</a></h2>
-<p>You can download a complete test set including input files, input parameters and expected output <a href="https://doi.org/10.5281/zenodo.1323559">here</a>!</p>
+<p>You can download a complete test set including input files, input parameters and expected output <a class="reference external" href="https://doi.org/10.5281/zenodo.1323559">here</a>!</p>
 </div>
 </div>
 <div class="section" id="installation">
@@ -1328,7 +1328,7 @@ make STATIC=1
 </div>
 <div class="section" id="command-line-parameters">
 <h1><a class="toc-backref" href="#id17">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></h1>
-<p>You can run slabcc without any additional options. Or you can use the following options to modify its behavior:</p>
+<p>You can run slabcc without any additional options. Alternatively, you can use the following options to modify its behavior:</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />

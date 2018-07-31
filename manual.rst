@@ -1,6 +1,6 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 29 July 2018
+:Last updated: 31 July 2018
 :version: 0.3
 
 .. sectnum::
@@ -15,21 +15,21 @@ SLABCC calculates an *a posteriori* energy correction for charged slab models un
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
  
 This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using a simple Gaussian model.
-The model charge is assumed to be embedded in a medium with dielectric-tensor profile depending only on one space axis ε(k) orthogonal to the slab.
+The model charge is assumed to be embedded in a medium with dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) which is orthogonal to the slab.
 The energy correction is calculated as:
 
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
 
 where, E\ :sub:`corr` \ is the total energy correction for the model, 
-E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric profile and is either determined by extrapolation or analytic (for simple cases).
+E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and is determined by extrapolation.
 q is the total extra charge and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
 
 | The code have been initially developed for `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
 
 Algorithm
 ----------
-* slabcc reads `VASP <https://www.vasp.at>`_ output files (CHGCAR and LOCPOT), calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.
-* Extra charge is modeled by a Gaussian charge distribution as:
+* slabcc reads `VASP <https://www.vasp.at>`_ output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.
+* The extra charge is modeled by a Gaussian charge distribution as:
 
 .. math::
 
@@ -42,7 +42,7 @@ which gives a charge distribution normalized to q with standard deviation of σ 
 .. math::
   \epsilon (k) =  \frac{\epsilon_2-\epsilon_1}{2} \text{erf}\left(\frac{k-k_0 }{\beta}\right)+\frac{\epsilon_2+\epsilon_1}{2}
 
-where k\ :sub:`0` \ is the interface position in k-direction, ε\ :sub:`1` \ and ε\ :sub:`2` \ are dielectric tensors on either side of interface (``diel_in`` & ``diel_out``) and β (``diel_taper``) defines the smoothness of transition assuming anisotrope dielectric tensor as:
+where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub:`1` \ and ε\ :sub:`2` \ are dielectric tensors on either side of interface (``diel_in`` & ``diel_out``) and β (``diel_taper``) defines the smoothness of transition assuming anisotrope dielectric tensor as:
 
 .. math::
  \epsilon = 
@@ -57,7 +57,7 @@ where k\ :sub:`0` \ is the interface position in k-direction, ε\ :sub:`1` \ and
 .. math::
 	 \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
 
-* If the ``optimize`` parameter is set, a non-linear optimization routine will minimize difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
+* If the ``optimize`` parameter is set, a non-linear optimization routine will minimize the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
 
 * The E\ :sub:`periodic` is calculated as:
 
@@ -130,10 +130,10 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     CHGCAR_neutral = UNCHARGED_CHGCAR
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
-	diel_out = 4.8
+    diel_out = 4.8
     optimize_interface = no
 
-	
+
 Test set
 --------
 
@@ -158,11 +158,11 @@ Installation
 =======================
 Command-line parameters
 =======================
-You can run slabcc without any additional options. Or you can use the following options to modify its behavior:
+You can run slabcc without any additional options. Alternatively, you can use the following options to modify its behavior:
 
--h, --help						Display usage information (this list)
--i, --input <input_file>		slabcc input file name
--o, --output <input_file>		slabcc output file name
+-h, --help					Display usage information (this list)
+-i, --input <input_file>			slabcc input file name
+-o, --output <input_file>			slabcc output file name
 -m, --manual					Show quick start guide
 -v, --version					Show version and compilation date
 -c, --copyright					Show copyright information and the attributions
