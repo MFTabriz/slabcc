@@ -2,19 +2,6 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
-
-//TODO before release:
-//		check various verbosity levels
-
-
-//Development plans:
-//	IMPORTANT:
-//		add restart option
-//		refactor and write proper unit tests
-//		add gz streaming support for input files
-//		automatic initial charge position estimation
-//		generalize to different cell shapes
-
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
@@ -31,59 +18,6 @@ chrono::time_point<chrono::steady_clock> t0; //initial start time of the program
 
 int main(int argc, char *argv[])
 {
-	//tests
-	//cout << fixed << showpos << setprecision(10);
-	//rowvec3 length0 = { 15, 15, 10 };
-	//length0 *= ang_to_bohr;
-	//urowvec grid0 = { 150, 150, 100 };
-	//UpdateCell(length0, grid0);
-	//slabcc_cell.normal_direction = 2;
-	//rowvec Qd1 = { -1 };
-	//rowvec sigma1 = {  0.5 };
-	//rowvec3 diel_in1 = { 6,6,2 };
-	//rowvec3 diel_out1 = { 1,1,1 };
-	//mat cpos = { 2.5,2.5,1.5 };
-	//mat charge_position1 = cpos/length0*ang_to_bohr;
-	//double ifabs1 = 1;
-	//double ifabs2 = 2.5;
-	//rowvec2 interfaces0 = { ifabs1 / length0(2), ifabs2 / length0(2) };
-	//interfaces0 *= ang_to_bohr;
-	//double erfb = 0.01;
-	//int steps_num = 15;
-	//verbos = 5;
-	//cx_cube rhoMt(as_size(slabcc_cell.grid), fill::zeros);
-	//for (int i = 0; i < charge_position1.n_rows; i++) {
-	//	rhoMt += gaussian_charge(Qd1(i), charge_position1.row(i) % length0, sigma1(i));
-	//}
-	//double Qt = accu(real(rhoMt)) * slabcc_cell.voxel_vol;
-	//cout << "Q "<< Qt << endl;
-
-	//mat diels0 = dielectric_profiles(interfaces0, diel_in1, diel_out1, erfb);
-	//auto Vt = poisson_solver_3D(rhoMt, diels0);
-	////write_planar_avg(Vt * Hartree_to_eV, rhoMt * slabcc_cell.voxel_vol, "T");
-	//double EperModel00 = 0.5 * accu(real(Vt) % real(rhoMt- Qt / prod(slabcc_cell.lengths))) * slabcc_cell.voxel_vol * Hartree_to_eV;
-	//cout << timing() << "Scaling\tEper(Model)\tif1\tif2\tpos" << endl;
-	//cout << timing() << "1\t\t" << EperModel00 << "\t" << interfaces0(0) * slabcc_cell.lengths(slabcc_cell.normal_direction) << "\t" << interfaces0(1) * slabcc_cell.lengths(slabcc_cell.normal_direction) << "\t" << charge_position1(0, slabcc_cell.normal_direction) * slabcc_cell.lengths(slabcc_cell.normal_direction) << endl;
-	//rowvec Es1 = zeros<rowvec>(steps_num), sizes1 = Es1;
-	//tie(Es1, sizes1) = extrapolate_2D(steps_num, 0.5 , diel_in1, diel_out1, interfaces0, erfb, charge_position1, Qd1, sigma1, 2.5);
-	//
-	//
-	//length0 /= max(length0);
-	//const double radius = 10;
-	//auto ewald_shells = generate_shells(length0, radius);
-	//const double madelung_const = jellium_madelung_constant(ewald_shells, length0, 1);
-	//cout << "Madelung constant = " << madelung_const << endl;
-	//double madelung_term = - pow(Qt, 2) * madelung_const / 2;
-	//nonlinear_fit_data fit_data = { Es1 ,sizes1, madelung_term };
-	//auto cs = nonlinear_fit(1e-18, fit_data);
-	//for (auto c : cs) {
-	//	cout << c << endl;
-	//}
-	//double Eiso = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
-	//cout << "Eiso = "<<Eiso << endl;
-	//exit(0);
-
-
 	t0 = chrono::steady_clock::now();
 
 	string input_file = "slabcc.in";
