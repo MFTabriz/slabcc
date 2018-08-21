@@ -121,22 +121,12 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 
 double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data)
 {
-
-	//input variables from the optimizer
-	const rowvec2 interfaces = { x.at(0), x.at(1) };
-	const uword variable_per_charge = 5;
-	const uword defects = x.size() / variable_per_charge;
-	rowvec sigma = zeros<rowvec>(defects);
-	rowvec Qd = zeros<rowvec>(defects);
-	mat defcenter(defects, 3, fill::zeros);
-
-	for (uword i = 0; i < defects; ++i) {
-		sigma(i) = x.at(2 + variable_per_charge * i);
-		Qd(i) = x.at(3 + variable_per_charge * i);
-		for (uword j = 0; j < 3; ++j) {
-			defcenter(i, j) = x.at(4 + i * variable_per_charge + j);
-		}
-	}
+	
+	rowvec2 interfaces;
+	rowvec sigma, Qd;
+	mat defcenter;
+	opt_vars variables = { interfaces, sigma, Qd, defcenter };
+	optimizer_unpacker(x, variables);
 
 	//input data
 	const auto d = static_cast<opt_data *>(slabcc_data);
@@ -146,6 +136,10 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	const cube &defect_potential = d->defect_potential;
 	const rowvec3 &cell = slabcc_cell.lengths;
 	const double volume = prod(cell);
+	const double &Q0 = d->Q0;
+
+	//rest of the charge goes to the last Gaussian
+	Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 
 	//output data
 	mat& diels = d->diels;
@@ -175,7 +169,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	if (is_active(verbosity::detailed_progress)) {
 		cout << timing() << "-----------------------------------------" << endl;
 		cout << timing() << "> shifted_interfaces=" << x.at(0) << " " << x.at(1) << endl;
-		for (uword i = 0; i < defects; ++i) {
+		for (uword i = 0; i < Qd.n_elem; ++i) {
 			cout << timing() << "> charge_sigma=" << sigma(i) << " charge_fraction="<< abs(Qd(i)/accu(Qd)) << endl;
 			cout << timing() << "> shifted_charge_position=" << defcenter(i, 0) << " " << defcenter(i, 1) << " " << defcenter(i, 2) << endl;
 		}
@@ -188,7 +182,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	return pot_MSE;
 }
 
-double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interface) {
+double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interfaces) {
 	double pot_MSE_min = 0;
 	auto opt_algorithm = nlopt::LN_COBYLA;
 	if (opt_algo == "BOBYQA") {
@@ -202,7 +196,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	}
 
 	vector<double> opt_param, low_b, upp_b;
-	tie(opt_param, low_b, upp_b) = optimizer_packer(opt_vars, optimize_charge, optimize_interface);
+	tie(opt_param, low_b, upp_b) = optimizer_packer(opt_vars, optimize_charge, optimize_interfaces);
 	nlopt::opt opt(opt_algorithm, opt_param.size());
 
 	opt.set_lower_bounds(low_b);
@@ -218,12 +212,12 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	}
 	if (opt_vars.Qd.n_elem > 1) {
 		//add constraint to keep the total charge constant
-		opt.add_equality_constraint(opt_charge_constraint, &opt_data, 1e-8);
+		opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-8);
 	}
 
 	if (is_active(verbosity::steps)) {
 		const int var_per_charge = (opt_vars.Qd.n_elem == 1) ? 4 : 5;
-		const int opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interface;
+		const int opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interfaces;
 		cout << timing() << "Started optimizing " << opt_parameters << " parameters" << endl;
 		cout << timing() << "NLOPT version: " << nlopt::version_major() << "." << nlopt::version_minor() << "." << nlopt::version_bugfix() << endl;
 		cout << timing() << "Optimization algorithm: " << string(opt.get_algorithm_name()) << endl;
@@ -264,54 +258,60 @@ tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt
 	}
 
 	for (uword i = 0; i < opt_vars.charge_position.n_rows; ++i) {
+		for (uword j = 0; j < 3; ++j) {
+			opt_param.push_back(opt_vars.charge_position(i, j));
+			if (optimize_charge) {
+				low_b.push_back(0);
+				upp_b.push_back(1);
+			}
+			else {
+				low_b.push_back(opt_vars.charge_position(i, j));
+				upp_b.push_back(opt_vars.charge_position(i, j));
+			}
+		}
+
 		opt_param.push_back(opt_vars.sigma(i));
 		opt_param.push_back(opt_vars.Qd(i));
 		const auto min_charge = min(0.0, accu(opt_vars.Qd));
 		const auto max_charge = max(0.0, accu(opt_vars.Qd));
 		if (optimize_charge) {
-			low_b.insert(low_b.end(), { 0.1, min_charge, 0, 0, 0 });	//sigma, q, x, y, z
-			upp_b.insert(upp_b.end(), { 7, max_charge, 1, 1, 1 });
+			low_b.insert(low_b.end(), { 0.1, min_charge });	//sigma, q
+			upp_b.insert(upp_b.end(), { 7, max_charge });
 		}
 		else {
 			low_b.insert(low_b.end(), { opt_vars.sigma(i), opt_vars.Qd(i) });
 			upp_b.insert(upp_b.end(), { opt_vars.sigma(i), opt_vars.Qd(i) });
 		}
-
-
-		for (uword j = 0; j < 3; ++j) {
-			opt_param.push_back(opt_vars.charge_position(i, j));
-			if (!optimize_charge) {
-				low_b.push_back(opt_vars.charge_position(i, j));
-				upp_b.push_back(opt_vars.charge_position(i, j));
-			}
-		}
 	}
 
-	//if we have only one charge, there's no need to optimize the Qd
-	if (opt_vars.charge_position.is_rowvec()) {
-		low_b.at(3) = opt_vars.Qd(0);
-		upp_b.at(3) = opt_vars.Qd(0);
-	}
+	//remove the last Qd from the parameters 
+	//This gives a better chance to optimizer and also removes the Qd if we have only one charge
+	opt_param.pop_back();
+	upp_b.pop_back();
+	low_b.pop_back();
 
 	return make_tuple(opt_param, low_b, upp_b);
 }
 
-void optimizer_unpacker(const vector<double> &optimized_vars, opt_vars &opt_vars) {
+void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_vars) {
 	// the coefficients in this part depend on the set of our variables
-	// they are ordered as: interfaces, :|[sigma, q, x, y, z]|:
+	// they are ordered as: interfaces, :|[x, y, z, sigma, q]|:
+	// the last "q" must be calculated from the total charge
 	const uword variable_per_charge = 5;
-	const uword n_charges = optimized_vars.size() / variable_per_charge;
-	rowvec sigma = zeros<rowvec>(n_charges);
-	rowvec Qd = zeros<rowvec>(n_charges);
-	mat positions = zeros(n_charges, 3);
-	opt_vars.interfaces = { optimized_vars.at(0), optimized_vars.at(1) };
+	const uword n_charges = optimizer_vars_vec.size() / variable_per_charge;
+	opt_vars.sigma = zeros<rowvec>(n_charges);
+	opt_vars.Qd = zeros<rowvec>(n_charges);
+	opt_vars.charge_position = zeros(n_charges, 3);
+	opt_vars.interfaces = { optimizer_vars_vec.at(0), optimizer_vars_vec.at(1) };
 
 	for (uword i = 0; i < n_charges; ++i) {
-		opt_vars.sigma(i) = optimized_vars.at(2 + variable_per_charge * i);
-		opt_vars.Qd(i) = optimized_vars.at(3 + variable_per_charge * i);
 		for (uword j = 0; j < 3; ++j) {
-			opt_vars.charge_position(i, j) = optimized_vars.at(4 + i * variable_per_charge + j);
+			opt_vars.charge_position(i, j) = optimizer_vars_vec.at(2 + i * variable_per_charge + j);
 		}
+		opt_vars.sigma(i) = optimizer_vars_vec.at(5 + variable_per_charge * i);
+		if (i != n_charges - 1) {
+			opt_vars.Qd(i) = optimizer_vars_vec.at(6 + variable_per_charge * i);
+		}	
 	}
 }
 
@@ -428,17 +428,18 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data)
 {
-	const int variable_per_charge = 5;
-	const int n_charges = x.size() / variable_per_charge;
-	rowvec Qd = zeros<rowvec>(n_charges);
-	for (uword i = 0; i < n_charges; ++i) {
-		Qd(i) = x.at(3 + variable_per_charge * i);
-	}
+	rowvec2 interfaces;
+	rowvec sigma, Qd;
+	mat defcenter;
+	opt_vars variables = { interfaces, sigma, Qd, defcenter };
+	optimizer_unpacker(x, variables);
 
 	const auto d = static_cast<const opt_data *>(data);
-	const auto constraint = accu(Qd) - d->Q0;
+	auto Q0 = d->Q0;
+	Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
+	const auto constraint = -Qd(Qd.n_elem - 1)  * Q0;
 	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Total charge error : " << abs(constraint) << endl;
+		cout << timing() << "Charge in each Gaussian: " << Qd << endl;
 	}
 	return constraint;
 }
@@ -569,7 +570,6 @@ double fit_eval(const vector<double> &c, vector<double> &grad, void *data)
 	const double madelung_term = d->madelung_term;
 	const rowvec model_energies = c.at(0) + c.at(1) * scales + c.at(2) * square(scales) + (c.at(1) - madelung_term) / c.at(3) * exp(-c.at(3) * scales);
 	const double fit_MSE = accu(square(energies - model_energies));
-	//cout << "MSE: " << fit_MSE << endl;
 	return fit_MSE;
 }
 

@@ -1,3 +1,7 @@
+// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyrights licensed under the 2-Clause BSD License.
+// See the accompanying LICENSE.txt file for terms.
+
 #pragma once
 #include "slabcc_math.hpp"
 
@@ -81,7 +85,7 @@ void swap_axes(supercell& structure, const uword& axis1, const uword& axis2);
 void write_CHGPOT(const string& type, const string& file_name, const supercell& structure);
 
 //writes POSCAR of a supercell to a file
-void write_POSCAR(const supercell& structure, string& file_name);
+void write_POSCAR(const supercell& structure, const string& file_name);
 
 //Planar average of grid-based data in the desired direction from a supecell
 //type: "CHGCAR", "POTCAR"

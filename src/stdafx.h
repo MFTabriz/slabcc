@@ -1,12 +1,11 @@
 // stdafx.h : include file for standard system include files,
 // or project specific include files that are used frequently, but
 // are changed infrequently
-//
 
 #pragma once
 
 //comment the next line while developing the code! Uncommenting will disable the range checks in Armadillo.
-//#define ARMA_NO_DEBUG
+#define ARMA_NO_DEBUG
 
 
 #include "targetver.h"

@@ -9,8 +9,10 @@ extern const double Hartree_to_eV;
 
 // These functions are providing the basic functions needed in various stages of calculation:
 // generating a 1D dielectric profile
-// generating a 3D Gaussian charge distribution in receporical space
+// generating a 3D Gaussian charge distribution
+// solving the Poisson equation
 // estimating the average error of the model potential
+// optimizing the model parameters
 
 struct slabcc_cell_type {
 
@@ -22,7 +24,7 @@ struct slabcc_cell_type {
 
 	uword normal_direction = 0;
 
-	// vocel volume of the grid in Bohr^3
+	// voxel volume of the grid in Bohr^3
 	double voxel_vol = 0;
 };
 
@@ -42,7 +44,7 @@ struct input_data {
 	double &extrapol_steps_size;
 };
 
-//the input data for optimizer function
+//input data for the optimizer function
 struct opt_data {
 	const double &Q0, &diel_erf_beta;
 	const rowvec &diel_in, &diel_out;
@@ -73,7 +75,7 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 void UpdateCell(const rowvec3& lengths, const urowvec3& divi);
 
 //Produces Gaussian charge distribution in reciprocal space and transforms back to real space
-// Q is total charge, pos is the position in real space (cartesian), sigma is the width
+// Q is total charge, pos is the position in real space (cartesian), sigma is the Gaussian width
 cx_cube gaussian_charge(const double& Q, const rowvec3& pos, const double& sigma);
 
 
@@ -82,7 +84,7 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel);
 
 
 //calculates local: V, V_diff, rhoM (without jellium), diels, Q
-//returns: mean squared error of the model charge  potential 
+//returns: mean squared error (MSE) of the model charge potential 
 double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data);
 
 // runs the NLOPT with:
@@ -91,24 +93,25 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 // max number of evaluations: "max_eval"
 // reference to the data: "opt_data"
 // reference to the variables to be optimized: "opt_vars"
-double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interface);
+double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interfaces);
 
-//packs the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
+//pack the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
+//returned vectors are "optimization parameters", "lower boundaries", "upper boundaries"
 tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interface);
 
-//assigns the "optimized_vars" to the main body variables through the references in the opt_vars struct
-void optimizer_unpacker(const vector<double> &optimized_vars, opt_vars &opt_vars);
+//unpack the optimization variable structure into opt_vars struct variables
+void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_vars);
 
 //sanity check on the input parameters
 void check_inputs(input_data input_set);
 
-//check or enforces some conditions on the supercell grid sizes and the shape
+//check or enforce some conditions on the supercell grid sizes and the shape
 void check_cells(supercell& Neutral_supercell, supercell& Charged_supercell, input_data input_set);
 
 //parse the parameters from the input file
 void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set);
 
-//optimization constraint to ensure total charge does not change
+//optimization constraint to ensure all the Gaussian charges have the same sign
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data);
 
 // returns the extrapolated sizes and the energies

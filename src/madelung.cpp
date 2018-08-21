@@ -1,3 +1,7 @@
+// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyrights licensed under the 2-Clause BSD License.
+// See the accompanying LICENSE.txt file for terms.
+
 #include "madelung.hpp"
 
 mat generate_shells(const rowvec3 &lattice_vectors, const double &radius) {

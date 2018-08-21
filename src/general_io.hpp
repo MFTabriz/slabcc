@@ -1,3 +1,7 @@
+// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyrights licensed under the 2-Clause BSD License.
+// See the accompanying LICENSE.txt file for terms.
+
 #pragma once
 #include "stdafx.h"
 #include "clara.hpp"

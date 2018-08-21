@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
-
 using namespace std;
 
 //verbosity level to be compared with "enum verbosity" by is_active()
@@ -16,8 +15,10 @@ const double Hartree_to_eV = 27.2113714880369;
 const float version = 0.3F;
 chrono::time_point<chrono::steady_clock> t0; //initial start time of the program
 
+
 int main(int argc, char *argv[])
 {
+
 	t0 = chrono::steady_clock::now();
 
 	string input_file = "slabcc.in";
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 	int extrapol_steps_num = 0;		//number of extrapolation steps for E_isolated calculation
 	double extrapol_steps_size = 0; //size of each extrapolation step with respect to the initial supercell size
 	bool optimize_charge = false;	//optimize the charge_position and sigma
-	bool optimize_interface = false;//optimize the position of interfaces
+	bool optimize_interfaces = false;//optimize the position of interfaces
 	bool extrapol_slab = true;		//extrapolate the slab thickness or not!
 
 	// parameters read from the input file
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
 		CHGCAR_NEU, LOCPOT_CHG, LOCPOT_NEU, CHGCAR_CHG, 
 		opt_algo, charge_position, Qd, sigma, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
-		opt_tol, optimize_charge, optimize_interface, extrapol_slab, opt_grid_x, extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
+		opt_tol, optimize_charge, optimize_interfaces, extrapol_slab, opt_grid_x, extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
 	parse_input_params(input_file, output_fstream, input_file_variables);
 	
@@ -172,7 +173,7 @@ int main(int argc, char *argv[])
 	// variables to optimize
 	opt_vars opt_vars = { interfaces, sigma, Qd, charge_position };
 
-	if (optimize_charge || optimize_interface) {
+	if (optimize_charge || optimize_interfaces) {
 		//interpolation grid
 		rowvec vx = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(0));
 		rowvec vy = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(1));
@@ -187,12 +188,12 @@ int main(int argc, char *argv[])
 		//data needed for potential error calculation
 		opt_data optimize_data = { Q0, diel_erf_beta, diel_in, diel_out, interpolated_potential, diels, rhoM, V, V_diff, initial_pot_MSE };
 		UpdateCell(cell, SizeVec(interpolated_potential));
-		pot_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interface);
+		pot_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interfaces);
 		UpdateCell(cell, grid);
 
 		//write the unshifted optimized values to the file
 		output_fstream << endl << "[Optimized_parameters]" << endl;
-		if (optimize_interface) {
+		if (optimize_interfaces) {
 			const rowvec2 original_interfaces = fmod_p(interfaces - rounded_relative_shift(normal_direction), 1);
 			output_fstream << "interfaces_optimized = " << original_interfaces << endl;
 		}

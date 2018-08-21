@@ -1,5 +1,5 @@
-:Last updated: 30 July 2018
-:version: 0.3
+:Last updated: 21 Aug 2018
+:version: 0.3.1
 
 .. sectnum::
 
@@ -85,7 +85,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
     diel_out = 4.8
-    optimize_interface = no
+    optimize_interfaces = no
 
 	
 Test set

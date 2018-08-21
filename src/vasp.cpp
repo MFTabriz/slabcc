@@ -330,3 +330,4 @@ void write_planar_avg(const cx_cube& potential_data, const cx_cube& charge_data,
 	write_vec2file(AV2, "slabcc_" + id + "YCHG.dat");
 	write_vec2file(AV3, "slabcc_" + id + "ZCHG.dat");
 }
+
