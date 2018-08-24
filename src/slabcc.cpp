@@ -295,6 +295,11 @@ int main(int argc, char *argv[])
 	cout << timing() << "Potential alignment (dV=): " << dV << endl;
 	results.emplace_back("dV", INIReader::to_string(dV));
 
+	if (dV > 0.05) {
+		cout << endl << timing() << ">> WARNING <<: The potential alignment term (dV) is relatively large." << endl;
+		cout << "The constructed model may not be accurate!" << endl << endl;
+	}
+
 	if (is_active(verbosity::detailed_progress)) {
 		cout << timing() << "Alignment term calculated at grid point: " << ind2sub(as_size(slabcc_cell.grid), index_far) << endl;
 	}
