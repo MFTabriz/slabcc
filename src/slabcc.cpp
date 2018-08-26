@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 	cout << timing() << "Potential alignment (dV=): " << dV << endl;
 	results.emplace_back("dV", INIReader::to_string(dV));
 
-	if (dV > 0.05) {
+	if (abs(dV) > 0.05) {
 		cout << endl << timing() << ">> WARNING <<: The potential alignment term (dV) is relatively large." << endl;
 		cout << "The constructed model may not be accurate!" << endl << endl;
 	}
