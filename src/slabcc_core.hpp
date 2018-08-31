@@ -16,8 +16,11 @@ extern const double Hartree_to_eV;
 
 struct slabcc_cell_type {
 
-	// lengths of the model box in Bohr
-	rowvec3 lengths = { 0, 0, 0 };
+	// lengths of the basis vectors in Bohr
+	rowvec3 vec_lengths = { 0, 0, 0 };
+
+	// size of the supercell in Bohr
+	mat33 size = zeros(3, 3);
 
 	//calculation grid size
 	urowvec3 grid = { 1, 1, 1 };
@@ -74,9 +77,10 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 //Everything is in Bohr here!!
 void UpdateCell(const rowvec3& lengths, const urowvec3& divi);
 
-//Produces Gaussian charge distribution in reciprocal space and transforms back to real space
-// Q is total charge, pos is the position in real space (cartesian), sigma is the Gaussian width
-cx_cube gaussian_charge(const double& Q, const rowvec3& pos, const double& sigma);
+//Produces Gaussian charge distribution in real space
+// Q is total charge, rel_pos is the relative position of the center of Gaussian charge,
+// sigma is the Gaussian width
+cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma);
 
 
 //poisson solver in 3D with anisotrope dielectric profiles

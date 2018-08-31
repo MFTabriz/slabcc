@@ -43,28 +43,43 @@ void UpdateCell(const rowvec3& lengths, const urowvec3& divi) {
 	slabcc_cell.voxel_vol = prod(lengths / divi);
 }
 
-cx_cube gaussian_charge(const double& Q, const rowvec3& pos, const double& sigma) {
+cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma) {
 
-	rowvec Gs = 2.0 * PI / slabcc_cell.lengths;
-	rowvec Gx0 = regspace<rowvec>(ceil(-0.5 * slabcc_cell.grid(0)), ceil(0.5 * slabcc_cell.grid(0) - 1)) * Gs(0);
-	rowvec Gy0 = regspace<rowvec>(ceil(-0.5 * slabcc_cell.grid(1)), ceil(0.5 * slabcc_cell.grid(1) - 1)) * Gs(1);
-	rowvec Gz0 = regspace<rowvec>(ceil(-0.5 * slabcc_cell.grid(2)), ceil(0.5 * slabcc_cell.grid(2) - 1)) * Gs(2);
-	cube Gx, Gy, Gz;
-	tie(Gx, Gy, Gz) = ndgrid(Gx0, Gy0, Gz0);
+	double grid_dens_x = slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0);
 
-	cube Gr = square(Gx) + square(Gy) + square(Gz);
+	rowvec x0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(0) - slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0), slabcc_cell.grid(0));
+	rowvec y0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(1) - slabcc_cell.vec_lengths(1) / slabcc_cell.grid(1), slabcc_cell.grid(1));
+	rowvec z0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(2) - slabcc_cell.vec_lengths(2) / slabcc_cell.grid(2), slabcc_cell.grid(2));
+	
+	// shift the axis reference to position of the Gaussian charge center
+	x0 -= accu(slabcc_cell.size.col(0) * rel_pos(0));
+	y0 -= accu(slabcc_cell.size.col(1) * rel_pos(1));
+	z0 -= accu(slabcc_cell.size.col(2) * rel_pos(2));
 
-	//real part of the complex charge
-	//G(0)=q is for normalization
-	cube rhok_real = Q * exp(-pow(sigma, 2) / 2 * Gr);
+	//handle the minimum distance from the mirror charges
+	for (auto &pos : x0) {
+		if (abs(pos) > slabcc_cell.vec_lengths(0) / 2) {
+			pos = slabcc_cell.vec_lengths(0) - abs(pos);
+		}
+	}
+	for (auto &pos : y0) {
+		if (abs(pos) > slabcc_cell.vec_lengths(1) / 2) {
+			pos = slabcc_cell.vec_lengths(1) - abs(pos);
+		}
+	}
+	for (auto &pos : z0) {
+		if (abs(pos) > slabcc_cell.vec_lengths(2) / 2) {
+			pos = slabcc_cell.vec_lengths(2) - abs(pos);
+		}
+	}
 
-	cx_cube rhok = cx_cube(rhok_real, zeros(arma::size(rhok_real)));
+	cube x, y, z;
+	tie(x, y, z) = ndgrid(x0, y0, z0);
 
+	const cube r2 = square(x) + square(y) + square(z);
 
-	//  fourier shift theorem [intel compiler compatible form!] 
-	rhok = rhok % exp(cx_cube(zeros<cube>(arma::size(Gx)), (Gx * pos(0) + Gy * pos(1) + Gz * pos(2)) * -1));
-
-	return ifft(ifftshift(rhok)) / slabcc_cell.voxel_vol;
+	const cx_cube charge_dist = cx_cube(Q / pow((sigma*sqrt(2 * PI)), 3) * exp(-r2 / (2 * pow(sigma, 2))), zeros(as_size(slabcc_cell.grid)));
+	return charge_dist;
 }
 
 cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
