@@ -59,9 +59,6 @@ struct supercell {
 	cube potential;			//VASP first dataset (spin 1+2) in LOCPOT
 };
 
-//converts the direct-coordinates (relative positions) to cartesian coordinates in the 
-//defined supercell structure
-rowvec3 cartesian_cord(const supercell& structure, const rowvec3& directs);
 
 //Returns the direct (relative) position based on the provided cartesians and the supercell size*scaling
 rowvec3 direct_cord(const supercell& structure, const rowvec3& cartesians);
@@ -79,8 +76,6 @@ cube read_CHGPOT(const string& file_name);
 //shifts the whole supercell (positions, charge, potential) by pos_shift as relative shift vector [0 1]
 void shift_structure(supercell& structure, const rowvec3& pos_shift);
 
-void swap_axes(supercell& structure, const uword& axis1, const uword& axis2);
-
 //type: "CHGCAR", "LOCPOT"
 void write_CHGPOT(const string& type, const string& file_name, const supercell& structure);
 
@@ -96,4 +91,3 @@ vector<double> planar_average(const string& type, const uword& direction, const 
 void write_planar_avg(const supercell& structure, const string& id);
 
 void write_planar_avg(const cx_cube& potential_data, const cx_cube& charge_data, const string& id);
-

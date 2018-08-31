@@ -2,6 +2,7 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
+
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
@@ -101,18 +102,18 @@ int main(int argc, char *argv[])
 
 	check_cells(Neutral_supercell, Charged_supercell, input_file_variables);
 
-	//volume of supercell models (A^3)
-	const double volume_a3 = det(Neutral_supercell.cell_vectors * Neutral_supercell.scaling);
+	//volume of supercell models (A^3) (only works in the orthogonal case!)
+	const double volume_a3 = abs(prod(nonzeros(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling));
 
 	Neutral_supercell.charge /= volume_a3;
 	Charged_supercell.charge /= volume_a3;
 
 	//lengths of the cell vectors of the CHGCAR and LOCPOT files in bohr
-	const rowvec3 cell = diagvec(Neutral_supercell.cell_vectors).t() * Neutral_supercell.scaling * ang_to_bohr;
+	const mat33 cell_size = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
 
 	//grid density of the CHGCAR and LOCPOT files
 	const urowvec3 grid = SizeVec(Neutral_supercell.charge);
-	UpdateCell(cell, grid);
+	UpdateCell(cell_size, grid);
 
 	const rowvec3 relative_shift = 0.5 - slabcenter;
 
@@ -187,9 +188,9 @@ int main(int argc, char *argv[])
 		
 		//data needed for potential error calculation
 		opt_data optimize_data = { Q0, diel_erf_beta, diel_in, diel_out, interpolated_potential, diels, rhoM, V, V_diff, initial_pot_MSE };
-		UpdateCell(cell, SizeVec(interpolated_potential));
+		UpdateCell(cell_size, SizeVec(interpolated_potential));
 		pot_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interfaces);
-		UpdateCell(cell, grid);
+		UpdateCell(cell_size, grid);
 
 		//write the unshifted optimized values to the file
 		output_fstream << endl << "[Optimized_parameters]" << endl;
@@ -246,14 +247,12 @@ int main(int argc, char *argv[])
 		cout << endl << timing() << ">> WARNING <<: The potential error is highly anisotropic. Either the extra charge is not properly described by the model Gaussian charge or the choosen dielectric tensor is not a good representation of the actual tensor!" << endl << endl;
 	}
 
-	//slabcc_cell volume in bohr^3
-	const double volume = prod(slabcc_cell.lengths);
+	//slabcc_cell volume in bohr^3 (only works in the orthogonal case!)
+	const double volume = prod(slabcc_cell.vec_lengths);
 
 	if (is_active(verbosity::steps)) {
 		cout << timing() << "Potential error anisotropy: " << max(V_error_planars) / min(V_error_planars) <<endl;
-		cout << timing() << "Shifted slab interfaces:" << interfaces << endl;
-		cout << timing() << "Shifted charges position (bohr):" << mat(charge_position.each_row() % cell) << endl;
-		cout << timing() << "Cell dimensions (bohr):" << cell << endl;
+		cout << timing() << "Cell dimensions (bohr):" << slabcc_cell.vec_lengths << endl;
 		cout << timing() << "Grid size:" << grid << endl;
 		cout << timing() << "Volume (bohr^3): " << volume << endl;
 	}
@@ -310,7 +309,7 @@ int main(int argc, char *argv[])
 	cout << timing() << "E periodic of model charge: " << EperModel0 << endl;
 	results.emplace_back("E periodic of model charge", INIReader::to_string(EperModel0));
 
-	const rowvec max_size = slabcc_cell.lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
+	const rowvec max_size = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
 	if (min(slabcc_cell.grid * extrapol_grid_x / max_size) < 1) {
 		cout << endl << timing() << ">> WARNING <<: The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate." << endl;
 		cout << timing() << "The energy of the largest extrapolated model will be calculated with "  << min(slabcc_cell.grid * extrapol_grid_x / max_size) << " points/bohr grid" << endl;
@@ -319,8 +318,9 @@ int main(int argc, char *argv[])
 
 	if (is_active(verbosity::steps)) {
 		cout << timing() << "Total extra charge: " << Q0 << endl;
+		cout << timing() << "Total model charge: " << Q << endl;
 		cout << timing() << "Scaling\tE_periodic\t\tinterfaces\t\tcharge position" << endl;
-		cout << timing() << "1\t\t" << EperModel0 << "\t" << interfaces(0) * slabcc_cell.lengths(slabcc_cell.normal_direction) << "\t" << interfaces(1) * slabcc_cell.lengths(slabcc_cell.normal_direction) << endl;
+		cout << timing() << "1\t\t" << EperModel0 << "\t" << interfaces(0) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << "\t" << interfaces(1) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
 	}
 	rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
 	double E_isolated = 0;
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
 	}
 	else {
 		tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out, interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
-		rowvec3 unit_cell = cell / max(cell);
+		rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
 		const double radius = 10;
 		auto ewald_shells = generate_shells(unit_cell, radius);
 		const double madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);

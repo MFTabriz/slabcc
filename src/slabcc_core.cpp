@@ -7,7 +7,7 @@
 extern slabcc_cell_type slabcc_cell;
 
 mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta) {
-	auto length = slabcc_cell.lengths(slabcc_cell.normal_direction);
+	auto length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
 	auto n_points = slabcc_cell.grid(slabcc_cell.normal_direction);
 	const rowvec2 interfaces_cartesian = interfaces * length;
 	sort(interfaces_cartesian);
@@ -37,11 +37,15 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 	return diels;
 }
 
-void UpdateCell(const rowvec3& lengths, const urowvec3& divi) {
-	slabcc_cell.lengths = lengths;
+void UpdateCell(const mat33& size, const urowvec3& divi) {
+	slabcc_cell.size = size;
+	for (uword i = 0; i < 3; ++i) {
+		slabcc_cell.vec_lengths(i) = norm(size.col(i));
+	}
 	slabcc_cell.grid = divi;
-	slabcc_cell.voxel_vol = prod(lengths / divi);
+	slabcc_cell.voxel_vol = prod(slabcc_cell.vec_lengths / divi);
 }
+
 
 cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma) {
 
@@ -82,8 +86,9 @@ cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigm
 	return charge_dist;
 }
 
+
 cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
-	auto length = slabcc_cell.lengths;
+	auto length = slabcc_cell.vec_lengths;
 	auto n_points = slabcc_cell.grid;
 
 	if (slabcc_cell.normal_direction != 2) {
@@ -149,8 +154,6 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	const rowvec3 &diel_out = d->diel_out;
 	const double &diel_erf_beta = d->diel_erf_beta;
 	const cube &defect_potential = d->defect_potential;
-	const rowvec3 &cell = slabcc_cell.lengths;
-	const double volume = prod(cell);
 	const double &Q0 = d->Q0;
 
 	//rest of the charge goes to the last Gaussian
@@ -168,7 +171,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	rhoM.reset();
 	rhoM = zeros<cx_cube>(as_size(slabcc_cell.grid));
 	for (uword i = 0; i < Qd.n_elem; ++i) {
-		rhoM += gaussian_charge(Qd(i), defcenter.row(i) % cell, sigma(i));
+		rhoM += gaussian_charge(Qd(i), defcenter.row(i).t(), sigma(i));
 	}
 
 	V = poisson_solver_3D(rhoM, diels);
@@ -463,7 +466,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const rowvec cell0 = slabcc_cell.lengths;
+	const mat33 cell_size0 = slabcc_cell.size;
 	const urowvec grid0 = slabcc_cell.grid;
 	const rowvec3 grid_ext = grid_multiplier * conv_to<rowvec>::from(grid0);
 	const urowvec3 grid_ext_u = { (uword)grid_ext(0),(uword)grid_ext(1),(uword)grid_ext(2) };
@@ -471,7 +474,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 		const double extrapol_factor = 1 + extrapol_steps_size * (1.0 + n);
 
-		UpdateCell(cell0 * extrapol_factor, grid_ext_u);
+		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);
 
 		//extrapolated interfaces
 		rowvec2 interfaces_ext = interfaces;
@@ -496,16 +499,16 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(Qd(i), (charge_position_shifted.row(i) % slabcc_cell.lengths), sigma(i));
+			rhoM += gaussian_charge(Qd(i), charge_position_shifted.row(i).t(), sigma(i));
 		}
 		auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
-
-		rhoM -= Q / prod(slabcc_cell.lengths);
+		// (only works for the orthogonal cells!)
+		rhoM -= Q / prod(slabcc_cell.vec_lengths);
 		auto V = poisson_solver_3D(rhoM, diels);
 		double EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 
 		if (is_active(verbosity::steps)) {
-			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.lengths(normal_direction) << "\t" << charge_position_shifted(0, slabcc_cell.normal_direction) * slabcc_cell.lengths(slabcc_cell.normal_direction) << endl;
+			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction) << "\t" << charge_position_shifted(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
 		}
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
@@ -519,17 +522,17 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const rowvec cell0 = slabcc_cell.lengths;
+	const mat33 cell_size0 = slabcc_cell.size;
 	const urowvec grid0 = slabcc_cell.grid;
 	const rowvec3 grid_ext = grid_multiplier * conv_to<rowvec>::from(grid0);
-	const urowvec3 grid_ext_u = { (uword)grid_ext(0),(uword)grid_ext(1),(uword)grid_ext(2) };
-	UpdateCell(cell0, grid_ext_u);
+	const urowvec3 grid_ext_u = { (uword)grid_ext(0), (uword)grid_ext(1), (uword)grid_ext(2) };
+	UpdateCell(cell_size0, grid_ext_u);
 	mat diels0 = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
 
 	for (int n = 0; n < extrapol_steps_num - 1; ++n) {
 
 		const double extrapol_factor = 1 + extrapol_steps_size * (1.0 + n);
-		UpdateCell(cell0 * extrapol_factor, grid_ext_u);
+		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);
 		//extrapolated interfaces
 		rowvec2 interfaces_ext = interfaces/ extrapol_factor;
 
@@ -538,15 +541,16 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(Qd(i), (charge_position_ext.row(i) % slabcc_cell.lengths), sigma(i));
+			rhoM += gaussian_charge(Qd(i), charge_position_ext.row(i).t(), sigma(i));
 		}
 		const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
-		rhoM -= Q / prod(slabcc_cell.lengths);
+		// (only works for the orthogonal cells!)
+		rhoM -= Q / prod(slabcc_cell.vec_lengths);
 		auto V = poisson_solver_3D(rhoM, diels);
 		double EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 
 		if (is_active(verbosity::steps)) {
-			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.lengths(normal_direction) << "\t" << charge_position_ext(0, slabcc_cell.normal_direction) * slabcc_cell.lengths(slabcc_cell.normal_direction) << endl;
+			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction) << "\t" << charge_position_ext(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
 		}
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
@@ -590,10 +594,6 @@ double fit_eval(const vector<double> &c, vector<double> &grad, void *data)
 
 void check_cells(supercell& Neutral_supercell, supercell& Charged_supercell, input_data input_set) {
 
-	// all positive vectors
-	Neutral_supercell.cell_vectors = abs(Neutral_supercell.cell_vectors);
-	Charged_supercell.cell_vectors = abs(Charged_supercell.cell_vectors);
-
 	// equal cell size
 	if (!approx_equal(Neutral_supercell.cell_vectors * Neutral_supercell.scaling,
 		Charged_supercell.cell_vectors * Charged_supercell.scaling, "reldiff", 0.001)) {
@@ -606,37 +606,6 @@ void check_cells(supercell& Neutral_supercell, supercell& Charged_supercell, inp
 	if (cellvec_nonzeros.n_elem != 3) {
 		cerr << "ERROR: unsupported supercell shape!" << endl;
 		exit(1);
-	}
-
-	// cell just needs axis swap
-	if (!approx_equal(diagvec(Neutral_supercell.cell_vectors * Neutral_supercell.scaling),
-		nonzeros(Neutral_supercell.cell_vectors * Charged_supercell.scaling), "reldiff", 0.001)) {
-		uvec indexes = find(Neutral_supercell.cell_vectors.t());
-		Mat<uword> subs = ind2sub(size(3, 3), indexes);
-		// TODO: more human brain must be used here
-		for (uword i = 0; i < 3; ++i) {
-			if (subs(0, i) != subs(1, i)) {
-				if (is_active(verbosity::detailed_progress)) {
-					cout << timing() << "File axis swaped!" << endl;
-				}
-				swap_axes(Neutral_supercell, subs(0, i), subs(1, i));
-				swap_axes(Charged_supercell, subs(0, i), subs(1, i));
-				input_set.charge_position.swap_cols(subs(0, i), subs(1, i));
-				input_set.diel_in.swap_cols(subs(0, i), subs(1, i));
-				input_set.diel_out.swap_cols(subs(0, i), subs(1, i));
-				input_set.slabcenter.swap_cols(subs(0, i), subs(1, i));
-				
-				if (slabcc_cell.normal_direction == subs(0, i)) {
-					slabcc_cell.normal_direction = subs(1, i);
-				}else if (slabcc_cell.normal_direction == subs(1, i)) {
-					slabcc_cell.normal_direction = subs(0, i);
-				}
-
-				indexes = find(Neutral_supercell.cell_vectors.t());
-				subs = ind2sub(size(3, 3), indexes);
-				i = 0;
-			}
-		}
 	}
 
 	// equal grid

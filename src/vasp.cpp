@@ -9,7 +9,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	out_file.open(file_name);
 	out_file << structure.label << endl;
 	out_file << "   " << fixed << setprecision(15) << structure.scaling << endl;
-	structure.cell_vectors.raw_print(out_file);
+	structure.cell_vectors.t().raw_print(out_file);
 	vector<int> defs = structure.atoms.definition_order;
 	auto end = unique(defs.begin(), defs.end(), [](const int& l, const int& r) noexcept { return  l == r; });
 	defs.erase(end, defs.end());
@@ -55,17 +55,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	out_file.close();
 }
 
-rowvec3 cartesian_cord(const supercell& structure, const rowvec3& directs) {
 
-	if (structure.coordination_system == "cartesian") {
-		cout << "WARNING: The structure have the cartesian coordinate system! Conversion did not happen!!" << endl;
-		return directs;
-	}
-
-	mat33 cell_vectors = structure.cell_vectors.t() * structure.scaling;
-	rowvec3 cartesians = trans(cell_vectors * directs.t());
-	return cartesians;
-}
 rowvec3 direct_cord(const supercell& structure, const rowvec3& cartesians) {
 	mat33 cell_vectors = structure.cell_vectors / structure.scaling;
 	rowvec3 direct_coords = solve(cell_vectors.t(), cartesians.t()).t();
@@ -209,26 +199,6 @@ void shift_structure(supercell& structure, const rowvec3& relative_shift) {
 
 	structure.charge = shift(structure.charge, relative_shift);
 	structure.potential = shift(structure.potential, relative_shift);
-
-}
-
-void swap_axes(supercell& structure, const uword& axis1, const uword& axis2) {
-
-	//change cell shape
-	structure.cell_vectors.swap_cols(axis1, axis2);
-
-	//change atoms positions
-	structure.atoms.position.swap_cols(axis1, axis2);
-	for (auto &i : structure.atoms.constrains) {
-		swap(i.at(axis1), i.at(axis2));
-	}
-
-	cube swaped = swap_axes(structure.charge, axis1, axis2);
-	structure.charge.reset();
-	structure.charge = swaped;
-	swaped = swap_axes(structure.potential, axis1, axis2);
-	structure.potential.reset();
-	structure.potential = swaped;
 
 }
 

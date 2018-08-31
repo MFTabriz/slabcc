@@ -75,7 +75,7 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 
 //Sets the global struct slabcc_cell parameters from cell size of "lengths" and grid density "divi"
 //Everything is in Bohr here!!
-void UpdateCell(const rowvec3& lengths, const urowvec3& divi);
+void UpdateCell(const mat33& size, const urowvec3& divi);
 
 //Produces Gaussian charge distribution in real space
 // Q is total charge, rel_pos is the relative position of the center of Gaussian charge,
