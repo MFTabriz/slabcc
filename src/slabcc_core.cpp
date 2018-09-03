@@ -81,7 +81,8 @@ cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigm
 	tie(x, y, z) = ndgrid(x0, y0, z0);
 
 	const cube r2 = square(x) + square(y) + square(z);
-
+	// this charge distribution is due to the 1st nearest Gaussian image. 
+	// In case of the very small supercells or very diffuse charges (large sigma), the higher order of the image charges must also be included.
 	const cx_cube charge_dist = cx_cube(Q / pow((sigma*sqrt(2 * PI)), 3) * exp(-r2 / (2 * pow(sigma, 2))), zeros(as_size(slabcc_cell.grid)));
 	return charge_dist;
 }
@@ -111,7 +112,6 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	const auto rhok = fft(cx_cube(4.0 * PI * rho));
 	auto Vk = cx_cube(arma::size(rhok));
 	const cx_mat dielsG = fft(diel);
-
 	cx_mat eps11 = circ_toeplitz(dielsG.col(0)) / Gz0.n_elem;
 	cx_mat eps22 = circ_toeplitz(dielsG.col(1)) / Gz0.n_elem;
 	cx_mat eps33 = circ_toeplitz(dielsG.col(2)) / Gz0.n_elem;
@@ -265,7 +265,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	return pot_MSE_min;
 }
 
-tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interface) {
+tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge, const bool optimize_interface) {
 
 	vector<double> opt_param = { opt_vars.interfaces(0), opt_vars.interfaces(1) };
 	vector<double> low_b = { 0, 0 };		//lower bounds

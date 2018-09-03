@@ -42,9 +42,6 @@ cube shift(cube cube_in, rowvec3 shifts);
 //direction: 0,1,2 > x,y,z
 vector<double> planar_average(const uword& direction, const cube& cube_in);
 
-//Planar average of a complex cube data in defined direction
-//direction: 0,1,2 > x,y,z
-vector<double> planar_average(const uword& direction, const cx_cube& cube_in);
 
 // 1D FFT of complex data.
 // no normalization for forward FFT

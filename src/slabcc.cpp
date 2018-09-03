@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_CHG));
 
 	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Slab normal direction index: " << normal_direction << endl;
+		cout << timing() << "Slab normal direction index (0-2): " << normal_direction << endl;
 		cout << timing() << "Started reading CHGCAR and LOCPOT files" << endl;
 	}
 
@@ -102,11 +102,6 @@ int main(int argc, char *argv[])
 
 	check_cells(Neutral_supercell, Charged_supercell, input_file_variables);
 
-	//volume of supercell models (A^3) (only works in the orthogonal case!)
-	const double volume_a3 = abs(prod(nonzeros(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling));
-
-	Neutral_supercell.charge /= volume_a3;
-	Charged_supercell.charge /= volume_a3;
 
 	//lengths of the cell vectors of the CHGCAR and LOCPOT files in bohr
 	const mat33 cell_size = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
@@ -114,6 +109,9 @@ int main(int argc, char *argv[])
 	//grid density of the CHGCAR and LOCPOT files
 	const urowvec3 grid = SizeVec(Neutral_supercell.charge);
 	UpdateCell(cell_size, grid);
+
+	//slabcc_cell volume in bohr^3 (only works in the orthogonal case!)
+	const double volume = prod(slabcc_cell.vec_lengths);
 
 	const rowvec3 relative_shift = 0.5 - slabcenter;
 
@@ -142,13 +140,13 @@ int main(int argc, char *argv[])
 	}
 
 	//normalize the charges and potentials
-	Neutral_supercell.charge *= -volume_a3 / Neutral_supercell.charge.n_elem;
-	Charged_supercell.charge *= -volume_a3 / Charged_supercell.charge.n_elem;
-	Defect_supercell.charge *= -volume_a3 / Defect_supercell.charge.n_elem;
+	Neutral_supercell.charge *= -1.0 / volume;
+	Charged_supercell.charge *= -1.0 / volume;
+	Defect_supercell.charge *= -1.0 / volume;
 	Defect_supercell.potential *= -1.0;
 
 	// total extra charge of the VASP calculation
-	const double Q0 = accu(Defect_supercell.charge);
+	const double Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
 	// normalize the value of the charges (is necessary if not provided or relatively defined)
 	Qd *= Q0 / accu(Qd);
 
@@ -158,12 +156,12 @@ int main(int argc, char *argv[])
 	//dielectric profile
 	mat diels = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
 
-	// model charge distribution
+	// model charge distribution (e/bohr^3), negative for presence of the electron 
 	cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 
-	//potential resulted from the model charge
+	//potential resulted from the model charge (Hartree)
 	cx_cube V(arma::size(rhoM));
-	//difference of the potential resulted from the model charge and the QM calculation (VASP) results
+	//difference of the potential resulted from the model charge and the QM calculation (VASP) results (eV)
 	cube V_diff(arma::size(V));
 	//mean squared potential error in 3D
 	double pot_MSE = 0;
@@ -224,7 +222,7 @@ int main(int argc, char *argv[])
 	}
 	
 	opt_data optimized_data = { Q0, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, diels, rhoM, V, V_diff, initial_pot_MSE };
-	auto local_param = optimizer_packer(opt_vars, true, true);
+	auto local_param = optimizer_packer(opt_vars);
 	vector<double> grads = {};
 	pot_MSE = potential_eval(get<0>(local_param), grads, &optimized_data);
 
@@ -247,9 +245,6 @@ int main(int argc, char *argv[])
 		cout << endl << timing() << ">> WARNING <<: The potential error is highly anisotropic. Either the extra charge is not properly described by the model Gaussian charge or the choosen dielectric tensor is not a good representation of the actual tensor!" << endl << endl;
 	}
 
-	//slabcc_cell volume in bohr^3 (only works in the orthogonal case!)
-	const double volume = prod(slabcc_cell.vec_lengths);
-
 	if (is_active(verbosity::steps)) {
 		cout << timing() << "Potential error anisotropy: " << max(V_error_planars) / min(V_error_planars) <<endl;
 		cout << timing() << "Cell dimensions (bohr):" << slabcc_cell.vec_lengths << endl;
@@ -259,8 +254,10 @@ int main(int argc, char *argv[])
 
 	if (is_active(verbosity::write_defect_file)) {
 		supercell MDout = Neutral_supercell;
-		MDout.charge = real(rhoM);
-		MDout.potential = real(V) * Hartree_to_eV;
+		//charge is normalized to the VASP CHGCAR convention (rho * Vol)
+		//Also, positive value for the electron charge!
+		MDout.charge = -real(rhoM) * slabcc_cell.voxel_vol * rhoM.n_elem;
+		MDout.potential = -real(V) * Hartree_to_eV;
 		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_M.CHGCAR", MDout));
 		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_M.LOCPOT", MDout));
 		cout << timing() << "Started writing slabcc_M files" << endl;
@@ -270,10 +267,10 @@ int main(int argc, char *argv[])
 		write_mat2file(diels, "slabcc_DIEL.dat");
 	}
 	if (is_active(verbosity::write_planarAvg_file)) {
-		write_planar_avg(Neutral_supercell, "N");
-		write_planar_avg(Charged_supercell, "C");
-		write_planar_avg(Defect_supercell, "D");
-		write_planar_avg(V * Hartree_to_eV, rhoM * slabcc_cell.voxel_vol, "M");
+		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * slabcc_cell.voxel_vol, "N");
+		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * slabcc_cell.voxel_vol, "C");
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D");
+		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M");
 		if (is_active(verbosity::detailed_progress)) {
 			cout << timing() << "Planar averages are written!" << endl;
 		}
@@ -303,8 +300,6 @@ int main(int argc, char *argv[])
 		cout << timing() << "Alignment term calculated at grid point: " << ind2sub(as_size(slabcc_cell.grid), index_far) << endl;
 	}
 
-	//normalized charge of the original defect
-	cube rho0 = Defect_supercell.charge / slabcc_cell.voxel_vol;
 	double EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 	cout << timing() << "E periodic of model charge: " << EperModel0 << endl;
 	results.emplace_back("E periodic of model charge", INIReader::to_string(EperModel0));

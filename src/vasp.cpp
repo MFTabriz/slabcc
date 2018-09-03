@@ -227,52 +227,7 @@ void write_CHGPOT(const string& type, const string& file_name, const supercell& 
 	out_file.close();
 }
 
-vector<double> planar_average(const string& type, const uword& direction, const bool& correct, const supercell& structure) {
-
-	cube CHGPOT;
-	if (type == "CHGCAR") {
-		CHGPOT = structure.charge;
-		if (correct) {
-			CHGPOT *= -det(structure.cell_vectors * structure.scaling) / structure.charge.n_elem;
-		}
-	}
-	else if (type == "LOCPOT") {
-		CHGPOT = structure.potential;
-		if (correct) {
-			CHGPOT *= static_cast<double>(arma::size(structure.potential)(direction)) / structure.potential.n_elem;
-		}
-	}
-	else {
-		cerr << "ERROR: Unrecognized type specified!" << endl;
-	}
-	if (CHGPOT.is_empty()) {
-		cerr << "ERROR: Requested CHG/POT is empty!" << endl;
-	}
-
-	return planar_average(direction, CHGPOT);
-
-}
-
-void write_planar_avg(const supercell& structure, const string& id) {
-	vector<double> NAVG1 = planar_average("CHGCAR", 0, false, structure);
-	vector<double> NAVG2 = planar_average("CHGCAR", 1, false, structure);
-	vector<double> NAVG3 = planar_average("CHGCAR", 2, false, structure);
-
-	write_vec2file(NAVG1, "slabcc_" + id + "XCHG.dat");
-	write_vec2file(NAVG2, "slabcc_" + id + "YCHG.dat");
-	write_vec2file(NAVG3, "slabcc_" + id + "ZCHG.dat");
-
-	NAVG1 = planar_average("LOCPOT", 0, true, structure);
-	NAVG2 = planar_average("LOCPOT", 1, true, structure);
-	NAVG3 = planar_average("LOCPOT", 2, true, structure);
-
-	write_vec2file(NAVG1, "slabcc_" + id + "XPOT.dat");
-	write_vec2file(NAVG2, "slabcc_" + id + "YPOT.dat");
-	write_vec2file(NAVG3, "slabcc_" + id + "ZPOT.dat");
-}
-
-
-void write_planar_avg(const cx_cube& potential_data, const cx_cube& charge_data, const string& id) {
+void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id) {
 
 	vector<double> AV1 = planar_average(0, potential_data);
 	vector<double> AV2 = planar_average(1, potential_data);
@@ -300,4 +255,3 @@ void write_planar_avg(const cx_cube& potential_data, const cx_cube& charge_data,
 	write_vec2file(AV2, "slabcc_" + id + "YCHG.dat");
 	write_vec2file(AV3, "slabcc_" + id + "ZCHG.dat");
 }
-

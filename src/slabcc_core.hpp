@@ -80,6 +80,7 @@ void UpdateCell(const mat33& size, const urowvec3& divi);
 //Produces Gaussian charge distribution in real space
 // Q is total charge, rel_pos is the relative position of the center of Gaussian charge,
 // sigma is the Gaussian width
+// the generated charge distribution data is in (e/bohr^3)
 cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma);
 
 
@@ -101,7 +102,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 
 //pack the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
 //returned vectors are "optimization parameters", "lower boundaries", "upper boundaries"
-tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interface);
+tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge = false, const bool optimize_interface = false);
 
 //unpack the optimization variable structure into opt_vars struct variables
 void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_vars);

@@ -98,9 +98,6 @@ vector<double> planar_average(const uword& direction, const cube& cube_in) {
 	}
 	return average;
 }
-vector<double> planar_average(const uword& direction, const cx_cube& cube_in) {
-	return planar_average(direction, real(cube_in));
-}
 
 cx_vec fft(vec X)
 {

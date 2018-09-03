@@ -55,7 +55,7 @@ struct supercell {
 	//total number of atoms
 	int atoms_number = 0;
 
-	cube charge;			//VASP first dataset (spin 1+2) in CHGCAR
+	cube charge;			//VASP first dataset (spin 1+2) in CHGCAR (divided by the volume in Bohr^3)
 	cube potential;			//VASP first dataset (spin 1+2) in LOCPOT
 };
 
@@ -82,12 +82,5 @@ void write_CHGPOT(const string& type, const string& file_name, const supercell& 
 //writes POSCAR of a supercell to a file
 void write_POSCAR(const supercell& structure, const string& file_name);
 
-//Planar average of grid-based data in the desired direction from a supecell
-//type: "CHGCAR", "POTCAR"
-//direction: 0,1,2 > x,y,z
-//correct: apply the normalization
-vector<double> planar_average(const string& type, const uword& direction, const bool& correct, const supercell& structure);
-
-void write_planar_avg(const supercell& structure, const string& id);
-
-void write_planar_avg(const cx_cube& potential_data, const cx_cube& charge_data, const string& id);
+//Write planar average of potential and charge to files
+void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id);
