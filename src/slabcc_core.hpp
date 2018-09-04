@@ -73,9 +73,8 @@ struct nonlinear_fit_data {
 // dielectric tensor elements' variation in the normal direction.
 mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta);
 
-//Sets the global struct slabcc_cell parameters from cell size of "lengths" and grid density "divi"
-//Everything is in Bohr here!!
-void UpdateCell(const mat33& size, const urowvec3& divi);
+//Sets the global struct slabcc_cell parameters from cell vectors "size" (in Bohr) and grid density "grid"
+void UpdateCell(const mat33& size, const urowvec3& grid);
 
 //Produces Gaussian charge distribution in real space
 // Q is total charge, rel_pos is the relative position of the center of Gaussian charge,
@@ -84,7 +83,8 @@ void UpdateCell(const mat33& size, const urowvec3& divi);
 cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma);
 
 
-//poisson solver in 3D with anisotrope dielectric profiles
+//Poisson solver in 3D with anisotropic dielectric profiles
+//diel is the N*3 matrix of variations in dielectric tensor elements in direction normal to the surface
 cx_cube poisson_solver_3D(const cx_cube &rho, mat diel);
 
 
@@ -126,5 +126,5 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 // evaluates the MSE for fitting to the 2nd-order + exponential function as described in the Erratum of the paper
 double fit_eval(const vector<double> &x, vector<double> &grad, void *data);
 
-// fit the extrapolated energies to custum function form (needed for non-linear energies of the extrapolate_2D)
+// fit the extrapolated energies to customized (2nd-order + exponential) function form (needed for non-linear energies of the extrapolate_2D)
 vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data);

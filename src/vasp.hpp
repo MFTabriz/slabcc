@@ -11,7 +11,6 @@ extern const double ang_to_bohr;
 // These functions are processing the VASP files:
 // read/write POSCAR, CHGCAR, LOCPOT files
 // convert direct <> relative coordinates
-// swap_axes of the model and all its loaded data
 // calculate the planar average of the 3D grid-based data
 
 
@@ -20,8 +19,8 @@ extern const double ang_to_bohr;
 struct supercell {
 	struct atom {
 
-		//the order in which the atoms are declated in the POSCAR
-		//needed to keep the atom groups with the same name seperated
+		//the order in which the atoms are declared in the POSCAR
+		//needed to keep the atom groups with the same name separated
 		vector<int> definition_order;
 
 		//atomic types as declared in the POSCAR
@@ -55,12 +54,12 @@ struct supercell {
 	//total number of atoms
 	int atoms_number = 0;
 
-	cube charge;			//VASP first dataset (spin 1+2) in CHGCAR (divided by the volume in Bohr^3)
-	cube potential;			//VASP first dataset (spin 1+2) in LOCPOT
+	cube charge;			//total charge distribution, negative for presence of electron (spin 1+2 dataset of CHGCAR, * -1 / volume (in Bohr^3))
+	cube potential;			//total potential (LOCPOT * -1)
 };
 
 
-//Returns the direct (relative) position based on the provided cartesians and the supercell size*scaling
+//Returns the direct (relative) position based on the provided Cartesians and the supercell size*scaling
 rowvec3 direct_cord(const supercell& structure, const rowvec3& cartesians);
 
 //normalizes the coordinates in direct/relative system to [0 1]
@@ -83,4 +82,4 @@ void write_CHGPOT(const string& type, const string& file_name, const supercell& 
 void write_POSCAR(const supercell& structure, const string& file_name);
 
 //Write planar average of potential and charge to files
-void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id);
+void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id, const int direction = -1);

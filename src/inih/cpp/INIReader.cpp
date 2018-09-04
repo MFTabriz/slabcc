@@ -34,7 +34,7 @@ void INIReader::dump_parsed(std::ofstream& out_file) const {
 		return tolower(rhs.at(0)) > tolower(lhs.at(0));
 	});
 
-	if (is_active(verbosity::steps)) {
+	if (is_active(verbosity::basic_steps)) {
 		cout << timing() << "-------------slabcc parameters-------------" << endl;
 		for (const auto &i : _parsed) {
 			std::cout << timing() << i.at(0) << " = " << i.at(1) << std::endl;

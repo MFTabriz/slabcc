@@ -42,6 +42,13 @@ unsigned int xyz2int(const string& s) {
 	return dir_map.at(dir_char);
 }
 
+char int2xyz(const unsigned int& i) {
+	const unordered_map<unsigned int, char> dir_map{
+		{ 0 , 'X'}, { 1 , 'Y' }, { 2 , 'Z' },
+	};
+	return dir_map.at(i);
+}
+
 string timing() {
 	if (is_active(verbosity::timing)) {
 		stringstream streamObj;

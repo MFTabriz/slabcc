@@ -1070,51 +1070,49 @@ span.boxed, span.framebox {
 </head>
 <body>
 <div class="document">
- <div class="body">
-
-<table class="docinfo" frame="void" rules="none">
-<col class="docinfo-name" />
-<col class="docinfo-content" />
+<div class="body">
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
 <tbody valign="top">
-<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">21 Aug 2018</td>
+<tr class="field"><th class="field-name">Last updated:</th><td class="field-body">4 Sep 2018</td>
 </tr>
-<tr><th class="docinfo-name">Version:</th>
-<td>0.3.1</td></tr>
+<tr class="field"><th class="field-name">version:</th><td class="field-body">0.3.1</td>
+</tr>
 </tbody>
 </table>
-
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference internal" href="#introduction" id="id11">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
-<li><a class="reference internal" href="#algorithm" id="id12">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></li>
+<li><a class="reference internal" href="#introduction" id="id23">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
+<li><a class="reference internal" href="#algorithm" id="id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#quick-start-guide" id="id13">2&nbsp;&nbsp;&nbsp;Quick start guide</a><ul class="auto-toc">
-<li><a class="reference internal" href="#example" id="id14">2.1&nbsp;&nbsp;&nbsp;Example</a></li>
-<li><a class="reference internal" href="#test-set" id="id15">2.2&nbsp;&nbsp;&nbsp;Test set</a></li>
+<li><a class="reference internal" href="#quick-start-guide" id="id25">2&nbsp;&nbsp;&nbsp;Quick start guide</a><ul class="auto-toc">
+<li><a class="reference internal" href="#example" id="id26">2.1&nbsp;&nbsp;&nbsp;Example</a></li>
+<li><a class="reference internal" href="#test-set" id="id27">2.2&nbsp;&nbsp;&nbsp;Test set</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation" id="id16">3&nbsp;&nbsp;&nbsp;Installation</a></li>
-<li><a class="reference internal" href="#command-line-parameters" id="id17">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></li>
-<li><a class="reference internal" href="#input-parameters" id="id18">5&nbsp;&nbsp;&nbsp;Input parameters</a></li>
-<li><a class="reference internal" href="#results-and-the-generated-files" id="id19">6&nbsp;&nbsp;&nbsp;Results and the generated files</a><ul class="auto-toc">
-<li><a class="reference internal" href="#output-files" id="id20">6.1&nbsp;&nbsp;&nbsp;Output files</a></li>
+<li><a class="reference internal" href="#installation" id="id28">3&nbsp;&nbsp;&nbsp;Installation</a></li>
+<li><a class="reference internal" href="#command-line-parameters" id="id29">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></li>
+<li><a class="reference internal" href="#input-parameters" id="id30">5&nbsp;&nbsp;&nbsp;Input parameters</a></li>
+<li><a class="reference internal" href="#results-and-the-generated-files" id="id31">6&nbsp;&nbsp;&nbsp;Results and the generated files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#output-files" id="id32">6.1&nbsp;&nbsp;&nbsp;Output files</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#faq" id="id21">7&nbsp;&nbsp;&nbsp;FAQ</a></li>
-<li><a class="reference internal" href="#known-issues-and-limitations" id="id22">8&nbsp;&nbsp;&nbsp;Known issues and limitations</a></li>
-<li><a class="reference internal" href="#release-history" id="id23">9&nbsp;&nbsp;&nbsp;Release history</a></li>
-<li><a class="reference internal" href="#copyright-and-attributions" id="id24">10&nbsp;&nbsp;&nbsp;Copyright and attributions</a><ul class="auto-toc">
-<li><a class="reference internal" href="#included-libraries" id="id25">10.1&nbsp;&nbsp;&nbsp;Included libraries</a></li>
-<li><a class="reference internal" href="#linked-libraries" id="id26">10.2&nbsp;&nbsp;&nbsp;Linked libraries</a></li>
-<li><a class="reference internal" href="#license" id="id27">10.3&nbsp;&nbsp;&nbsp;License</a></li>
+<li><a class="reference internal" href="#faq" id="id33">7&nbsp;&nbsp;&nbsp;FAQ</a></li>
+<li><a class="reference internal" href="#known-issues-and-limitations" id="id34">8&nbsp;&nbsp;&nbsp;Known issues and limitations</a></li>
+<li><a class="reference internal" href="#release-history" id="id35">9&nbsp;&nbsp;&nbsp;Release history</a></li>
+<li><a class="reference internal" href="#copyright-and-attributions" id="id36">10&nbsp;&nbsp;&nbsp;Copyright and attributions</a><ul class="auto-toc">
+<li><a class="reference internal" href="#included-libraries" id="id37">10.1&nbsp;&nbsp;&nbsp;Included libraries</a></li>
+<li><a class="reference internal" href="#linked-libraries" id="id38">10.2&nbsp;&nbsp;&nbsp;Linked libraries</a></li>
+<li><a class="reference internal" href="#license" id="id39">10.3&nbsp;&nbsp;&nbsp;License</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="introduction">
-<h1><a class="toc-backref" href="#id11">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
+<h1><a class="toc-backref" href="#id23">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
 <p>SLABCC calculates an <em>a posteriori</em> energy correction for charged slab models under 3D periodic boundary condition (PBC) based on the method proposed in:</p>
 <blockquote>
 Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: <a class="reference external" href="https://doi.org/10.1103/PhysRevLett.110.095505">10.1103/PhysRevLett.110.095505</a> <a class="reference external" href="https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf">(Supplements)</a></blockquote>
@@ -1130,7 +1128,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <div class="line">The code have been initially developed for <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
 </div>
 <div class="section" id="algorithm">
-<h2><a class="toc-backref" href="#id12">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
+<h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
 <ul class="simple">
 <li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
 <li>The extra charge is modeled by a Gaussian charge distribution as:</li>
@@ -1145,7 +1143,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <div class="formula">
 <i>ϵ</i>(<i>k</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> − <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="text"> erf</span><span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>k</i> − <i>k</i><sub>0</sub></span><span class="ignored">)/(</span><span class="denominator"><i>β</i></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> + <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span>
 </div>
-<p>where k<sub>0</sub> is the interface position in Cartesian k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotrope dielectric tensor as:</p>
+<p>where k<sub>0</sub> is the interface position in Cartesian k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotropic dielectric tensor as:</p>
 <div class="formula">
 <i>ϵ</i> = <span class="array"><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span></span><span class="environment"><span class="arrayrow">
 <span class="arraycell align-l">
@@ -1230,7 +1228,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 </div>
 </div>
 <div class="section" id="quick-start-guide">
-<h1><a class="toc-backref" href="#id13">2&nbsp;&nbsp;&nbsp;Quick start guide</a></h1>
+<h1><a class="toc-backref" href="#id25">2&nbsp;&nbsp;&nbsp;Quick start guide</a></h1>
 <p>To calculate the charge correction slabcc needs the following files:</p>
 <ul class="simple">
 <li>Input parameters file (default: <code>slabcc.in</code>)</li>
@@ -1247,7 +1245,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <li><tt class="docutils literal">interface</tt>: position of the surfaces of the slab (in the normal direction)</li>
 </ul>
 <div class="section" id="example">
-<h2><a class="toc-backref" href="#id14">2.1&nbsp;&nbsp;&nbsp;Example</a></h2>
+<h2><a class="toc-backref" href="#id26">2.1&nbsp;&nbsp;&nbsp;Example</a></h2>
 <p>The following examples list the <a class="reference internal" href="#input-parameters">input parameters</a> to be defined in <code>slabcc.in</code> file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory.</p>
 <ol class="arabic">
 <li><p class="first"><strong>Minimum input</strong>: The program models the extra charge with a Gaussian charge distribution localized around the position (<tt class="docutils literal">charge_position= 0.24&nbsp; 0.56&nbsp; 0.65</tt>) in a slab model with normal direction of (<tt class="docutils literal">normal_direction = y</tt>) and surfaces at (<tt class="docutils literal">interfaces = 0.25&nbsp; 0.75</tt>). The dielectric tensor inside of the slab is assumed to be isotropic (<tt class="docutils literal">diel_in = 4.8</tt>):</p>
@@ -1298,12 +1296,12 @@ optimize_interfaces = no
 </ol>
 </div>
 <div class="section" id="test-set">
-<h2><a class="toc-backref" href="#id15">2.2&nbsp;&nbsp;&nbsp;Test set</a></h2>
+<h2><a class="toc-backref" href="#id27">2.2&nbsp;&nbsp;&nbsp;Test set</a></h2>
 <p>You can download a complete test set including input files, input parameters and expected output <a class="reference external" href="https://doi.org/10.5281/zenodo.1323559">here</a>!</p>
 </div>
 </div>
 <div class="section" id="installation">
-<h1><a class="toc-backref" href="#id16">3&nbsp;&nbsp;&nbsp;Installation</a></h1>
+<h1><a class="toc-backref" href="#id28">3&nbsp;&nbsp;&nbsp;Installation</a></h1>
 <ol class="arabic simple">
 <li><strong>Prerequisites:</strong></li>
 </ol>
@@ -1327,7 +1325,7 @@ make STATIC=1
 (You will need static version of the compiled libraries for static linking)</blockquote>
 </div>
 <div class="section" id="command-line-parameters">
-<h1><a class="toc-backref" href="#id17">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></h1>
+<h1><a class="toc-backref" href="#id29">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></h1>
 <p>You can run slabcc without any additional options. Alternatively, you can use the following options to modify its behavior:</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
@@ -1358,7 +1356,7 @@ make STATIC=1
 </table>
 </div>
 <div class="section" id="input-parameters">
-<h1><a class="toc-backref" href="#id18">5&nbsp;&nbsp;&nbsp;Input parameters</a></h1>
+<h1><a class="toc-backref" href="#id30">5&nbsp;&nbsp;&nbsp;Input parameters</a></h1>
 <p>slabcc reads all its parameters from the input file (by default: <code>slabcc.in</code>) You can change the input file's name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.
 The input file is processed as follows:</p>
 <ul class="simple">
@@ -1558,16 +1556,19 @@ for mean squared error of the model potential</td>
 </tr>
 <tr><td><tt class="docutils literal">verbosity</tt></td>
 <td><p class="first">Verbosity of the program <a class="footnote-reference" href="#id9" id="id5">[4]</a></p>
-<p>0: no extra output: will only write output file and
-minimum parameters to standard output</p>
+<p>0: no extra output. Will only write output file and
+minimum parameters to standard output.</p>
 <p>1: display calculation steps and execution walltime
-(hh:mm:ss)</p>
+(hh:mm:ss). Will also write the planar averaged
+potential and charge for the Gaussian model charge and
+the extra charge in the input files in the direction
+normal to the slab surface.</p>
 <p>2: write extra charge density, extra charge potential
-and dielectric profile to disk</p>
-<p>3: write planar average to disk</p>
-<p class="last">4: show more digits and behind the scene!</p>
+and dielectric profiles to the disk.</p>
+<p>3: write all the planar averaged files to the disk.</p>
+<p class="last">4: show more digits and behind the scene! (debug mode)</p>
 </td>
-<td>0</td>
+<td>1</td>
 </tr>
 </tbody>
 </table>
@@ -1597,11 +1598,11 @@ and dielectric profile to disk</p>
 </table>
 </div>
 <div class="section" id="results-and-the-generated-files">
-<h1><a class="toc-backref" href="#id19">6&nbsp;&nbsp;&nbsp;Results and the generated files</a></h1>
+<h1><a class="toc-backref" href="#id31">6&nbsp;&nbsp;&nbsp;Results and the generated files</a></h1>
 <p>slabcc writes its calculated energy correction values to the standard output as well as the output file. All reported energy values are in eV.</p>
 <p>Depending on the verbosity level of your choice, you may get additional reports from each part of calculation in the standard output and/or extra output files.</p>
 <div class="section" id="output-files">
-<h2><a class="toc-backref" href="#id20">6.1&nbsp;&nbsp;&nbsp;Output files</a></h2>
+<h2><a class="toc-backref" href="#id32">6.1&nbsp;&nbsp;&nbsp;Output files</a></h2>
 <p>The parsed input variables or their default values and the calculation results will be written to the output file (by default: slabcc.out) You can change this file’s name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>. A typical output file is shown below:</p>
 <pre class="literal-block">
 # Parameters read from the file or their default values:
@@ -1630,15 +1631,15 @@ optimize_tolerance = 0.001
 slab_center = 0.5 0.5 0.25
 verbosity = 5
 
-[Optimized_parameters]
+[Optimized_model_parameters]
 interfaces_optimized =  0.942000748357 0.455672787711
 charge_sigma_optimized = 1.4132676877
 charge_position_optimized = 0.501460639345 0.50145532106 0.385476689493;
 
 [Results]
 dV = -0.00291385176718
-E periodic of model charge = 2.0404453156
-E isolated of model charge = 2.59716677886
+E_periodic of model charge = 2.0404453156
+E_isolated of model charge = 2.59716677886
 Energy correction for model charge (Eiso-Eper-q*dV) = 0.559635314929
 </pre>
 <p>Planar average files are written as a single column in plain text format and named as: &quot;slabcc_{1}{2}{XXX}.dat&quot; where:</p>
@@ -1701,32 +1702,32 @@ Energy correction for model charge (Eiso-Eper-q*dV) = 0.559635314929
 <tr><td><code>slabcc_DXCHG.dat</code></td>
 <td>Planar average of extra charge (neutral and charged
 difference) CHGCAR file in X direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_DXPOT.dat</code></td>
 <td>Planar average of extra charge (neutral and charged
 difference) LOCPOT file in X direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_DYCHG.dat</code></td>
 <td>Planar average of extra charge (neutral and charged
 difference) CHGCAR file in Y direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_DYPOT.dat</code></td>
 <td>Planar average of extra charge (neutral and charged
 difference) LOCPOT file in Y direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_DZCHG.dat</code></td>
 <td>Planar average of extra charge (neutral and charged
 difference) CHGCAR file in Z direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_DZPOT.dat</code></td>
 <td>Planar average of extra charge (neutral and charged
 difference) LOCPOT file in Z direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_M.CHGCAR</code></td>
 <td>CHGCAR of the Gaussian model</td>
@@ -1738,27 +1739,27 @@ difference) LOCPOT file in Z direction</td>
 </tr>
 <tr><td><code>slabcc_MXCHG.dat</code></td>
 <td>Planar average of model charge in X direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_MXPOT.dat</code></td>
 <td>Planar average of model potential in X direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_MYCHG.dat</code></td>
 <td>Planar average of model charge in Y direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_MYPOT.dat</code></td>
 <td>Planar average of model potential in Y direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_MZCHG.dat</code></td>
 <td>Planar average of model charge in Z direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_MZPOT.dat</code></td>
 <td>Planar average of model potential in Z direction</td>
-<td>3</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
 <tr><td><code>slabcc_NXCHG.dat</code></td>
 <td>Planar average of neutral CHGCAR file in X direction</td>
@@ -1786,10 +1787,11 @@ difference) LOCPOT file in Z direction</td>
 </tr>
 </tbody>
 </table>
+<p id="avg-note"><strong>Note:</strong> The planar averaged potential and charge files corresponding to the normal direction will be written in verbosity = 1</p>
 </div>
 </div>
 <div class="section" id="faq">
-<h1><a class="toc-backref" href="#id21">7&nbsp;&nbsp;&nbsp;FAQ</a></h1>
+<h1><a class="toc-backref" href="#id33">7&nbsp;&nbsp;&nbsp;FAQ</a></h1>
 <ol class="arabic">
 <li><p class="first"><strong>How to obtain the CHGCAR and LOCPOT files from VASP calculations?</strong> You can add the following tags to your INCAR file to get the LOCPOT and CHGCAR files:</p>
 <pre class="literal-block">
@@ -1814,7 +1816,7 @@ After obtaining the files for your charged system, do the calculation again <em>
 <li><strong>How accurate are the slabcc results?</strong> The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few <a class="reference internal" href="#known-issues-and-limitations">known issues and limitations</a> to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the <a class="reference internal" href="#license">license</a> explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.</li>
 </ol>
 <ol class="arabic simple" id="check" start="10">
-<li><strong>How can I check the slabcc results?</strong> By setting <tt class="docutils literal">verbosity &gt; 2</tt> in the input file, slabcc will write planar averaged files. You should compare the model charge distribution and potential in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in you slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <code>slabcc_MZCHG.dat</code> and <code>slabcc_MZPOT.dat</code>, with <code>slabcc_DZCHG.dat</code> and <code>slabcc_DZPOT.dat</code>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
+<li><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <code>slabcc_MZCHG.dat</code> and <code>slabcc_MZPOT.dat</code>, with <code>slabcc_DZCHG.dat</code> and <code>slabcc_DZPOT.dat</code>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
 </ol>
 <blockquote>
 Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</blockquote>
@@ -1823,7 +1825,7 @@ Another method to test the effectiveness of the charge correction is to increase
 </ol>
 </div>
 <div class="section" id="known-issues-and-limitations">
-<h1><a class="toc-backref" href="#id22">8&nbsp;&nbsp;&nbsp;Known issues and limitations</a></h1>
+<h1><a class="toc-backref" href="#id34">8&nbsp;&nbsp;&nbsp;Known issues and limitations</a></h1>
 <ul>
 <li><p class="first">Shape of the VASP files cell is limited to orthogonal cells with vectors along the main axis:</p>
 <pre class="literal-block">
@@ -1839,13 +1841,13 @@ X 0 0
 </ul>
 </div>
 <div class="section" id="release-history">
-<h1><a class="toc-backref" href="#id23">9&nbsp;&nbsp;&nbsp;Release history</a></h1>
+<h1><a class="toc-backref" href="#id35">9&nbsp;&nbsp;&nbsp;Release history</a></h1>
 <ul class="simple">
 <li>2018-07-29: version 0.3 - First public release</li>
 </ul>
 </div>
 <div class="section" id="copyright-and-attributions">
-<h1><a class="toc-backref" href="#id24">10&nbsp;&nbsp;&nbsp;Copyright and attributions</a></h1>
+<h1><a class="toc-backref" href="#id36">10&nbsp;&nbsp;&nbsp;Copyright and attributions</a></h1>
 <p>Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz</p>
 <p>The source codes and all the documentations are available under The 2-Clause BSD License. For more information see <a class="reference internal" href="#license">license</a>.</p>
 <div class="line-block">
@@ -1853,7 +1855,7 @@ X 0 0
 <div class="line">The attributions are also present in the binary file and can be accessed using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.</div>
 </div>
 <div class="section" id="included-libraries">
-<h2><a class="toc-backref" href="#id25">10.1&nbsp;&nbsp;&nbsp;Included libraries</a></h2>
+<h2><a class="toc-backref" href="#id37">10.1&nbsp;&nbsp;&nbsp;Included libraries</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://arma.sourceforge.net">Armadillo C++ Linear Algebra Library</a> licensed under the Apache License 2.0</li>
 </ul>
@@ -1903,14 +1905,14 @@ X 0 0
 </blockquote>
 </div>
 <div class="section" id="linked-libraries">
-<h2><a class="toc-backref" href="#id26">10.2&nbsp;&nbsp;&nbsp;Linked libraries</a></h2>
+<h2><a class="toc-backref" href="#id38">10.2&nbsp;&nbsp;&nbsp;Linked libraries</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://www.fftw.org">FFTW</a> licensed under GNU General Public License</li>
 <li><a class="reference external" href="http://www.openblas.net">OpenBLAS</a> licensed under the 3-clause BSD license</li>
 </ul>
 </div>
 <div class="section" id="license">
-<h2><a class="toc-backref" href="#id27">10.3&nbsp;&nbsp;&nbsp;License</a></h2>
+<h2><a class="toc-backref" href="#id39">10.3&nbsp;&nbsp;&nbsp;License</a></h2>
 <p>Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz</p>
 <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
 <ol class="arabic simple">

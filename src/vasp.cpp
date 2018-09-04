@@ -55,7 +55,6 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	out_file.close();
 }
 
-
 rowvec3 direct_cord(const supercell& structure, const rowvec3& cartesians) {
 	mat33 cell_vectors = structure.cell_vectors / structure.scaling;
 	rowvec3 direct_coords = solve(cell_vectors.t(), cartesians.t()).t();
@@ -67,7 +66,8 @@ void normalize_positions(supercell& structure) {
 		structure.atoms.position = fmod_p(structure.atoms.position, 1);
 	}
 	else {
-		cout << "WARNING: positions in cartesian coordinates cannot be normalized!" << endl;
+		//I'm lying here! > It can be converted to direct coordinates, normalized and converted back.
+		cout << "WARNING: positions in the Cartesian coordinates cannot be normalized!" << endl;
 	}
 }
 
@@ -227,31 +227,23 @@ void write_CHGPOT(const string& type, const string& file_name, const supercell& 
 	out_file.close();
 }
 
-void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id) {
+void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id, const int direction) {
+	unsigned int direction_first = 0;
+	unsigned int direction_last = 2;
 
-	vector<double> AV1 = planar_average(0, potential_data);
-	vector<double> AV2 = planar_average(1, potential_data);
-	vector<double> AV3 = planar_average(2, potential_data);
-	for (auto &elem : AV1) {
-		elem /= potential_data.n_cols * potential_data.n_slices;
-	}
-	for (auto &elem : AV2) {
-		elem /= potential_data.n_rows * potential_data.n_slices;
-	}
-	for (auto &elem : AV3) {
-		elem /= potential_data.n_rows * potential_data.n_cols;
+	if (direction != -1) {
+		direction_first = direction;
+		direction_last = direction;
 	}
 
-
-	write_vec2file(AV1, "slabcc_" + id + "XPOT.dat");
-	write_vec2file(AV2, "slabcc_" + id + "YPOT.dat");
-	write_vec2file(AV3, "slabcc_" + id + "ZPOT.dat");
-
-	AV1 = planar_average(0, charge_data);
-	AV2 = planar_average(1, charge_data);
-	AV3 = planar_average(2, charge_data);
-
-	write_vec2file(AV1, "slabcc_" + id + "XCHG.dat");
-	write_vec2file(AV2, "slabcc_" + id + "YCHG.dat");
-	write_vec2file(AV3, "slabcc_" + id + "ZCHG.dat");
+	for (unsigned int dir = direction_first; dir <= direction_last; ++dir) {
+		vector<double> avg_pot = planar_average(dir, potential_data);
+		const vector<double> avg_chg = planar_average(dir, charge_data);
+		for (auto &elem : avg_pot) {
+			elem *= static_cast<double>(avg_pot.size()) / potential_data.n_elem;
+		}
+		write_vec2file(avg_pot, "slabcc_" + id + int2xyz(dir) + "POT.dat");
+		write_vec2file(avg_chg, "slabcc_" + id + int2xyz(dir) + "CHG.dat");
+	}
 }
+

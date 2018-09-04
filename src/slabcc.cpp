@@ -2,7 +2,6 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
-
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
@@ -88,7 +87,6 @@ int main(int argc, char *argv[])
 	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_CHG));
 
 	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Slab normal direction index (0-2): " << normal_direction << endl;
 		cout << timing() << "Started reading CHGCAR and LOCPOT files" << endl;
 	}
 
@@ -125,6 +123,7 @@ int main(int argc, char *argv[])
 	charge_position = fmod_p(charge_position, 1);
 
 	if (is_active(verbosity::detailed_progress)) {
+		cout << timing() << "Slab normal direction index (0-2): " << normal_direction << endl;
 		cout << timing() << "Shift to center done!" << endl;
 	}
 
@@ -134,9 +133,7 @@ int main(int argc, char *argv[])
 
 	if (is_active(verbosity::write_defect_file)) {
 		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_D.LOCPOT", Defect_supercell));
-		cout << timing() << "Started writing slabcc_D.LOCPOT" << endl;
 		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_D.CHGCAR", Defect_supercell));
-		cout << timing() << "Started writing slabcc_D.CHGCAR" << endl;
 	}
 
 	//normalize the charges and potentials
@@ -149,10 +146,6 @@ int main(int argc, char *argv[])
 	const double Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
 	// normalize the value of the charges (is necessary if not provided or relatively defined)
 	Qd *= Q0 / accu(Qd);
-
-	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Extra charge evaluated!" << endl;
-	}
 	//dielectric profile
 	mat diels = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
 
@@ -174,9 +167,9 @@ int main(int argc, char *argv[])
 
 	if (optimize_charge || optimize_interfaces) {
 		//interpolation grid
-		rowvec vx = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(0));
-		rowvec vy = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(1));
-		rowvec vz = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(2));
+		const rowvec vx = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(0));
+		const rowvec vy = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(1));
+		const rowvec vz = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(2));
 		//interpolated defect potential for the optimization process
 		cube interpolated_potential = interp3(Defect_supercell.potential, vx, vy, vz);
 		interpolated_potential -= accu(interpolated_potential) / interpolated_potential.n_elem;
@@ -189,9 +182,11 @@ int main(int argc, char *argv[])
 		UpdateCell(cell_size, SizeVec(interpolated_potential));
 		pot_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interfaces);
 		UpdateCell(cell_size, grid);
+		//add back the last Gaussian charge (removed in the optimization)
+		Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 
 		//write the unshifted optimized values to the file
-		output_fstream << endl << "[Optimized_parameters]" << endl;
+		output_fstream << endl << "[Optimized_model_parameters]" << endl;
 		if (optimize_interfaces) {
 			const rowvec2 original_interfaces = fmod_p(interfaces - rounded_relative_shift(normal_direction), 1);
 			output_fstream << "interfaces_optimized = " << original_interfaces << endl;
@@ -220,7 +215,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-	
 	opt_data optimized_data = { Q0, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, diels, rhoM, V, V_diff, initial_pot_MSE };
 	auto local_param = optimizer_packer(opt_vars);
 	vector<double> grads = {};
@@ -242,11 +236,12 @@ int main(int argc, char *argv[])
 		cout << timing() << "Directional relative potential errors: " << V_error_planars << endl;
 	}
 	if (max(V_error_planars) / min(V_error_planars) > 10) {
-		cout << endl << timing() << ">> WARNING <<: The potential error is highly anisotropic. Either the extra charge is not properly described by the model Gaussian charge or the choosen dielectric tensor is not a good representation of the actual tensor!" << endl << endl;
+		cout << endl << timing() << ">> WARNING <<: The potential error is highly anisotropic." << endl;
+		cout << "If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge or the chosen dielectric tensor is not a good representation of the actual tensor!" << endl << endl;
 	}
 
-	if (is_active(verbosity::steps)) {
-		cout << timing() << "Potential error anisotropy: " << max(V_error_planars) / min(V_error_planars) <<endl;
+	if (is_active(verbosity::intermediate_steps)) {
+		cout << timing() << "Potential error anisotropy: " << max(V_error_planars) / min(V_error_planars) << endl;
 		cout << timing() << "Cell dimensions (bohr):" << slabcc_cell.vec_lengths << endl;
 		cout << timing() << "Grid size:" << grid << endl;
 		cout << timing() << "Volume (bohr^3): " << volume << endl;
@@ -260,7 +255,6 @@ int main(int argc, char *argv[])
 		MDout.potential = -real(V) * Hartree_to_eV;
 		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_M.CHGCAR", MDout));
 		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_M.LOCPOT", MDout));
-		cout << timing() << "Started writing slabcc_M files" << endl;
 	}
 
 	if (is_active(verbosity::write_dielectric_file)) {
@@ -275,9 +269,13 @@ int main(int argc, char *argv[])
 			cout << timing() << "Planar averages are written!" << endl;
 		}
 	}
+	else if (is_active(verbosity::write_normal_planarAvg)) {
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D", slabcc_cell.normal_direction);
+		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M", slabcc_cell.normal_direction);
+	}
 	//total charge of the model
 	double Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
-	//add jelium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but in energy calculation it is needed)
+	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but in energy calculation it is needed)
 	rhoM -= Q / volume;
 	//index of the element least affected by the extra charge
 	uword index_far = 0;
@@ -301,21 +299,32 @@ int main(int argc, char *argv[])
 	}
 
 	double EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
-	cout << timing() << "E periodic of model charge: " << EperModel0 << endl;
-	results.emplace_back("E periodic of model charge", INIReader::to_string(EperModel0));
+	cout << timing() << "E_periodic of the model charge: " << EperModel0 << endl;
+	results.emplace_back("E_periodic of the model charge", INIReader::to_string(EperModel0));
 
 	const rowvec max_size = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
 	if (min(slabcc_cell.grid * extrapol_grid_x / max_size) < 1) {
 		cout << endl << timing() << ">> WARNING <<: The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate." << endl;
 		cout << timing() << "The energy of the largest extrapolated model will be calculated with "  << min(slabcc_cell.grid * extrapol_grid_x / max_size) << " points/bohr grid" << endl;
-		cout << timing() << "You should increase the extrapolation grid multiplier or decrese the number/size of extrapolation steps." << endl << endl;
+		cout << timing() << "You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps." << endl << endl;
 	}
 
-	if (is_active(verbosity::steps)) {
-		cout << timing() << "Total extra charge: " << Q0 << endl;
-		cout << timing() << "Total model charge: " << Q << endl;
-		cout << timing() << "Scaling\tE_periodic\t\tinterfaces\t\tcharge position" << endl;
-		cout << timing() << "1\t\t" << EperModel0 << "\t" << interfaces(0) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << "\t" << interfaces(1) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
+	if (is_active(verbosity::basic_steps)) {
+		cout << timing() << "Difference of the charge in the input files: " << Q0 << endl;
+		cout << timing() << "Total charge of the model: " << Q << endl;
+	}
+	if (abs(Q - Q0) > 0.05) {
+		cout << endl << timing() << ">> WARNING <<: Part of the extra charge is missing from the model. This usually happens when the size of the supercell is too small and cannot contain the whole Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
+			<< "The present charge correction method is not suitable for these cases!" << endl << endl;
+	}
+	const rowvec3 grid_ext = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
+	const urowvec3 grid_ext_u = { (uword)grid_ext(0), (uword)grid_ext(1), (uword)grid_ext(2) };
+	if (is_active(verbosity::intermediate_steps)) {
+		cout << timing() << "Extrapolation grid size: " << grid_ext_u << endl;
+	}
+	if (is_active(verbosity::intermediate_steps)) {
+		cout << timing() << "Scaling\tE_periodic\t\tinterfaces\t\tcharge position in normal direction" << endl;
+		cout << timing() << "1\t\t" << EperModel0 << "\t" << interfaces(0) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << "\t" << interfaces(1) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << "\t" << charge_position(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
 	}
 	rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
 	double E_isolated = 0;
@@ -370,11 +379,11 @@ int main(int argc, char *argv[])
 	}
 	
 
-	cout << timing() << "E_iso from extrapolation with " << extrapol_steps_num << "x" << extrapol_steps_size << " steps: " << E_isolated << endl;
-	results.emplace_back("E isolated of model charge", INIReader::to_string(E_isolated));
+	cout << timing() << "E_isolated from extrapolation with " << extrapol_steps_num << "x" << extrapol_steps_size << " steps: " << E_isolated << endl;
+	results.emplace_back("E_isolated of the model charge", INIReader::to_string(E_isolated));
 
-	cout << timing() << "Energy correction for model charge (E_iso-E_per-q*dV=): " << E_correction << endl;
-	results.emplace_back("Energy correction for model charge (E_iso-E_per-q*dV)", INIReader::to_string(E_correction));
+	cout << timing() << "Energy correction for the model charge (E_iso-E_per-q*dV=): " << E_correction << endl;
+	results.emplace_back("Energy correction for the model charge (E_iso-E_per-q*dV)", INIReader::to_string(E_correction));
 
 	//write the results to output file
 	output_fstream << endl << "[Results]" << endl;
