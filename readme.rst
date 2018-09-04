@@ -13,7 +13,7 @@ SLABCC calculates an *a posteriori* energy correction for charged slab models un
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
  
 This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using a simple Gaussian model.
-The model charge is assumed to be embedded in a medium with dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) which is orthogonal to the slab.
+The model charge is assumed to be embedded in a medium with dielectric-tensor profile depending only on one Cartesian space axis orthogonal to the slab.
 The energy correction is calculated as:
 
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
