@@ -207,7 +207,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 		}
 		else {
 			//BOBYQA in NLOPT 2.4.2 does not support the constraints!
-			cout << timing() << "BOBYQA does not support the models with multiple charges! COBYLA will be use instead!" << endl;
+			cout << timing() << "BOBYQA does not support the models with multiple charges! COBYLA will be used instead!" << endl;
 		}
 	}
 
