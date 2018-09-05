@@ -1075,7 +1075,7 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Last updated:</th><td class="field-body">4 Sep 2018</td>
+<tr class="field"><th class="field-name">Last updated:</th><td class="field-body">5 Sep 2018</td>
 </tr>
 <tr class="field"><th class="field-name">version:</th><td class="field-body">0.3.1</td>
 </tr>
@@ -1131,12 +1131,12 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
 <ul class="simple">
 <li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
-<li>The extra charge is modeled by a Gaussian charge distribution as:</li>
+<li>The extra charge is modeled by sum of Gaussian charge distributions as:</li>
 </ul>
 <div class="formula">
-<i>ρ</i>(<i>r</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><sup>3</sup>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><sup>2</sup></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><sup>2</sup></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
+<i>ρ</i>(<i>r</i>) = <span class="limits"><sup class="limit"> </sup><span class="limit">⎲</span><span class="limit">⎳</span><sub class="limit"><i>i</i></sub></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i><sub><i>i</i></sub></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><span class="scripts"><sup class="script">3</sup><sub class="script"><i>i</i></sub></span>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
 </div>
-<p>which gives a charge distribution normalized to q with standard deviation of σ (<tt class="docutils literal">charge_sigma</tt>).</p>
+<p>which gives a charge distribution normalized to q<sub>i</sub> with standard deviation of σ<sub>i</sub> (<tt class="docutils literal">charge_sigma</tt>) for each Gaussian distribution i centered at r<sub>i</sub> (<tt class="docutils literal">charge_position</tt>).</p>
 <ul class="simple">
 <li>The generated Gaussian model charge will be embedded in a dielectric medium with profile of the form:</li>
 </ul>
@@ -1214,7 +1214,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <i>ϵ</i>(<i>k</i>)∇<sup>2</sup><i>V</i>(<i>r</i>) + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>ϵ</i>(<i>k</i>)<span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>V</i>(<i>r</i>) =  − <i>ρ</i>(<i>r</i>)
 </div>
 <ul class="simple">
-<li>If the <tt class="docutils literal">optimize</tt> parameter is set, a non-linear optimization routine will minimize the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
+<li>A non-linear optimization routine minimizes the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
 <li>The E<sub>periodic</sub> is calculated as:</li>
 </ul>
 <div class="formula">
@@ -1600,7 +1600,7 @@ and dielectric profiles to the disk.</p>
 <div class="section" id="results-and-the-generated-files">
 <h1><a class="toc-backref" href="#id31">6&nbsp;&nbsp;&nbsp;Results and the generated files</a></h1>
 <p>slabcc writes its calculated energy correction values to the standard output as well as the output file. All reported energy values are in eV.</p>
-<p>Depending on the verbosity level of your choice, you may get additional reports from each part of calculation in the standard output and/or extra output files.</p>
+<p>Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files.</p>
 <div class="section" id="output-files">
 <h2><a class="toc-backref" href="#id32">6.1&nbsp;&nbsp;&nbsp;Output files</a></h2>
 <p>The parsed input variables or their default values and the calculation results will be written to the output file (by default: slabcc.out) You can change this file’s name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>. A typical output file is shown below:</p>

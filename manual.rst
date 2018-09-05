@@ -1,6 +1,6 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 4 Sep 2018
+:Last updated: 5 Sep 2018
 :version: 0.3.1
 
 .. sectnum::
@@ -29,13 +29,13 @@ q is the total extra charge and ΔV is the difference between the potential of t
 Algorithm
 ----------
 * slabcc reads `VASP <https://www.vasp.at>`_ output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.
-* The extra charge is modeled by a Gaussian charge distribution as:
+* The extra charge is modeled by sum of Gaussian charge distributions as:
 
 .. math::
 
-  \rho(r) = \frac{q}{\sigma^3(2\pi)^{3/2}} \exp \left ({- \frac{r^2}{2\sigma^2} } \right )
+  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right )
 
-which gives a charge distribution normalized to q with standard deviation of σ (``charge_sigma``).
+which gives a charge distribution normalized to q\ :sub:`i` \ with standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
 
 * The generated Gaussian model charge will be embedded in a dielectric medium with profile of the form:
 
@@ -57,7 +57,7 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 .. math::
 	 \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
 
-* If the ``optimize`` parameter is set, a non-linear optimization routine will minimize the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
+* A non-linear optimization routine minimizes the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
 
 * The E\ :sub:`periodic` is calculated as:
 
@@ -344,7 +344,7 @@ Results and the generated files
 ===============================
 slabcc writes its calculated energy correction values to the standard output as well as the output file. All reported energy values are in eV.
 
-Depending on the verbosity level of your choice, you may get additional reports from each part of calculation in the standard output and/or extra output files. 
+Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files. 
 
 
 Output files
