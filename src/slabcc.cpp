@@ -2,6 +2,7 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
+
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
@@ -12,7 +13,9 @@ int verbos = 0;
 slabcc_cell_type slabcc_cell;			//All the parameters various functions need to be aware of
 const double ang_to_bohr = 1.889725989;
 const double Hartree_to_eV = 27.2113714880369;
-const float version = 0.3F;
+const int version_major = 0;
+const int version_minor = 3;
+const int version_patch = 3;
 chrono::time_point<chrono::steady_clock> t0; //initial start time of the program
 
 
@@ -62,10 +65,17 @@ int main(int argc, char *argv[])
 		CHGCAR_NEU, LOCPOT_CHG, LOCPOT_NEU, CHGCAR_CHG, 
 		opt_algo, charge_position, Qd, sigma, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
-		opt_tol, optimize_charge, optimize_interfaces, extrapol_slab, opt_grid_x, extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
+		opt_tol, optimize_charge, optimize_interfaces, extrapol_slab, opt_grid_x, 
+		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
 	parse_input_params(input_file, output_fstream, input_file_variables);
 	
+	if (is_active(verbosity::detailed_progress)) {
+		cout << timing() << "SLABCC version " << "." << version_major <<"." << version_minor << "." << version_patch << endl;
+		cout << timing() << "Armadillo library: version " << ARMA_VERSION_MAJOR << "." << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << endl;
+		cout << timing() << "NLOPT library: version " << nlopt::version_major() << "." << nlopt::version_minor() << "." << nlopt::version_bugfix() << endl;
+	}
+
 	if (is_active(verbosity::more_digits)) {
 		cout << setprecision(12);
 	}
@@ -109,7 +119,7 @@ int main(int argc, char *argv[])
 	UpdateCell(cell_size, grid);
 
 	//slabcc_cell volume in bohr^3 (only works in the orthogonal case!)
-	const double volume = prod(slabcc_cell.vec_lengths);
+	const auto volume = prod(slabcc_cell.vec_lengths);
 
 	const rowvec3 relative_shift = 0.5 - slabcenter;
 
@@ -143,7 +153,7 @@ int main(int argc, char *argv[])
 	Defect_supercell.potential *= -1.0;
 
 	// total extra charge of the VASP calculation
-	const double Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
+	const auto Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
 	// normalize the value of the charges (is necessary if not provided or relatively defined)
 	Qd *= Q0 / accu(Qd);
 	//dielectric profile
@@ -237,7 +247,8 @@ int main(int argc, char *argv[])
 	}
 	if (max(V_error_planars) / min(V_error_planars) > 10) {
 		cout << endl << timing() << ">> WARNING <<: The potential error is highly anisotropic." << endl;
-		cout << "If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge or the chosen dielectric tensor is not a good representation of the actual tensor!" << endl << endl;
+		cout << "If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge "
+				"or the chosen dielectric tensor is not a good representation of the actual tensor!" << endl << endl;
 	}
 
 	if (is_active(verbosity::intermediate_steps)) {
@@ -248,13 +259,13 @@ int main(int argc, char *argv[])
 	}
 
 	if (is_active(verbosity::write_defect_file)) {
-		supercell MDout = Neutral_supercell;
+		supercell Model_supercell = Neutral_supercell;
 		//charge is normalized to the VASP CHGCAR convention (rho * Vol)
-		//Also, positive value for the electron charge!
-		MDout.charge = -real(rhoM) * slabcc_cell.voxel_vol * rhoM.n_elem;
-		MDout.potential = -real(V) * Hartree_to_eV;
-		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_M.CHGCAR", MDout));
-		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_M.LOCPOT", MDout));
+		//Also, positive value for the electron charge! (the probability of finding an electron)
+		Model_supercell.charge = -real(rhoM) * slabcc_cell.voxel_vol * rhoM.n_elem;
+		Model_supercell.potential = -real(V) * Hartree_to_eV;
+		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_M.CHGCAR", Model_supercell));
+		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_M.LOCPOT", Model_supercell));
 	}
 
 	if (is_active(verbosity::write_dielectric_file)) {
@@ -274,8 +285,8 @@ int main(int argc, char *argv[])
 		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M", slabcc_cell.normal_direction);
 	}
 	//total charge of the model
-	double Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
-	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but in energy calculation it is needed)
+	const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
+	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= Q / volume;
 	//index of the element least affected by the extra charge
 	uword index_far = 0;
@@ -285,7 +296,7 @@ int main(int argc, char *argv[])
 	else {
 		index_far = real(V).index_min();
 	}
-	auto dV = V_diff(index_far);
+	const auto dV = V_diff(index_far);
 	cout << timing() << "Potential alignment (dV=): " << dV << endl;
 	results.emplace_back("dV", INIReader::to_string(dV));
 
@@ -298,7 +309,7 @@ int main(int argc, char *argv[])
 		cout << timing() << "Alignment term calculated at grid point: " << ind2sub(as_size(slabcc_cell.grid), index_far) << endl;
 	}
 
-	double EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
+	const auto EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 	cout << timing() << "E_periodic of the model charge: " << EperModel0 << endl;
 	results.emplace_back("E_periodic of the model charge", INIReader::to_string(EperModel0));
 
@@ -314,8 +325,10 @@ int main(int argc, char *argv[])
 		cout << timing() << "Total charge of the model: " << Q << endl;
 	}
 	if (abs(Q - Q0) > 0.05) {
-		cout << endl << timing() << ">> WARNING <<: Part of the extra charge is missing from the model. This usually happens when the size of the supercell is too small and cannot contain the whole Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
-			<< "The present charge correction method is not suitable for these cases!" << endl << endl;
+		cout << endl << timing() << ">> WARNING <<: Part of the extra charge is missing from the model. "
+			"This usually happens when the size of the supercell is too small and cannot contain the whole "
+			"Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
+			"The present charge correction method is not suitable for these cases!" << endl << endl;
 	}
 	const rowvec3 grid_ext = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
 	const urowvec3 grid_ext_u = { (uword)grid_ext(0), (uword)grid_ext(1), (uword)grid_ext(2) };
@@ -324,19 +337,22 @@ int main(int argc, char *argv[])
 	}
 	if (is_active(verbosity::intermediate_steps)) {
 		cout << timing() << "Scaling\tE_periodic\t\tinterfaces\t\tcharge position in normal direction" << endl;
-		cout << timing() << "1\t\t" << EperModel0 << "\t" << interfaces(0) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << "\t" << interfaces(1) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << "\t" << charge_position(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
+		cout << timing() << "1\t\t" << EperModel0 << "\t" << interfaces(0) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << 
+							"\t" << interfaces(1) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << 
+							"\t" << charge_position(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
 	}
 	rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
 	double E_isolated = 0;
 	double E_correction = 0;
 	if (extrapol_slab) {
-		tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out, interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+		tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out, 
+			interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
 
 		const colvec pols = polyfit(sizes, Es, 1);
 		const colvec evals = polyval(pols, sizes.t());
-		const double linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;
+		const auto linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;
 		const rowvec slopes = diff(Es) / diff(sizes);
-		const double extrapol_error_periodic = abs(slopes(0) - slopes(slopes.n_elem - 1));
+		const auto extrapol_error_periodic = abs(slopes(0) - slopes(slopes.n_elem - 1));
 
 		if (is_active(verbosity::detailed_progress)) {
 			cout << timing() << "Linear fit: Eper(Model) = " << pols(0) << "/scaling + " << pols(1) << endl;
@@ -357,19 +373,23 @@ int main(int argc, char *argv[])
 
 	}
 	else {
-		tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out, interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
-		rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
-		const double radius = 10;
-		auto ewald_shells = generate_shells(unit_cell, radius);
-		const double madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
-		double madelung_term = -pow(Q, 2) * madelung_const / 2;
+		tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out, 
+			interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+		const rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
+		const auto radius = 10.0;
+		const auto ewald_shells = generate_shells(unit_cell, radius);
+		const auto madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
+		auto madelung_term = -pow(Q, 2) * madelung_const / 2;
 		nonlinear_fit_data fit_data = { Es ,sizes, madelung_term };
-		auto cs = nonlinear_fit(1e-12, fit_data);
+		const auto cs = nonlinear_fit(1e-12, fit_data);
 
 		if (is_active(verbosity::detailed_progress)) {
 			cout << timing() << "Madelung constant = " << madelung_const << endl;
 			cout << timing() << "Non-linear fit parameters: c0=" << cs.at(0) << ", c1=" << cs.at(1) << ", c2=" << cs.at(2) << ", c3=" << cs.at(3) << endl;
-			const string fit_params = "c0= " + INIReader::to_string(cs.at(0)) + ", c1=" + INIReader::to_string(cs.at(1)) + ", c2=" + INIReader::to_string(cs.at(2)) + ", c3=" + INIReader::to_string(cs.at(3));
+			const string fit_params = "c0= " + INIReader::to_string(cs.at(0)) + 
+									", c1=" + INIReader::to_string(cs.at(1)) + 
+									", c2=" + INIReader::to_string(cs.at(2)) + 
+									", c3=" + INIReader::to_string(cs.at(3));
 			results.emplace_back("Non-linear fit parameters", fit_params);
 			results.emplace_back("Madelung constant", INIReader::to_string(madelung_const));
 		}
@@ -394,7 +414,7 @@ int main(int argc, char *argv[])
 	for (auto &k : future_files) { k.get(); }
 
 	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "slabcc version " << setprecision(3) << version << " calculations successfully ended!" << endl;
+		cout << timing() << "Calculations successfully ended!" << endl;
 	}
 
 	return 0;

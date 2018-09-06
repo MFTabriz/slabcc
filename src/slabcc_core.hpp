@@ -111,7 +111,7 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_
 void check_inputs(input_data input_set);
 
 //check or enforce some conditions on the supercell grid sizes and the shape
-void check_cells(supercell& Neutral_supercell, supercell& Charged_supercell, input_data input_set);
+void check_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell, const input_data& input_set);
 
 //parse the parameters from the input file
 void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set);

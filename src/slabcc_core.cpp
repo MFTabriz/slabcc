@@ -7,11 +7,11 @@
 extern slabcc_cell_type slabcc_cell;
 
 mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta) {
-	auto length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
-	auto n_points = slabcc_cell.grid(slabcc_cell.normal_direction);
-	const rowvec2 interfaces_cartesian = interfaces * length;
+	const auto length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
+	const auto n_points = slabcc_cell.grid(slabcc_cell.normal_direction);
+	rowvec2 interfaces_cartesian = interfaces * length;
 	sort(interfaces_cartesian);
-	auto positions = linspace<rowvec>(0, length, n_points + 1);
+	const auto positions = linspace<rowvec>(0, length, n_points + 1);
 	mat diels = zeros(n_points,3);
 	const rowvec3 diel_sum = diel_in + diel_out;
 	const rowvec3 diel_diff = diel_out - diel_in;
@@ -30,7 +30,7 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 			min_distance = distances(1);
 		}
 
-		const double diel_edge = erf(min_distance / diel_erf_beta);
+		const auto diel_edge = erf(min_distance / diel_erf_beta);
 		diels.row(k) = (diel_diff * diel_side * diel_edge + diel_sum) / 2;
 	}
 
@@ -48,8 +48,6 @@ void UpdateCell(const mat33& size, const urowvec3& grid) {
 
 
 cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma) {
-
-	const double grid_dens_x = slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0);
 
 	rowvec x0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(0) - slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0), slabcc_cell.grid(0));
 	rowvec y0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(1) - slabcc_cell.vec_lengths(1) / slabcc_cell.grid(1), slabcc_cell.grid(1));
@@ -126,9 +124,8 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 			swap(spans.at(slabcc_cell.normal_direction), spans.at(2));
 			AG = Az + eps11 * pow(Gx0(k), 2) + eps22 * pow(Gy0(m), 2);
 
-			if ((k == 0) && (m == 0)) {
-				AG(0, 0) = 1;
-			}
+			if ((k == 0) && (m == 0)) { AG(0, 0) = 1; }
+
 			Vk(spans.at(0), spans.at(1), spans.at(2)) = solve(AG, cx_colvec(vectorise(rhok(spans.at(0), spans.at(1), spans.at(2)))));
 		}
 	}
@@ -140,8 +137,7 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	return V;
 }
 
-double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data)
-{
+double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data) {
 	
 	rowvec2 interfaces;
 	rowvec sigma, Qd;
@@ -153,9 +149,9 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	const auto d = static_cast<opt_data *>(slabcc_data);
 	const rowvec3 &diel_in = d->diel_in;
 	const rowvec3 &diel_out = d->diel_out;
-	const double &diel_erf_beta = d->diel_erf_beta;
+	const auto &diel_erf_beta = d->diel_erf_beta;
 	const cube &defect_potential = d->defect_potential;
-	const double &Q0 = d->Q0;
+	const auto &Q0 = d->Q0;
 
 	//rest of the charge goes to the last Gaussian
 	Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
@@ -165,7 +161,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	cx_cube& rhoM = d->rhoM;
 	cx_cube& V = d->V;
 	cube& V_diff = d->V_diff;
-	double& initial_pot_MSE = d->initial_pot_MSE;
+	auto& initial_pot_MSE = d->initial_pot_MSE;
 
 	diels = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
 	
@@ -178,7 +174,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	V = poisson_solver_3D(rhoM, diels);
 	V_diff = real(V) * Hartree_to_eV - defect_potential;
 
-	const double pot_MSE = accu(square(V_diff)) / V_diff.n_elem * 100;
+	const auto pot_MSE = accu(square(V_diff)) / V_diff.n_elem * 100;
 
 	//if this is the 1st step, save the error for opt success checking
 	if (initial_pot_MSE < 0) {
@@ -236,9 +232,6 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 		const int opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interfaces;
 		cout << timing() << "Started optimizing " << opt_parameters << " model parameters" << endl;
 		cout << timing() << "Optimization algorithm: " << string(opt.get_algorithm_name()) << endl;
-	}
-	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "NLOPT version: " << nlopt::version_major() << "." << nlopt::version_minor() << "." << nlopt::version_bugfix() << endl;
 	}
 	try {
 		const nlopt::result nlopt_final_result = opt.optimize(opt_param, pot_MSE_min);
@@ -300,7 +293,7 @@ tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt
 	}
 
 	//remove the last Qd from the parameters 
-	//This gives a better chance to optimizer and also removes the Qd if we have only one charge
+	//this gives a better chance to optimizer and also removes the Qd if we have only one charge
 	opt_param.pop_back();
 	upp_b.pop_back();
 	low_b.pop_back();
@@ -451,7 +444,7 @@ double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void
 	optimizer_unpacker(x, variables);
 
 	const auto d = static_cast<const opt_data *>(data);
-	auto Q0 = d->Q0;
+	const auto Q0 = d->Q0;
 	Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 	const auto constraint = -Qd(Qd.n_elem - 1)  * Q0;
 	if (is_active(verbosity::detailed_progress)) {
@@ -469,17 +462,17 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 	const urowvec3 grid_ext_u = { (uword)grid_ext(0),(uword)grid_ext(1),(uword)grid_ext(2) };
 	for (int n = 0; n < extrapol_steps_num - 1; ++n) {
 
-		const double extrapol_factor = 1 + extrapol_steps_size * (1.0 + n);
+		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 
 		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);
 
 		//extrapolated interfaces
 		rowvec2 interfaces_ext = interfaces;
-		uvec interface_sorted_i = sort_index(interfaces);
+		const uvec interface_sorted_i = sort_index(interfaces);
 		interfaces_ext(interface_sorted_i(1)) += abs(interfaces(0) - interfaces(1)) * (extrapol_factor - 1);
 		interfaces_ext /= extrapol_factor;
 
-		//charges each moved to the same distance from its original nearest interface
+		//charges moved to the same distance from their original nearest interface
 		mat charge_position_shifted = charge_position / extrapol_factor;
 
 		for (auto charge = 0; charge < charge_position.n_rows; ++charge) {
@@ -492,17 +485,17 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 			}
 		}
 
-		mat diels = dielectric_profiles(interfaces_ext, diel_in, diel_out, diel_erf_beta);
+		const mat diels = dielectric_profiles(interfaces_ext, diel_in, diel_out, diel_erf_beta);
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
 			rhoM += gaussian_charge(Qd(i), charge_position_shifted.row(i).t(), sigma(i));
 		}
-		auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
+		const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
 		rhoM -= Q / prod(slabcc_cell.vec_lengths);
-		auto V = poisson_solver_3D(rhoM, diels);
-		double EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
+		const auto V = poisson_solver_3D(rhoM, diels);
+		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 		if (is_active(verbosity::intermediate_steps)) {
 			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction) << "\t" << charge_position_shifted(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
 		}
@@ -523,17 +516,17 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 	const rowvec3 grid_ext = grid_multiplier * conv_to<rowvec>::from(grid0);
 	const urowvec3 grid_ext_u = { (uword)grid_ext(0), (uword)grid_ext(1), (uword)grid_ext(2) };
 	UpdateCell(cell_size0, grid_ext_u);
-	mat diels0 = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
+	const mat diels0 = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
 
 	for (int n = 0; n < extrapol_steps_num - 1; ++n) {
 
-		const double extrapol_factor = 1 + extrapol_steps_size * (1.0 + n);
+		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);
 		//extrapolated interfaces
-		rowvec2 interfaces_ext = interfaces/ extrapol_factor;
+		const rowvec2 interfaces_ext = interfaces / extrapol_factor;
 
 		const mat charge_position_ext = charge_position / extrapol_factor;
-		mat diels = dielectric_profiles(interfaces_ext, diel_in, diel_out, diel_erf_beta);
+		const mat diels = dielectric_profiles(interfaces_ext, diel_in, diel_out, diel_erf_beta);
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
@@ -542,8 +535,8 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 		const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
 		rhoM -= Q / prod(slabcc_cell.vec_lengths);
-		auto V = poisson_solver_3D(rhoM, diels);
-		double EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
+		const auto V = poisson_solver_3D(rhoM, diels);
+		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 
 		if (is_active(verbosity::intermediate_steps)) {
 			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction) << "\t" << charge_position_ext(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
@@ -582,13 +575,13 @@ double fit_eval(const vector<double> &c, vector<double> &grad, void *data)
 	const auto d = static_cast<const nonlinear_fit_data *>(data);
 	const rowvec scales = d ->sizes;
 	const rowvec energies = d->energies;
-	const double madelung_term = d->madelung_term;
+	const auto madelung_term = d->madelung_term;
 	const rowvec model_energies = c.at(0) + c.at(1) * scales + c.at(2) * square(scales) + (c.at(1) - madelung_term) / c.at(3) * exp(-c.at(3) * scales);
-	const double fit_MSE = accu(square(energies - model_energies));
+	const auto fit_MSE = accu(square(energies - model_energies));
 	return fit_MSE;
 }
 
-void check_cells(supercell& Neutral_supercell, supercell& Charged_supercell, input_data input_set) {
+void check_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell, const input_data& input_set) {
 
 	// equal cell size
 	if (!approx_equal(Neutral_supercell.cell_vectors * Neutral_supercell.scaling,
@@ -598,7 +591,7 @@ void check_cells(supercell& Neutral_supercell, supercell& Charged_supercell, inp
 	}
 
 	// cell needs rotation or is not orthogonal
-	vec cellvec_nonzeros = nonzeros(Neutral_supercell.cell_vectors);
+	const vec cellvec_nonzeros = nonzeros(Neutral_supercell.cell_vectors);
 	if (cellvec_nonzeros.n_elem != 3) {
 		cerr << "ERROR: unsupported supercell shape!" << endl;
 		exit(1);

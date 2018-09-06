@@ -7,7 +7,12 @@
 #include "clara.hpp"
 using namespace std;
 
-extern const float version;
+extern const int version_major;
+extern const int version_minor;
+extern const int version_patch;
+extern int verbos;
+extern chrono::time_point<chrono::steady_clock> t0;
+
 //defines the minimum verbosity level for each type of action
 enum class verbosity :int {
 	basic_steps = 1,
@@ -21,9 +26,6 @@ enum class verbosity :int {
 	detailed_progress = 4,		//show details of each caculation step for debugging  
 };
 
-extern int verbos;
-extern chrono::time_point<chrono::steady_clock> t0;
-
 // writes each element of a vector in a separate line inside a text file named "output_file"
 void write_vec2file(const vector<double>& input, const string& output_file);
 
@@ -35,7 +37,6 @@ unsigned int xyz2int(const string& s);
 
 //converts 0/1/2 to X/Y/Z
 char int2xyz(const unsigned int& i);
-
 
 // returns the time passed from the start of the program (if needed!)
 string timing();

@@ -11,10 +11,10 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	out_file << "   " << fixed << setprecision(15) << structure.scaling << endl;
 	structure.cell_vectors.t().raw_print(out_file);
 	vector<int> defs = structure.atoms.definition_order;
-	auto end = unique(defs.begin(), defs.end(), [](const int& l, const int& r) noexcept { return  l == r; });
+	const auto end = unique(defs.begin(), defs.end(), [](const int& l, const int& r) noexcept { return  l == r; });
 	defs.erase(end, defs.end());
 	for (const int& i : defs) {
-		auto it = find(structure.atoms.definition_order.begin(), structure.atoms.definition_order.end(), i);
+		const auto it = find(structure.atoms.definition_order.begin(), structure.atoms.definition_order.end(), i);
 		const auto pos = distance(structure.atoms.definition_order.begin(), it);
 		out_file << " " << structure.atoms.type.at(pos);
 	}
@@ -38,7 +38,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	out_file << structure.coordination_system << endl;
 
 	for (uword number = 0; number < structure.atoms_number; ++number) {
-		out_file << arma::rowvec(structure.atoms.position.row(number));
+		out_file << rowvec(structure.atoms.position.row(number));
 		if (structure.selective_dynamics) {
 			for (int qq2 = 0; qq2 < 3; ++qq2) {
 				if (structure.atoms.constrains.at(number).at(qq2)) {
@@ -56,8 +56,8 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 }
 
 rowvec3 direct_cord(const supercell& structure, const rowvec3& cartesians) {
-	mat33 cell_vectors = structure.cell_vectors / structure.scaling;
-	rowvec3 direct_coords = solve(cell_vectors.t(), cartesians.t()).t();
+	const mat33 cell_vectors = structure.cell_vectors / structure.scaling;
+	const rowvec3 direct_coords = solve(cell_vectors.t(), cartesians.t()).t();
 	return direct_coords;
 }
 
@@ -105,7 +105,7 @@ supercell read_POSCAR(const string& file_name) {
 
 	int atom_counter = 0;
 	for (auto i = 0; i < temp_types.size(); ++i) {
-		for (int a = 0; a < temp_numbers.at(i); ++a) {
+		for (auto a = 0; a < temp_numbers.at(i); ++a) {
 			structure.atoms.type.push_back(temp_types.at(i));
 			structure.atoms.definition_order.push_back(i);
 			++atom_counter;
@@ -203,9 +203,8 @@ void shift_structure(supercell& structure, const rowvec3& relative_shift) {
 }
 
 void write_CHGPOT(const string& type, const string& file_name, const supercell& structure) {
-	supercell structure_info = structure;
 
-	write_POSCAR(structure_info, file_name);
+	write_POSCAR(structure, file_name);
 	ofstream out_file;
 	out_file.open(file_name, ofstream::app);
 

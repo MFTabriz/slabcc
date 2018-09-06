@@ -104,7 +104,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 
 	if (showVer) {
 		cout << "SLAB Charge Correction (slabcc)\n"
-			"Version: " << version << endl;
+			   "Version: " << "." << version_major << "." << version_minor << "." << version_patch << endl;
 		cout << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
 
 		exit(0);
@@ -120,7 +120,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 			" 5. LOCPOT of the charged system\n\n"
 			"The input parameters file for a slab should minimally include:\n"
 			" - charge_position : approximate position of the localized charge\n"
-			" - diel_in : dielectric constant of the slab\n"
+			" - diel_in : dielectric constant/tensor of the slab\n"
 			" - normal_direction : direction normal to the surface\n"
 			" - interfaces : surface positions of the slab\n";
 		exit(0);
