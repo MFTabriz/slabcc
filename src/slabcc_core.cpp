@@ -113,11 +113,11 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	const auto rhok = fft(cx_cube(4.0 * PI * rho));
 	auto Vk = cx_cube(arma::size(rhok));
 	const cx_mat dielsG = fft(diel);
-	cx_mat eps11 = circ_toeplitz(dielsG.col(0)) / Gz0.n_elem;
-	cx_mat eps22 = circ_toeplitz(dielsG.col(1)) / Gz0.n_elem;
-	cx_mat eps33 = circ_toeplitz(dielsG.col(2)) / Gz0.n_elem;
-	mat GzGzp = Gz0.t() * Gz0;
-	cx_mat Az = eps33 % GzGzp;
+	const cx_mat eps11 = circ_toeplitz(dielsG.col(0)) / Gz0.n_elem;
+	const cx_mat eps22 = circ_toeplitz(dielsG.col(1)) / Gz0.n_elem;
+	const cx_mat eps33 = circ_toeplitz(dielsG.col(2)) / Gz0.n_elem;
+	const mat GzGzp = Gz0.t() * Gz0;
+	const cx_mat Az = eps33 % GzGzp;
 	cx_mat AG(arma::size(Az));
 
 	for (uword k = 0; k < Gx0.n_elem; ++k) {
@@ -135,7 +135,7 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 
 	// 0,0,0 in k-space corresponds to a constant in the real space: average potential over the supercell.
 	Vk(0, 0, 0) = 0;
-	cx_cube V = ifft(Vk);
+	const cx_cube V = ifft(Vk);
 
 	return V;
 }
