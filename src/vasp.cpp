@@ -22,7 +22,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 
 	int counter = 0;
 	int counted = 0;
-	for (int k = 0; k < defs.size(); ++k) {
+	for (auto k = 0; k < defs.size(); ++k) {
 		while (structure.atoms.definition_order.at(counter) == defs.at(k)) {
 			++counter;
 			if (counter == structure.atoms_number) break;
@@ -40,7 +40,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	for (uword number = 0; number < structure.atoms_number; ++number) {
 		out_file << rowvec(structure.atoms.position.row(number));
 		if (structure.selective_dynamics) {
-			for (int qq2 = 0; qq2 < 3; ++qq2) {
+			for (auto qq2 = 0; qq2 < 3; ++qq2) {
 				if (structure.atoms.constrains.at(number).at(qq2)) {
 					out_file << " F";
 				}
@@ -138,7 +138,7 @@ supercell read_POSCAR(const string& file_name) {
 		string temp_constrain;
 		infile >> structure.atoms.position.row(i);
 		if (structure.selective_dynamics) {
-			for (int qq2 = 0; qq2 < 3; ++qq2) {
+			for (auto qq2 = 0; qq2 < 3; ++qq2) {
 				infile >> temp_constrain;
 				structure.atoms.constrains.at(i).at(qq2) = (tolower(temp_constrain.at(0)) == 't') ? false : true;
 			}
@@ -161,7 +161,7 @@ cube read_CHGPOT(const string& file_name) {
 		cerr << "ERROR: file not found:" << file_name << endl;
 		return {};
 	}
-	supercell structure = read_POSCAR(file_name);
+	const supercell structure = read_POSCAR(file_name);
 	for (auto currLineNumber = 0; currLineNumber < 8 + structure.atoms_number; ++currLineNumber) {
 		if (infile.ignore(numeric_limits<streamsize>::max(), infile.widen('\n'))) {
 			//just skipping the line. POSCAR must be read and checked seperately
@@ -245,4 +245,3 @@ void write_planar_avg(const cube& potential_data, const cube& charge_data, const
 		write_vec2file(avg_chg, "slabcc_" + id + int2xyz(dir) + "CHG.dat");
 	}
 }
-

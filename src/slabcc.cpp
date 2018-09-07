@@ -2,7 +2,6 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
-
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
@@ -71,7 +70,7 @@ int main(int argc, char *argv[])
 	parse_input_params(input_file, output_fstream, input_file_variables);
 	
 	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "SLABCC version " << "." << version_major <<"." << version_minor << "." << version_patch << endl;
+		cout << timing() << "SLABCC version " << version_major <<"." << version_minor << "." << version_patch << endl;
 		cout << timing() << "Armadillo library: version " << ARMA_VERSION_MAJOR << "." << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << endl;
 		cout << timing() << "NLOPT library: version " << nlopt::version_major() << "." << nlopt::version_minor() << "." << nlopt::version_bugfix() << endl;
 	}

@@ -101,10 +101,29 @@ class Cube : public BaseCube< eT, Cube<eT> >
   inline Cube& operator-=(const subview_cube<eT>& X);
   inline Cube& operator%=(const subview_cube<eT>& X);
   inline Cube& operator/=(const subview_cube<eT>& X);
+
+  template<typename T1> inline             Cube(const subview_cube_slices<eT,T1>& X);
+  template<typename T1> inline Cube&  operator=(const subview_cube_slices<eT,T1>& X);
+  template<typename T1> inline Cube& operator+=(const subview_cube_slices<eT,T1>& X);
+  template<typename T1> inline Cube& operator-=(const subview_cube_slices<eT,T1>& X);
+  template<typename T1> inline Cube& operator%=(const subview_cube_slices<eT,T1>& X);
+  template<typename T1> inline Cube& operator/=(const subview_cube_slices<eT,T1>& X);
+
+  arma_inline       subview_cube<eT> row(const uword in_row);
+  arma_inline const subview_cube<eT> row(const uword in_row) const;
+  
+  arma_inline       subview_cube<eT> col(const uword in_col);
+  arma_inline const subview_cube<eT> col(const uword in_col) const;
   
   inline       Mat<eT>& slice(const uword in_slice);
   inline const Mat<eT>& slice(const uword in_slice) const;
+
+  arma_inline       subview_cube<eT> rows(const uword in_row1, const uword in_row2);
+  arma_inline const subview_cube<eT> rows(const uword in_row1, const uword in_row2) const;
   
+  arma_inline       subview_cube<eT> cols(const uword in_col1, const uword in_col2);
+  arma_inline const subview_cube<eT> cols(const uword in_col1, const uword in_col2) const;
+
   arma_inline       subview_cube<eT> slices(const uword in_slice1, const uword in_slice2);
   arma_inline const subview_cube<eT> slices(const uword in_slice1, const uword in_slice2) const;
   
@@ -163,14 +182,25 @@ class Cube : public BaseCube< eT, Cube<eT> >
   #endif
   
   
+  template<typename T1> arma_inline       subview_cube_slices<eT,T1> slices(const Base<uword,T1>& indices);
+  template<typename T1> arma_inline const subview_cube_slices<eT,T1> slices(const Base<uword,T1>& indices) const;
+  
+  
+  inline void shed_row(const uword row_num);
+  inline void shed_col(const uword col_num);
   inline void shed_slice(const uword slice_num);
   
+  inline void shed_rows(const uword in_row1, const uword in_row2);
+  inline void shed_cols(const uword in_col1, const uword in_col2);
   inline void shed_slices(const uword in_slice1, const uword in_slice2);
   
+  inline void insert_rows(const uword row_num, const uword N, const bool set_to_zero = true);
+  inline void insert_cols(const uword row_num, const uword N, const bool set_to_zero = true);
   inline void insert_slices(const uword slice_num, const uword N, const bool set_to_zero = true);
   
-  template<typename T1>
-  inline void insert_slices(const uword row_num, const BaseCube<eT,T1>& X);
+  template<typename T1> inline void insert_rows(const uword row_num, const BaseCube<eT,T1>& X);
+  template<typename T1> inline void insert_cols(const uword col_num, const BaseCube<eT,T1>& X);
+  template<typename T1> inline void insert_slices(const uword slice_num, const BaseCube<eT,T1>& X);
   
   
   template<typename gen_type> inline             Cube(const GenCube<eT, gen_type>& X);
@@ -269,11 +299,11 @@ class Cube : public BaseCube< eT, Cube<eT> >
   arma_inline arma_warn_unused       eT* slice_colptr(const uword in_slice, const uword in_col);
   arma_inline arma_warn_unused const eT* slice_colptr(const uword in_slice, const uword in_col) const;
   
-  inline void impl_print(                           const std::string& extra_text) const;
-  inline void impl_print(std::ostream& user_stream, const std::string& extra_text) const;
+  arma_cold inline void impl_print(                           const std::string& extra_text) const;
+  arma_cold inline void impl_print(std::ostream& user_stream, const std::string& extra_text) const;
   
-  inline void impl_raw_print(                           const std::string& extra_text) const;
-  inline void impl_raw_print(std::ostream& user_stream, const std::string& extra_text) const;
+  arma_cold inline void impl_raw_print(                           const std::string& extra_text) const;
+  arma_cold inline void impl_raw_print(std::ostream& user_stream, const std::string& extra_text) const;
   
   inline void set_size(const uword in_rows, const uword in_cols, const uword in_slices);
   inline void set_size(const SizeCube& s);
@@ -333,21 +363,21 @@ class Cube : public BaseCube< eT, Cube<eT> >
   inline eT max(uword& row_of_max_val, uword& col_of_max_val, uword& slice_of_max_val) const;
   
   
-  inline bool save(const std::string   name, const file_type type = arma_binary, const bool print_status = true) const;
-  inline bool save(const hdf5_name&    spec, const file_type type = hdf5_binary, const bool print_status = true) const;
-  inline bool save(      std::ostream& os,   const file_type type = arma_binary, const bool print_status = true) const;
+  inline arma_cold bool save(const std::string   name, const file_type type = arma_binary, const bool print_status = true) const;
+  inline arma_cold bool save(const hdf5_name&    spec, const file_type type = hdf5_binary, const bool print_status = true) const;
+  inline arma_cold bool save(      std::ostream& os,   const file_type type = arma_binary, const bool print_status = true) const;
   
-  inline bool load(const std::string   name, const file_type type = auto_detect, const bool print_status = true);
-  inline bool load(const hdf5_name&    spec, const file_type type = hdf5_binary, const bool print_status = true);
-  inline bool load(      std::istream& is,   const file_type type = auto_detect, const bool print_status = true);
+  inline arma_cold bool load(const std::string   name, const file_type type = auto_detect, const bool print_status = true);
+  inline arma_cold bool load(const hdf5_name&    spec, const file_type type = hdf5_binary, const bool print_status = true);
+  inline arma_cold bool load(      std::istream& is,   const file_type type = auto_detect, const bool print_status = true);
   
-  inline bool quiet_save(const std::string   name, const file_type type = arma_binary) const;
-  inline bool quiet_save(const hdf5_name&    spec, const file_type type = hdf5_binary) const;
-  inline bool quiet_save(      std::ostream& os,   const file_type type = arma_binary) const;
+  inline arma_cold bool quiet_save(const std::string   name, const file_type type = arma_binary) const;
+  inline arma_cold bool quiet_save(const hdf5_name&    spec, const file_type type = hdf5_binary) const;
+  inline arma_cold bool quiet_save(      std::ostream& os,   const file_type type = arma_binary) const;
   
-  inline bool quiet_load(const std::string   name, const file_type type = auto_detect);
-  inline bool quiet_load(const hdf5_name&    spec, const file_type type = hdf5_binary);
-  inline bool quiet_load(      std::istream& is,   const file_type type = auto_detect);
+  inline arma_cold bool quiet_load(const std::string   name, const file_type type = auto_detect);
+  inline arma_cold bool quiet_load(const hdf5_name&    spec, const file_type type = hdf5_binary);
+  inline arma_cold bool quiet_load(      std::istream& is,   const file_type type = auto_detect);
   
   
   // iterators

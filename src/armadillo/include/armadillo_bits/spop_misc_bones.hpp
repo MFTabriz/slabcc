@@ -118,12 +118,12 @@ class spop_conj
 
 
 
-class spop_repmat
+class spop_repelem
   {
   public:
   
   template<typename T1>
-  inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_repmat>& in);
+  inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_repelem>& in);
   };
 
 
@@ -204,6 +204,26 @@ class spop_diagvec
   
   template<typename T1>
   inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_diagvec>& in);
+  };
+
+
+
+class spop_flipud
+  {
+  public:
+  
+  template<typename T1>
+  inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_flipud>& in);
+  };
+
+
+
+class spop_fliplr
+  {
+  public:
+  
+  template<typename T1>
+  inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_fliplr>& in);
   };
 
 

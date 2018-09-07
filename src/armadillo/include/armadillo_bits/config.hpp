@@ -95,7 +95,7 @@
 #if !defined(ARMA_USE_OPENMP)
 // #define ARMA_USE_OPENMP
 //// Uncomment the above line to forcefully enable use of OpenMP for parallelisation.
-//// Note that ARMA_USE_OPENMP is automatically enabled when a compiler supporting OpenMP 3.0 is detected.
+//// Note that ARMA_USE_OPENMP is automatically enabled when a compiler supporting OpenMP 3.1 is detected.
 #endif
 
 #if !defined(ARMA_64BIT_WORD)
@@ -110,6 +110,16 @@
 //// Uncomment the above line to allow the ability to save and load matrices stored in HDF5 format;
 //// the hdf5.h header file must be available on your system,
 //// and you will need to link with the hdf5 library (eg. -lhdf5)
+#endif
+
+#if !defined(ARMA_OPTIMISE_SOLVE_BAND)
+  #define ARMA_OPTIMISE_SOLVE_BAND
+  //// Comment out the above line if you don't want optimised handling of band matrices by solve()
+#endif
+
+#if !defined(ARMA_OPTIMISE_SOLVE_SYMPD)
+  #define ARMA_OPTIMISE_SOLVE_SYMPD
+  //// Comment out the above line if you don't want optimised handling of symmetric/hermitian positive definite matrices by solve()
 #endif
 
 // #define ARMA_USE_HDF5_ALT
@@ -129,23 +139,16 @@
 //// change the number to the size of your vectors.
 
 #if !defined(ARMA_OPENMP_THRESHOLD)
-  #define ARMA_OPENMP_THRESHOLD 384
+  #define ARMA_OPENMP_THRESHOLD 240
 #endif
 //// The minimum number of elements in a matrix to allow OpenMP based parallelisation;
 //// it must be an integer that is at least 1.
 
 #if !defined(ARMA_OPENMP_THREADS)
-  #define ARMA_OPENMP_THREADS 20
+  #define ARMA_OPENMP_THREADS 10
 #endif
 //// The maximum number of threads to use for OpenMP based parallelisation;
 //// it must be an integer that is at least 1.
-
-#if !defined(ARMA_SPMAT_CHUNKSIZE)
-  #define ARMA_SPMAT_CHUNKSIZE 256
-#endif
-//// This is the minimum increase in the amount of memory (in terms of elements) allocated by a sparse matrix;
-//// it must be an integer that is at least 1.
-//// The minimum recommended size is 16.
 
 // #define ARMA_NO_DEBUG
 //// Uncomment the above line if you want to disable all run-time checks.
@@ -252,6 +255,14 @@
 #if defined(ARMA_DONT_USE_HDF5)
   #undef ARMA_USE_HDF5
   #undef ARMA_USE_HDF5_ALT
+#endif
+
+#if defined(ARMA_DONT_OPTIMISE_SOLVE_BAND)
+  #undef ARMA_OPTIMISE_SOLVE_BAND
+#endif
+
+#if defined(ARMA_DONT_OPTIMISE_SOLVE_SYMPD)
+  #undef ARMA_OPTIMISE_SOLVE_SYMPD
 #endif
 
 #if defined(ARMA_DONT_PRINT_ERRORS)

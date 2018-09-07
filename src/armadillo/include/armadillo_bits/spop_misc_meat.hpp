@@ -267,7 +267,7 @@ spop_conj::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_conj>& i
 template<typename T1>
 inline
 void
-spop_repmat::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_repmat>& in)
+spop_repelem::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_repelem>& in)
   {
   arma_extra_debug_sigprint();
   
@@ -276,49 +276,46 @@ spop_repmat::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_repma
   const unwrap_spmat<T1> U(in.m);
   const SpMat<eT>& X =   U.M;
   
-  const uword X_n_rows = X.n_rows;
-  const uword X_n_cols = X.n_cols;
-  
   const uword copies_per_row = in.aux_uword_a;
   const uword copies_per_col = in.aux_uword_b;
   
-  // out.set_size(X_n_rows * copies_per_row, X_n_cols * copies_per_col);
-  // 
-  // const uword out_n_rows = out.n_rows;
-  // const uword out_n_cols = out.n_cols;
-  // 
-  // if( (out_n_rows > 0) && (out_n_cols > 0) )
-  //   {
-  //   for(uword col = 0; col < out_n_cols; col += X_n_cols)
-  //   for(uword row = 0; row < out_n_rows; row += X_n_rows)
-  //     {
-  //     out.submat(row, col, row+X_n_rows-1, col+X_n_cols-1) = X;
-  //     }
-  //   }
+  const uword out_n_rows = X.n_rows * copies_per_row;
+  const uword out_n_cols = X.n_cols * copies_per_col;
+  const uword out_nnz    = X.n_nonzero * copies_per_row * copies_per_col;
   
-  SpMat<eT> tmp(X_n_rows * copies_per_row, X_n_cols);
-  
-  if(tmp.n_elem > 0)
+  if( (out_n_rows > 0) && (out_n_cols > 0) && (out_nnz > 0) )
     {
-    for(uword row = 0; row < tmp.n_rows; row += X_n_rows)
+    umat    locs(2, out_nnz);
+    Col<eT> vals(   out_nnz);
+    
+    uword* locs_mem = locs.memptr();
+    eT*    vals_mem = vals.memptr();
+    
+    typename SpMat<eT>::const_iterator X_it  = X.begin();
+    typename SpMat<eT>::const_iterator X_end = X.end();
+    
+    for(; X_it != X_end; ++X_it)
       {
-      tmp.submat(row, 0, row+X_n_rows-1, X_n_cols-1) = X;
+      const uword col_base = copies_per_col * X_it.col();
+      const uword row_base = copies_per_row * X_it.row();
+      
+      const eT X_val = (*X_it);
+      
+      for(uword cols = 0; cols < copies_per_col; cols++)
+      for(uword rows = 0; rows < copies_per_row; rows++)
+        {
+        (*locs_mem) = row_base + rows;  ++locs_mem;
+        (*locs_mem) = col_base + cols;  ++locs_mem;
+        
+        (*vals_mem) = X_val;  ++vals_mem;
+        }
       }
+    
+    out = SpMat<eT>(locs, vals, out_n_rows, out_n_cols);
     }
-  
-  // tmp contains copies of the input matrix, so no need to check for aliasing
-  
-  out.set_size(X_n_rows * copies_per_row, X_n_cols * copies_per_col);
-  
-  const uword out_n_rows = out.n_rows;
-  const uword out_n_cols = out.n_cols;
-  
-  if( (out_n_rows > 0) && (out_n_cols > 0) )
+  else
     {
-    for(uword col = 0; col < out_n_cols; col += X_n_cols)
-      {
-      out.submat(0, col, out_n_rows-1, col+X_n_cols-1) = tmp;
-      }
+    out.zeros(out_n_rows, out_n_cols);
     }
   }
 
@@ -527,6 +524,30 @@ spop_diagvec::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_diagv
   
   access::rw(out.col_ptrs[0]) = 0;
   access::rw(out.col_ptrs[1]) = n_nonzero;
+  }
+
+
+
+template<typename T1>
+inline
+void
+spop_flipud::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_flipud>& in)
+  {
+  arma_extra_debug_sigprint();
+  
+  out = reverse(in.m, 0);
+  }
+
+
+
+template<typename T1>
+inline
+void
+spop_fliplr::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_fliplr>& in)
+  {
+  arma_extra_debug_sigprint();
+  
+  out = reverse(in.m, 1);
   }
 
 

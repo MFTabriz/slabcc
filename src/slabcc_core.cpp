@@ -460,7 +460,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 	const urowvec grid0 = slabcc_cell.grid;
 	const rowvec3 grid_ext = grid_multiplier * conv_to<rowvec>::from(grid0);
 	const urowvec3 grid_ext_u = { (uword)grid_ext(0),(uword)grid_ext(1),(uword)grid_ext(2) };
-	for (int n = 0; n < extrapol_steps_num - 1; ++n) {
+	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 
 		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 
@@ -518,7 +518,7 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 	UpdateCell(cell_size0, grid_ext_u);
 	const mat diels0 = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
 
-	for (int n = 0; n < extrapol_steps_num - 1; ++n) {
+	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 
 		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);

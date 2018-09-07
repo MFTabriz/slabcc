@@ -472,31 +472,11 @@ operator*
   {
   arma_extra_debug_sigprint();
   
-  const SpProxy<T1> pa(x);
-  const   Proxy<T2> pb(y);
+  typedef typename T1::elem_type eT;
   
-  arma_debug_assert_mul_size(pa.get_n_rows(), pa.get_n_cols(), pb.get_n_rows(), pb.get_n_cols(), "matrix multiplication");
+  Mat<eT> result;
   
-  Mat<typename T1::elem_type> result(pa.get_n_rows(), pb.get_n_cols());
-  result.zeros();
-  
-  if( (pa.get_n_nonzero() > 0) && (pb.get_n_elem() > 0) )
-    {
-    typename SpProxy<T1>::const_iterator_type x_it     = pa.begin();
-    typename SpProxy<T1>::const_iterator_type x_it_end = pa.end();
-    
-    const uword result_n_cols = result.n_cols;
-      
-    while(x_it != x_it_end)
-      {
-      for(uword col = 0; col < result_n_cols; ++col)
-        {
-        result.at(x_it.row(), col) += (*x_it) * pb.at(x_it.col(), col);
-        }
-      
-      ++x_it;
-      }
-    }
+  spglue_times_misc::sparse_times_dense(result, x, y);
   
   return result;
   }
@@ -520,31 +500,11 @@ operator*
   {
   arma_extra_debug_sigprint();
   
-  const   Proxy<T1> pa(x);
-  const SpProxy<T2> pb(y);
+  typedef typename T1::elem_type eT;
   
-  arma_debug_assert_mul_size(pa.get_n_rows(), pa.get_n_cols(), pb.get_n_rows(), pb.get_n_cols(), "matrix multiplication");
+  Mat<eT> result;
   
-  Mat<typename T1::elem_type> result(pa.get_n_rows(), pb.get_n_cols());
-  result.zeros();
-  
-  if( (pa.get_n_elem() > 0) && (pb.get_n_nonzero() > 0) )
-    {
-    typename SpProxy<T2>::const_iterator_type y_col_it     = pb.begin();
-    typename SpProxy<T2>::const_iterator_type y_col_it_end = pb.end();
-    
-    const uword result_n_rows = result.n_rows;
-    
-    while(y_col_it != y_col_it_end)
-      {
-      for(uword row = 0; row < result_n_rows; ++row)
-        {
-        result.at(row, y_col_it.col()) += pa.at(row, y_col_it.row()) * (*y_col_it);
-        }
-      
-      ++y_col_it;
-      }
-    }
+  spglue_times_misc::dense_times_sparse(result, x, y);
   
   return result;
   }

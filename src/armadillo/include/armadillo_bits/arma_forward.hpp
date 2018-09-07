@@ -52,8 +52,8 @@ template<typename eT> class spdiagview;
 
 template<typename eT> class MapMat;
 template<typename eT> class MapMat_val;
-template<typename eT> class MapMat_elem;
-template<typename eT> class MapMat_svel;
+template<typename eT> class SpMat_MapMat_val;
+template<typename eT> class SpSubview_MapMat_val;
 
 template<typename eT, typename T1>              class subview_elem1;
 template<typename eT, typename T1, typename T2> class subview_elem2;
@@ -63,6 +63,7 @@ template<typename parent, unsigned int mode, typename TB> class subview_each2;
 
 template<typename eT>              class subview_cube_each1;
 template<typename eT, typename TB> class subview_cube_each2;
+template<typename eT, typename T1> class subview_cube_slices;
 
 
 class SizeMat;
@@ -101,6 +102,8 @@ class op_find_simple;
 class op_find_unique;
 class op_flipud;
 class op_fliplr;
+class op_reverse_vec;
+class op_reverse_mat;
 class op_real;
 class op_imag;
 class op_nonzeros;
@@ -110,6 +113,8 @@ class op_unique;
 class op_unique_index;
 class op_diff_default;
 class op_hist;
+class op_chi2rnd;
+class op_roots;
 
 class eop_conj;
 
@@ -227,6 +232,51 @@ class spglue_minus2;
 class spglue_times;
 class spglue_times2;
 
+struct state_type
+  {
+  #if   defined(ARMA_USE_OPENMP)
+                int  state;
+  #elif defined(ARMA_USE_CXX11)
+    std::atomic<int> state;
+  #else
+                int  state;
+  #endif
+  
+  // openmp: "omp atomic" does an implicit flush on the affected variable
+  // C++11:  std::atomic<>::load() and std::atomic<>::store() use std::memory_order_seq_cst by default, which has an implied fence
+  
+  arma_inline
+  operator int () const
+    {
+    int out;
+    
+    #if   defined(ARMA_USE_OPENMP)
+      #pragma omp atomic read
+      out = state;
+    #elif defined(ARMA_USE_CXX11)
+      out = state.load();
+    #else
+      out = state;
+    #endif
+    
+    return out;
+    }
+  
+  arma_inline
+  void
+  operator= (const int in_state)
+    {
+    #if   defined(ARMA_USE_OPENMP)
+      #pragma omp atomic write
+      state = in_state;
+    #elif defined(ARMA_USE_CXX11)
+      state.store(in_state);
+    #else
+      state = in_state;
+    #endif
+    }
+  };
+
 
 template<                 typename T1, typename spop_type> class   SpOp;
 template<typename out_eT, typename T1, typename spop_type> class mtSpOp;
@@ -276,20 +326,71 @@ enum file_type
   };
 
 
-struct hdf5_name
+namespace hdf5_opts
   {
-  const std::string filename;
-  const std::string dsname;
+  typedef unsigned int flag_type;
+  
+  struct opts
+    {
+    const flag_type flags;
+    
+    inline explicit opts(const flag_type in_flags);
+    
+    inline const opts operator+(const opts& rhs) const;
+    };
   
   inline
-  hdf5_name(const std::string& in_filename)
-    : filename(in_filename)
+  opts::opts(const flag_type in_flags)
+    : flags(in_flags)
     {}
   
   inline
-  hdf5_name(const std::string& in_filename, const std::string& in_dsname)
+  const opts
+  opts::operator+(const opts& rhs) const
+    {
+    const opts result( flags | rhs.flags );
+    
+    return result;
+    }
+  
+  // The values below (eg. 1u << 0) are for internal Armadillo use only.
+  // The values can change without notice.
+  
+  static const flag_type flag_none    = flag_type(0      );
+  static const flag_type flag_trans   = flag_type(1u << 0);
+  static const flag_type flag_append  = flag_type(1u << 1);
+  static const flag_type flag_replace = flag_type(1u << 2);
+  
+  struct opts_none    : public opts { inline opts_none()    : opts(flag_none   ) {} };
+  struct opts_trans   : public opts { inline opts_trans()   : opts(flag_trans  ) {} };
+  struct opts_append  : public opts { inline opts_append()  : opts(flag_append ) {} };
+  struct opts_replace : public opts { inline opts_replace() : opts(flag_replace) {} };
+  
+  static const opts_none    none;
+  static const opts_trans   trans;
+  static const opts_append  append;
+  static const opts_replace replace;
+  }
+
+
+struct hdf5_name
+  {
+  const std::string     filename;
+  const std::string     dsname;
+  const hdf5_opts::opts opts;
+  
+  inline
+  hdf5_name(const std::string& in_filename)
+    : filename(in_filename    )
+    , dsname  (std::string()  )
+    , opts    (hdf5_opts::none)
+    {}
+  
+  inline
+  hdf5_name(const std::string& in_filename, const std::string& in_dsname, const hdf5_opts::opts& in_opts = hdf5_opts::none)
     : filename(in_filename)
     , dsname  (in_dsname  )
+    , opts    (in_opts    )
     {}
   };
 
@@ -349,6 +450,7 @@ struct superlu_opts : public spsolve_opts_base
   
   typedef enum {REF_NONE, REF_SINGLE, REF_DOUBLE, REF_EXTRA} refine_type;
   
+  bool             allow_ugly;
   bool             equilibrate;
   bool             symmetric;
   double           pivot_thresh;
@@ -358,6 +460,7 @@ struct superlu_opts : public spsolve_opts_base
   inline superlu_opts()
     : spsolve_opts_base(1)
     {
+    allow_ugly   = false;
     equilibrate  = false;
     symmetric    = false;
     pivot_thresh = 1.0;
