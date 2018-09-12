@@ -104,7 +104,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 
 	if (showVer) {
 		cout << "SLAB Charge Correction (slabcc)\n"
-			   "Version: " << "." << version_major << "." << version_minor << "." << version_patch << endl;
+			   "Version: " << version_major << "." << version_minor << "." << version_patch << endl;
 		cout << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
 
 		exit(0);
