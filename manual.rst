@@ -1,7 +1,7 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 5 Sep 2018
-:version: 0.3.1
+:Last updated: 14 Sep 2018
+:version: 0.3.3
 
 .. sectnum::
 
@@ -88,7 +88,7 @@ Input parameters file for a slab should minimally include (all in relative scale
 - ``charge_position``: position of the localized charge
 - ``diel_in``: dielectric tensor of the slab
 - ``normal_direction``: direction normal to the surface
-- ``interface``: position of the surfaces of the slab (in the normal direction)
+- ``interfaces``: position of the surfaces of the slab (in the normal direction)
 
 
 Example
@@ -140,7 +140,7 @@ Test set
 You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323559>`_!
 
 ============
-Installation 
+Installation
 ============
 1. **Prerequisites:**
 
