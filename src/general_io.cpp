@@ -19,19 +19,6 @@ void write_vec2file(const vector<double>& input, const string& output_file) {
 
 }
 
-vector<double> read_file2vec(const string& input_file) {
-	vector<double> vector;
-	string temp;
-	ifstream in_file(input_file);
-
-	while (getline(in_file, temp)) {
-		vector.push_back(stod(temp));
-	}
-	in_file.close();
-
-	return vector;
-}
-
 unsigned int xyz2int(const string& s) {
 	const char dir_char = tolower(s.at(0));
 	const unordered_map<char, unsigned int> dir_map{
@@ -52,9 +39,9 @@ char int2xyz(const unsigned int& i) {
 string timing() {
 	if (is_active(verbosity::timing)) {
 		stringstream streamObj;
-		auto time_diff_h = chrono::duration_cast<chrono::hours>(chrono::steady_clock::now() - t0);
-		auto time_diff_m = chrono::duration_cast<chrono::minutes>(chrono::steady_clock::now() - t0);
-		auto time_diff_s = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - t0);
+		const auto time_diff_h = chrono::duration_cast<chrono::hours>(chrono::steady_clock::now() - t0);
+		const auto time_diff_m = chrono::duration_cast<chrono::minutes>(chrono::steady_clock::now() - t0);
+		const auto time_diff_s = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - t0);
 		streamObj << fixed << setfill('0');
 		streamObj << setw(2) << time_diff_h.count() << ":" << setw(2) << time_diff_m.count() % 60 << ":" << setw(2) << time_diff_s.count() % 60 << " ";
 		return streamObj.str();
@@ -104,7 +91,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 
 	if (showVer) {
 		cout << "SLAB Charge Correction (slabcc)\n"
-			   "Version: " << version_major << "." << version_minor << "." << version_patch << endl;
+			   "Version: " << "." << version_major << "." << version_minor << "." << version_patch << endl;
 		cout << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
 
 		exit(0);

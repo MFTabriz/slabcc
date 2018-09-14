@@ -82,7 +82,7 @@ cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigm
 	// this charge distribution is due to the 1st nearest Gaussian image. 
 	// In case of the very small supercells or very diffuse charges (large sigma), the higher order of the image charges must also be included.
 	// But the validity of the correction method for these cases must be checked!
-	const cx_cube charge_dist = cx_cube(Q / pow((sigma*sqrt(2 * PI)), 3) * exp(-r2 / (2 * pow(sigma, 2))), zeros(as_size(slabcc_cell.grid)));
+	const cx_cube charge_dist = cx_cube(Q / pow((sigma * sqrt(2 * PI)), 3) * exp(-r2 / (2 * pow(sigma, 2))), zeros(as_size(slabcc_cell.grid)));
 	return charge_dist;
 }
 
@@ -109,24 +109,25 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 
 	// 4PI is for the atomic units
 	const auto rhok = fft(cx_cube(4.0 * PI * rho));
-	auto Vk = cx_cube(arma::size(rhok));
 	const cx_mat dielsG = fft(diel);
 	const cx_mat eps11 = circ_toeplitz(dielsG.col(0)) / Gz0.n_elem;
 	const cx_mat eps22 = circ_toeplitz(dielsG.col(1)) / Gz0.n_elem;
 	const cx_mat eps33 = circ_toeplitz(dielsG.col(2)) / Gz0.n_elem;
 	const mat GzGzp = Gz0.t() * Gz0;
 	const cx_mat Az = eps33 % GzGzp;
+	cx_cube Vk(arma::size(rhok));
 	cx_mat AG(arma::size(Az));
 
 	for (uword k = 0; k < Gx0.n_elem; ++k) {
+		const auto eps11_Gx0k2 = eps11 * Gx0(k) * Gx0(k);
 		for (uword m = 0; m < Gy0.n_elem; ++m) {
 			vector<span> spans = { span(k), span(m), span() };
 			swap(spans.at(slabcc_cell.normal_direction), spans.at(2));
-			AG = Az + eps11 * pow(Gx0(k), 2) + eps22 * pow(Gy0(m), 2);
+			AG = Az + eps11_Gx0k2 + eps22 * Gy0(m) * Gy0(m);
 
 			if ((k == 0) && (m == 0)) { AG(0, 0) = 1; }
 
-			Vk(spans.at(0), spans.at(1), spans.at(2)) = solve(AG, cx_colvec(vectorise(rhok(spans.at(0), spans.at(1), spans.at(2)))));
+			Vk(spans.at(0), spans.at(1), spans.at(2)) = solve(AG, vectorise(rhok(spans.at(0), spans.at(1), spans.at(2))));
 		}
 	}
 

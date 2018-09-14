@@ -11,14 +11,13 @@
 #define PI datum::pi
 
 
-//These functions extend the functionality of the included Armadillo library (version 8.5) by providing:
+//These functions extend the functionality of the included Armadillo library by providing:
 // (arma,iostream) << and >> operators for reading from iostreams to armadillo types and vice versa
 // fft/ifft functions for cube files: Wrappers for FFTW with MATLAB/Octave scaling convention
 //				in FFT functions the forward FFT scales by 1, and the reverse scales by 1/N. 
 // 3D ndgrid and 3D meshgrid
 // 3D spline interpolation
 // 3D shift: by number of the elements along one axis or with a relative 3D shift vector
-// 3D swap_axes
 // irowvec to matrix/cube size conversion
 // scalar triple product
 
@@ -92,9 +91,9 @@ void write_mat2file(const mat& input, const string& output_file);
 template <typename T>
 Cube<T> shift(const Cube<T>& A, const sword& N, const uword& dim) {
 	Cube<T> B(arma::size(A));
-	auto index_init = regspace<uvec>(0, A.n_elem - 1);
+	const auto index_init = regspace<uvec>(0, A.n_elem - 1);
 	imat sub_shift = conv_to<imat>::from(ind2sub(arma::size(A), index_init));
-	uword size = arma::size(A)(dim);
+	const uword size = arma::size(A)(dim);
 	sub_shift.row(dim).for_each([&N, &size](sword& i) noexcept {
 		i += N;
 		while (i < 0) i += size;
@@ -132,7 +131,7 @@ urowvec3 SizeVec(const Cube<T>& c) {
 //returns the size of a matrix as a rowvec
 template<typename T>
 urowvec2 SizeVec(const Mat<T>& c) {
-	SizeMat size = arma::size(c);
+	const SizeMat size = arma::size(c);
 	return urowvec({ size(0), size(1) });
 }
 
@@ -146,11 +145,11 @@ Cube<T> swap_axes(const Cube<T> &cube_in, const uword& axis1, const uword& axis2
 		return cube_in;
 	}
 
-	auto index_init = regspace<uvec>(0, cube_in.n_elem - 1);
+	const auto index_init = regspace<uvec>(0, cube_in.n_elem - 1);
 	auto sub_swap = ind2sub(arma::size(cube_in), index_init);
 	sub_swap.swap_rows(axis1, axis2);
 
-	urowvec3 output_size = SizeVec(cube_in);
+	const urowvec3 output_size = SizeVec(cube_in);
 	output_size.swap_cols(axis1, axis2);
 	Cube<T> cube_out(as_size(output_size), fill::zeros);
 

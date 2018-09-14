@@ -238,10 +238,12 @@ void write_planar_avg(const cube& potential_data, const cube& charge_data, const
 	for (unsigned int dir = direction_first; dir <= direction_last; ++dir) {
 		vector<double> avg_pot = planar_average(dir, potential_data);
 		const vector<double> avg_chg = planar_average(dir, charge_data);
+		const auto pot_normalization = static_cast<double>(avg_pot.size()) / potential_data.n_elem;
 		for (auto &elem : avg_pot) {
-			elem *= static_cast<double>(avg_pot.size()) / potential_data.n_elem;
+			elem *= pot_normalization;
 		}
 		write_vec2file(avg_pot, "slabcc_" + id + int2xyz(dir) + "POT.dat");
 		write_vec2file(avg_chg, "slabcc_" + id + int2xyz(dir) + "CHG.dat");
 	}
 }
+

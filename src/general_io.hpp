@@ -29,9 +29,6 @@ enum class verbosity :int {
 // writes each element of a vector in a separate line inside a text file named "output_file"
 void write_vec2file(const vector<double>& input, const string& output_file);
 
-// reads the txt file with double in each line and return a vector
-vector<double> read_file2vec(const string& input_file);
-
 //converts the first letter of the string from "a-b-c"/"x-y-z" to 0/1/2
 unsigned int xyz2int(const string& s);
 
