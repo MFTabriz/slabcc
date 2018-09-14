@@ -37,14 +37,14 @@ void INIReader::dump_parsed(std::ofstream& out_file) const {
 	if (is_active(verbosity::basic_steps)) {
 		cout << timing() << "-------------slabcc parameters-------------" << endl;
 		for (const auto &i : _parsed) {
-			std::cout << timing() << i.at(0) << " = " << i.at(1) << std::endl;
+			cout << timing() << i.at(0) << " = " << i.at(1) << endl;
 		}
-		std::cout << timing() << "-----------------------------------------" << std::endl;
+		cout << timing() << "-----------------------------------------" << endl;
 	}
 
-	out_file << "# Parameters read from the file or their default values:" << std::endl;
+	out_file << "# Parameters read from the file or their default values:" << endl;
 	for (const auto &i : _parsed) {
-		out_file << i.at(0) << " = " << i.at(1) << std::endl;
+		out_file << i.at(0) << " = " << i.at(1) << endl;
 	}
 
 	out_file.flush();
@@ -123,9 +123,9 @@ bool INIReader::GetBoolean(const string& name, const bool default_value) const {
 	const string valstr = tolower(Get(name));
 	bool result = default_value;
 
-	if (valstr == "true" || valstr == "yes" || valstr == "on" || valstr == "1")
+	if (valstr == ".true." || valstr == "true" || valstr == "yes" || valstr == "on" || valstr == "1")
 		result = true;
-	else if (valstr == "false" || valstr == "no" || valstr == "off" || valstr == "0")
+	else if (valstr == ".false." || valstr == "false" || valstr == "no" || valstr == "off" || valstr == "0")
 		result = false;
 
 	_parsed.push_back({ name, std::to_string(result) });
