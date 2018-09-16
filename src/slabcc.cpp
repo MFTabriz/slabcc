@@ -2,7 +2,6 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
-
 #include "stdafx.h"
 #include "slabcc_core.hpp"
 #include "vasp.hpp"
@@ -11,8 +10,8 @@ using namespace std;
 //verbosity level to be compared with "enum verbosity" by is_active()
 int verbos = 0;
 slabcc_cell_type slabcc_cell;			//All the parameters various functions need to be aware of
-const double ang_to_bohr = 1e-10 / datum::a_0;
-const double Hartree_to_eV = datum::R_inf * datum::h * datum::c_0 / datum::eV * 2;
+const double ang_to_bohr = 1e-10 / datum::a_0;  //1.88972612546
+const double Hartree_to_eV = datum::R_inf * datum::h * datum::c_0 / datum::eV * 2; //27.2113860193
 const int version_major = 0;
 const int version_minor = 3;
 const int version_patch = 4;
