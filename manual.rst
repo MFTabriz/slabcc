@@ -1,6 +1,6 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 14 Sep 2018
+:Last updated: 16 Sep 2018
 :version: 0.3.3
 
 .. sectnum::
@@ -149,11 +149,7 @@ Installation
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside slabcc but it is highly recommended to use OpenBLAS/MKL instead. If you don't have OpenBLAS/BLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
-3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc. If you want to statically link the libraries, run::
-
-    make STATIC=1
-
- (You will need static version of the compiled libraries for static linking) 
+3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
 
 =======================
 Command-line parameters

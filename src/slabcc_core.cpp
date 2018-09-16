@@ -117,11 +117,14 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	const cx_mat Az = eps33 % GzGzp;
 	cx_cube Vk(arma::size(rhok));
 	cx_mat AG(arma::size(Az));
+	cx_mat eps11_Gx0k2(arma::size(Az));
+	vector<span> spans;
 
+	#pragma omp parallel for private(AG, eps11_Gx0k2, spans)
 	for (uword k = 0; k < Gx0.n_elem; ++k) {
-		const auto eps11_Gx0k2 = eps11 * Gx0(k) * Gx0(k);
+		eps11_Gx0k2 = eps11 * Gx0(k) * Gx0(k);
 		for (uword m = 0; m < Gy0.n_elem; ++m) {
-			vector<span> spans = { span(k), span(m), span() };
+			spans = { span(k), span(m), span() };
 			swap(spans.at(slabcc_cell.normal_direction), spans.at(2));
 			AG = Az + eps11_Gx0k2 + eps22 * Gy0(m) * Gy0(m);
 
