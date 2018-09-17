@@ -12,7 +12,7 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 	rowvec2 interfaces_cartesian = interfaces * length;
 	sort(interfaces_cartesian);
 	const auto positions = linspace<rowvec>(0, length, n_points + 1);
-	mat diels = zeros(n_points,3);
+	mat diels = zeros(n_points, 3);
 	const rowvec3 diel_sum = diel_in + diel_out;
 	const rowvec3 diel_diff = diel_out - diel_in;
 
@@ -52,7 +52,7 @@ cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigm
 	rowvec x0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(0) - slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0), slabcc_cell.grid(0));
 	rowvec y0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(1) - slabcc_cell.vec_lengths(1) / slabcc_cell.grid(1), slabcc_cell.grid(1));
 	rowvec z0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(2) - slabcc_cell.vec_lengths(2) / slabcc_cell.grid(2), slabcc_cell.grid(2));
-	
+
 	// shift the axis reference to position of the Gaussian charge center
 	x0 -= accu(slabcc_cell.size.col(0) * rel_pos(0));
 	y0 -= accu(slabcc_cell.size.col(1) * rel_pos(1));
@@ -120,13 +120,13 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	cx_mat eps11_Gx0k2(arma::size(Az));
 	vector<span> spans;
 
-	#pragma omp parallel for private(AG, eps11_Gx0k2, spans)
+#pragma omp parallel for private(AG, eps11_Gx0k2, spans)
 	for (uword k = 0; k < Gx0.n_elem; ++k) {
-		eps11_Gx0k2 = eps11 * Gx0(k) * Gx0(k);
+		eps11_Gx0k2 = eps11 * square(Gx0(k));
 		for (uword m = 0; m < Gy0.n_elem; ++m) {
 			spans = { span(k), span(m), span() };
 			swap(spans.at(slabcc_cell.normal_direction), spans.at(2));
-			AG = Az + eps11_Gx0k2 + eps22 * Gy0(m) * Gy0(m);
+			AG = Az + eps11_Gx0k2 + eps22 * square(Gy0(m));
 
 			if ((k == 0) && (m == 0)) { AG(0, 0) = 1; }
 
@@ -142,7 +142,7 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 }
 
 double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data) {
-	
+
 	rowvec2 interfaces;
 	rowvec sigma, Qd;
 	mat defcenter;
@@ -168,7 +168,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	auto& initial_pot_MSE = d->initial_pot_MSE;
 
 	diels = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
-	
+
 	rhoM.reset();
 	rhoM = zeros<cx_cube>(as_size(slabcc_cell.grid));
 	for (uword i = 0; i < Qd.n_elem; ++i) {
@@ -189,10 +189,10 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 		cout << timing() << "-----------------------------------------" << endl;
 		cout << timing() << "> shifted_interfaces=" << x.at(0) << " " << x.at(1) << endl;
 		for (uword i = 0; i < Qd.n_elem; ++i) {
-			cout << timing() << "> charge_sigma=" << sigma(i) << " charge_fraction="<< abs(Qd(i)/accu(Qd)) << endl;
+			cout << timing() << "> charge_sigma=" << sigma(i) << " charge_fraction=" << abs(Qd(i) / accu(Qd)) << endl;
 			cout << timing() << "> shifted_charge_position=" << defcenter(i, 0) << " " << defcenter(i, 1) << " " << defcenter(i, 2) << endl;
 		}
-		cout << timing() << "Potential Mean Squared Error: " << pot_MSE << " %" << endl;
+		cout << timing() << "Potential Root Mean Square Error: " << sqrt(pot_MSE) << endl;
 	}
 
 	return pot_MSE;
@@ -219,7 +219,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	opt.set_upper_bounds(upp_b);
 
 	opt.set_min_objective(potential_eval, &opt_data);
-	opt.set_xtol_rel(opt_tol);   //tolerance for error value
+	opt.set_xtol_rel(square(opt_tol));   //tolerance is defined for RMSE in the input, optimizer is checking MSE
 	if (max_eval > 0) {
 		opt.set_maxeval(max_eval);
 	}
@@ -241,7 +241,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 		const nlopt::result nlopt_final_result = opt.optimize(opt_param, pot_MSE_min);
 
 		if (nlopt_final_result == nlopt::MAXEVAL_REACHED) {
-			cout << endl << timing() << ">> WARNING <<: optimization ended after "<< max_eval << " steps before reaching the requested accuracy!" << endl << endl;
+			cout << endl << timing() << ">> WARNING <<: optimization ended after " << max_eval << " steps before reaching the requested accuracy!" << endl << endl;
 		}
 		else if (nlopt_final_result == nlopt::MAXTIME_REACHED) {
 			cout << endl << timing() << ">> WARNING <<: optimization ended after " << max_time << " minutes of search before reaching the requested accuracy!" << endl << endl;
@@ -324,7 +324,7 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_
 		opt_vars.sigma(i) = optimizer_vars_vec.at(5 + variable_per_charge * i);
 		if (i != n_charges - 1) {
 			opt_vars.Qd(i) = optimizer_vars_vec.at(6 + variable_per_charge * i);
-		}	
+		}
 	}
 }
 
@@ -348,7 +348,7 @@ void check_inputs(input_data input_set) {
 		input_set.diel_out = rowvec{ input_set.diel_out(0), input_set.diel_out(0), input_set.diel_out(0) };
 	}
 
-	 if (input_set.opt_tol > 1){
+	if (input_set.opt_tol > 1) {
 		input_set.opt_tol = 0.001;
 		cout << endl << timing() << ">> WARNING <<: The optimization tolerance is not defined properly" << endl;
 		cout << timing() << "Will use optimize_tolerance=" << input_set.opt_tol << endl << endl;
@@ -357,7 +357,7 @@ void check_inputs(input_data input_set) {
 	if (input_set.sigma.n_elem != input_set.charge_position.n_rows) {
 		input_set.sigma = rowvec(input_set.charge_position.n_rows, fill::ones);
 		cout << endl << timing() << ">> WARNING <<: number of the defined Gaussian charges and the sigma values does not match!" << endl;
-		cout << timing() << "Will use sigma=" << input_set.sigma << endl << endl;
+		cout << timing() << "Will use charge_sigma=" << input_set.sigma << endl << endl;
 	}
 	if (input_set.Qd.n_elem != input_set.sigma.n_elem) {
 		input_set.Qd = rowvec(input_set.charge_position.n_rows, fill::ones);
@@ -384,8 +384,8 @@ void check_inputs(input_data input_set) {
 
 	if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA")) {
 		input_set.opt_algo = "COBYLA";
-		cout << endl << timing() << ">> WARNING <<: Unknown optimization algorithm is selected! "<< input_set.opt_algo << " will be used instead!" << endl << endl;
-		
+		cout << endl << timing() << ">> WARNING <<: Unknown optimization algorithm is selected! " << input_set.opt_algo << " will be used instead!" << endl << endl;
+
 	}
 
 	if (input_set.extrapol_steps_num < 3) {
@@ -452,7 +452,7 @@ double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void
 	Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 	const auto constraint = -Qd(Qd.n_elem - 1)  * Q0;
 	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Charge in each Gaussian: " << Qd << endl;
+		cout << timing() << "Charge in each Gaussian:" << Qd << endl;
 	}
 	return constraint;
 }
@@ -501,7 +501,11 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 		const auto V = poisson_solver_3D(rhoM, diels);
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 		if (is_active(verbosity::intermediate_steps)) {
-			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction) << "\t" << charge_position_shifted(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
+			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction);
+			for (auto i = 0; i < charge_position_shifted.n_rows; ++i) {
+				cout << "\t" << charge_position_shifted(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
+			}
+			cout << endl;
 		}
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
@@ -543,7 +547,11 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 
 		if (is_active(verbosity::intermediate_steps)) {
-			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction) << "\t" << charge_position_ext(0, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction) << endl;
+			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction);
+			for (auto i = 0; i < charge_position_ext.n_rows; ++i) {
+				cout << "\t" << charge_position_ext(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
+			}
+			cout << endl;
 		}
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
@@ -556,7 +564,7 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 
 vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data) {
 	double fit_MSE = 0;
-	vector<double> fit_parameters = { 1, 1, 1, 1};
+	vector<double> fit_parameters = { 1, 1, 1, 1 };
 	const auto opt_algorithm = nlopt::LN_COBYLA;
 
 	nlopt::opt opt(opt_algorithm, 4);
@@ -577,7 +585,7 @@ vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data
 double fit_eval(const vector<double> &c, vector<double> &grad, void *data)
 {
 	const auto d = static_cast<const nonlinear_fit_data *>(data);
-	const rowvec scales = d ->sizes;
+	const rowvec scales = d->sizes;
 	const rowvec energies = d->energies;
 	const auto madelung_term = d->madelung_term;
 	const rowvec model_energies = c.at(0) + c.at(1) * scales + c.at(2) * square(scales) + (c.at(1) - madelung_term) / c.at(3) * exp(-c.at(3) * scales);

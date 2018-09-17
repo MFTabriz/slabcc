@@ -1,6 +1,6 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 16 Sep 2018
+:Last updated: 17 Sep 2018
 :version: 0.3.3
 
 .. sectnum::
@@ -304,7 +304,7 @@ The input file is processed as follows:
 |                              |``optimize_maxtime = 1440``                            |               |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``optimize_tolerance``       |Relative optimization tolerance (convergence criteria) |    1e-3       |
-|                              |for mean squared error of the model potential          |               |
+|                              |for root mean square error of the model potential      |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Center of the slab.                                    |               |
 | ``slab_center``              |(This point must be inside of the slab)                |  0.5 0.5 0.5  |

@@ -187,8 +187,8 @@ SizeMat as_size(const urowvec2& vec) {
 }
 
 mat fmod(mat mat_in, const double& denom) noexcept {
-	mat_in.for_each([&denom](double& val) noexcept { 
-		val = fmod(val, denom); 
+	mat_in.for_each([&denom](double& val) noexcept {
+		val = fmod(val, denom);
 	});
 	return mat_in;
 }
@@ -214,4 +214,8 @@ void write_mat2file(const mat& input, const string& output_file) {
 	}
 	input.each_row([&out_file](const rowvec &row) { out_file << row << endl; });
 	out_file.close();
+}
+
+double square(const double& input) {
+	return input * input;
 }

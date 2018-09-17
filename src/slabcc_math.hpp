@@ -42,12 +42,12 @@ cube shift(cube cube_in, rowvec3 shifts);
 vector<double> planar_average(const uword& direction, const cube& cube_in);
 
 
-// 1D FFT of complex data.
-// no normalization for forward FFT
+//1D FFT of complex data.
+//no normalization for forward FFT
 cx_vec fft(cx_vec X);
 
 //1D FFT of real data.
-// no normalization for forward FFT
+//no normalization for forward FFT
 cx_vec fft(vec X);
 
 
@@ -81,6 +81,9 @@ mat fmod_p(mat mat_in, const double& denom) noexcept;
 
 //positive fmod
 double fmod_p(double num, const double& denom) noexcept;
+
+//just a simple square! May Overflow!!
+double square(const double& input);
 
 void write_mat2file(const mat& input, const string& output_file);
 
