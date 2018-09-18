@@ -89,7 +89,6 @@ arma::mat INIReader::GetMat(const string& name, const arma::mat default_value) c
 	string valstr = Get(name);
 	replace(valstr, "\n", ";");
 	replace(valstr, ";;", ";");
-	cout << valstr << endl;
 	const arma::mat result(valstr);
 	const arma::mat out = result.is_empty() ? default_value : result;
 	_parsed.push_back({ name, to_string(out) });
