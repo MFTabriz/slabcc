@@ -60,6 +60,9 @@ public:
 	//double to string convertion with more digits!
 	static std::string to_string(const double& d);
 
+	//replace all occurrences of the "from" string with "to" string inside "str" recursively
+	void replace(std::string& str, const std::string from, const std::string to) const;
+
 	//Row to string convertion with more digits!
 	template<class T>
 	std::string to_string(const arma::Row<T>& c) const {

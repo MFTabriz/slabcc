@@ -76,8 +76,8 @@ string INIReader::GetStr(const string& name, const string& default_value) const
 arma::rowvec INIReader::GetVec(const string& name, const arma::rowvec default_value) const
 {
 	string valstr = Get(name);
-	std::replace(valstr.begin(), valstr.end(), '\n', ' ');
-	std::replace(valstr.begin(), valstr.end(), ';', ' ');
+	replace(valstr, "\n", " ");
+	replace(valstr, ";", " ");
 	const arma::rowvec result(valstr);
 	const arma::rowvec out = result.is_empty() ? default_value : result;
 	_parsed.push_back({ name, to_string(out) });
@@ -87,7 +87,9 @@ arma::rowvec INIReader::GetVec(const string& name, const arma::rowvec default_va
 arma::mat INIReader::GetMat(const string& name, const arma::mat default_value) const
 {
 	string valstr = Get(name);
-	std::replace(valstr.begin(), valstr.end(), '\n', ';');
+	replace(valstr, "\n", ";");
+	replace(valstr, ";;", ";");
+	cout << valstr << endl;
 	const arma::mat result(valstr);
 	const arma::mat out = result.is_empty() ? default_value : result;
 	_parsed.push_back({ name, to_string(out) });
@@ -147,4 +149,13 @@ std::string INIReader::to_string(const double& d) {
 	std::ostringstream output;
 	output << std::setprecision(12) << d;
 	return output.str();
+}
+
+void INIReader::replace(std::string& str, const std::string from, const std::string to) const {
+	
+	size_t start_pos = str.find(from);
+	while (start_pos != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos = str.find(from);
+	}
 }
