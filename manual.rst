@@ -1,7 +1,7 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 17 Sep 2018
-:version: 0.3.3
+:Last updated: 18 Sep 2018
+:version: 0.3.4
 
 .. sectnum::
 
@@ -169,13 +169,15 @@ Input parameters
 slabcc reads all its parameters from the input file (by default: `slabcc.in`) You can change the input file's name using the `command-line parameters`_.
 The input file is processed as follows:
 
-- Lines starting with # will be treated as comments. Inline comments are also allowed.
+- Lines starting with # will be treated as comments. Inline comments are also allowed
 - Double quotation marks will be removed from the strings
 - A warning will be issued for any unidentified parameter
 - All the coordinates must be in fractional form [0-1]
-- True/False parameters can be also declared as 0/1, on/off, yes/no
+- True/False parameters can be also declared as 0/1, on/off, yes/no, .true./.false.
 - Parameter names can be written in small or CAPITAL letters
 - For vectors and matrices, columns are separated by a “ ”(space), while the rows are separated by a “;” (semicolon)
+- Lines starting with a space “ ” will be treated as the continuation of the last parameter value
+
  
 +------------------------------+-------------------------------------------------------+---------------+
 | Parameter                    | Description and options / ``example``                 | Default value |
@@ -536,6 +538,7 @@ Known issues and limitations
 	0 0 Z
 
 - BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges.
+- Maximum line length of the input file (slabcc.in) is 4000 bytes.
 - Current extrapolation algorithm for the E\ :sub:`isolated` \ is not suitable for the monolayer models!
 
 ===============

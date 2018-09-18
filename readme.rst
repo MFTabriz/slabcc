@@ -1,5 +1,5 @@
-:Last updated: 16 Sep 2018
-:version: 0.3.3
+:Last updated: 18 Sep 2018
+:version: 0.3.4
 
 .. sectnum::
 
@@ -91,7 +91,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_!
+You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323559>`_!
 
 ============
 Installation 

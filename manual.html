@@ -1075,9 +1075,9 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Last updated:</th><td class="field-body">17 Sep 2018</td>
+<tr class="field"><th class="field-name">Last updated:</th><td class="field-body">18 Sep 2018</td>
 </tr>
-<tr class="field"><th class="field-name">version:</th><td class="field-body">0.3.3</td>
+<tr class="field"><th class="field-name">version:</th><td class="field-body">0.3.4</td>
 </tr>
 </tbody>
 </table>
@@ -1353,13 +1353,14 @@ optimize_interfaces = no
 <p>slabcc reads all its parameters from the input file (by default: <code>slabcc.in</code>) You can change the input file's name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.
 The input file is processed as follows:</p>
 <ul class="simple">
-<li>Lines starting with # will be treated as comments. Inline comments are also allowed.</li>
+<li>Lines starting with # will be treated as comments. Inline comments are also allowed</li>
 <li>Double quotation marks will be removed from the strings</li>
 <li>A warning will be issued for any unidentified parameter</li>
 <li>All the coordinates must be in fractional form [0-1]</li>
 <li>True/False parameters can be also declared as 0/1, on/off, yes/no</li>
 <li>Parameter names can be written in small or CAPITAL letters</li>
 <li>For vectors and matrices, columns are separated by a “ ”(space), while the rows are separated by a “;” (semicolon)</li>
+<li>Lines starting with a space “ ” will be treated as the continuation of the last parameter value</li>
 </ul>
 <table border="1" class="docutils">
 <colgroup>
@@ -1828,6 +1829,8 @@ X 0 0
 </pre>
 </li>
 <li><p class="first">BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges.</p>
+</li>
+<li><p class="first">Maximum line length of the input file (slabcc.in) is 4000 bytes.</p>
 </li>
 <li><p class="first">Current extrapolation algorithm for the E<sub>isolated</sub> is not suitable for the monolayer models!</p>
 </li>
