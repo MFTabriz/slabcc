@@ -115,6 +115,7 @@ Known issues and limitations
 	0 0 Z
 
 - BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges.
+- Maximum line length of the input file (slabcc.in) is 4000 bytes.
 - Current extrapolation algorithm for the E\ :sub:`isolated` \ is not suitable for the monolayer models!
 
 ===============
