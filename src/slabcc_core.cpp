@@ -499,6 +499,12 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 		// (only works for the orthogonal cells!)
 		rhoM -= Q / prod(slabcc_cell.vec_lengths);
 		const auto V = poisson_solver_3D(rhoM, diels);
+
+		if (n == extrapol_steps_num - 2) {
+			supercell extrapolated;
+			extrapolated.potential = real(V) * Hartree_to_eV;
+			write_CHGPOT("LOCPOT", "slabcc_ext.LOCPOT", extrapolated);
+		}
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 		if (is_active(verbosity::intermediate_steps)) {
 			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction);
