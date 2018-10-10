@@ -208,14 +208,11 @@ double fmod_p(double num, const double& denom) noexcept {
 void write_mat2file(const mat& input, const string& output_file) {
 	ofstream out_file;
 	out_file.open(output_file);
-	out_file << fixed << showpos << setprecision(10);
-	if (is_active(verbosity::more_digits)) {
-		out_file << setprecision(15);
-	}
-	input.each_row([&out_file](const rowvec &row) { out_file << row << endl; });
+	out_file << fixed << showpos << setprecision(15);
+	input.each_row([&out_file](const rowvec &row) { 
+		row.for_each([&out_file](const double& val) { out_file << val << " "; });
+		out_file << endl; 
+	});
 	out_file.close();
 }
 
-double square(const double& input) {
-	return input * input;
-}

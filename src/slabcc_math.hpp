@@ -83,7 +83,9 @@ mat fmod_p(mat mat_in, const double& denom) noexcept;
 double fmod_p(double num, const double& denom) noexcept;
 
 //just a simple square! May Overflow!!
-double square(const double& input);
+inline double square(const double& input) {
+	return input * input;
+}
 
 void write_mat2file(const mat& input, const string& output_file);
 
@@ -138,69 +140,9 @@ urowvec2 SizeVec(const Mat<T>& c) {
 	return urowvec({ size(0), size(1) });
 }
 
-template <typename T>
-Cube<T> swap_axes(const Cube<T> &cube_in, const uword& axis1, const uword& axis2) {
-
-	if (cube_in.is_empty()) {
-		return {};
-	}
-	if (axis1 == axis2) {
-		return cube_in;
-	}
-
-	const auto index_init = regspace<uvec>(0, cube_in.n_elem - 1);
-	auto sub_swap = ind2sub(arma::size(cube_in), index_init);
-	sub_swap.swap_rows(axis1, axis2);
-
-	const urowvec3 output_size = SizeVec(cube_in);
-	output_size.swap_cols(axis1, axis2);
-	Cube<T> cube_out(as_size(output_size), fill::zeros);
-
-	cube_out(sub2ind(arma::size(cube_out), sub_swap)) = cube_in(index_init);
-
-	return cube_out;
-}
-
-
-//single-line output for vec
-template<typename T>
-ostream &operator << (ostream &o, const Row<T> &vec) {
-	vec.for_each([&o](const T &elem) { o << " " << elem; });
-	return o;
-}
-
-//single-line output for mat
-template<typename T>
-ostream &operator << (ostream &o, const Mat<T> &mat) {
-	mat.each_row([&o](const Row<T> &row) { o << row << ";"; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, Row<T> &vec) {
-	vec.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, subview_row<T> vec) {
-	vec.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, Cube<T> &c) {
-	c.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, Mat<T> &m) {
-	m.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
 
 //sign of the val as -1/0/+1
 template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
+

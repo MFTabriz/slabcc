@@ -5,25 +5,25 @@
 #pragma once
 #include "stdafx.h"
 #include "clara.hpp"
+#include "spdlog.h"
+#include "arma_io.hpp"
+#include "sinks/basic_file_sink.h"
+#include "sinks/stdout_color_sinks.h"
+
 using namespace std;
 
-extern const int version_major;
-extern const int version_minor;
-extern const int version_patch;
 extern int verbos;
-extern chrono::time_point<chrono::steady_clock> t0;
 
 //defines the minimum verbosity level for each type of action
 enum class verbosity :int {
-	basic_steps = 1,
-	timing = 1,					//log the walltime at the start of each cout line
+	info = 1,
 	write_normal_planarAvg = 1, //write the planar average of defect and model LOCPOT files
-	intermediate_steps = 2,
+	debug = 2,
 	write_defect_file = 2,		//write extra charge density, extra charge potential
 	write_dielectric_file = 2,	//write the dielectric profile of model
 	write_planarAvg_file = 3,	//write the planar average of the CHGCAR-LOCPOT files for neutral/charged/defect/model 
-	more_digits = 4,			//increase the number of digits in cout and vector output files
-	detailed_progress = 4,		//show details of each caculation step for debugging  
+	trace = 4,
+	timing = 4,					//log the walltime at the start of each cout line
 };
 
 // writes each element of a vector in a separate line inside a text file named "output_file"
@@ -34,9 +34,6 @@ unsigned int xyz2int(const string& s);
 
 //converts 0/1/2 to X/Y/Z
 char int2xyz(const unsigned int& i);
-
-// returns the time passed from the start of the program (if needed!)
-string timing();
 
 inline bool file_exists(const string& name) {
 	ifstream f(name.c_str());
@@ -51,4 +48,13 @@ inline bool is_active(const verbosity& action) noexcept {
 string tolower(string in_str) noexcept;
 
 // reads the command line and sets the input_file and output_file
-void parse_cli(int argc, char *argv[], string& input_file, string& output_file);
+void parse_cli(int argc, char *argv[], string& input_file, string &output_file, string &log_file);
+
+void initialize_logger(string log_file);
+void logger_update();
+
+// bool to yes/no conversion
+string to_string(bool& b);
+
+
+

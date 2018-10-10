@@ -154,11 +154,12 @@ supercell read_POSCAR(const string& file_name) {
 }
 
 cube read_CHGPOT(const string& file_name) {
+	auto log = spdlog::get("loggers");
 	ifstream infile;
 	string temp_line;
 	infile.open(file_name);
 	if (!infile) {
-		cerr << "ERROR: file not found:" << file_name << endl;
+		log->critical("File not found: " + file_name);
 		return {};
 	}
 	const supercell structure = read_POSCAR(file_name);
@@ -167,10 +168,11 @@ cube read_CHGPOT(const string& file_name) {
 			//just skipping the line. POSCAR must be read and checked seperately
 		}
 		else {
-			cerr << "ERROR: Could not read file properly: " << file_name << endl;
+			log->error(file_name+ " could not be read properly");
 			return {};
 		}
 	}
+	log->trace("Started reading "+ file_name);
 	getline(infile, temp_line);
 	urowvec3 grid;
 	infile >> grid;
@@ -203,6 +205,8 @@ void shift_structure(supercell& structure, const rowvec3& relative_shift) {
 }
 
 void write_CHGPOT(const string& type, const string& file_name, const supercell& structure) {
+	auto log = spdlog::get("loggers");
+	log->trace("Started writing " + file_name);
 
 	write_POSCAR(structure, file_name);
 	ofstream out_file;
@@ -246,4 +250,3 @@ void write_planar_avg(const cube& potential_data, const cube& charge_data, const
 		write_vec2file(avg_chg, "slabcc_" + id + int2xyz(dir) + "CHG.dat");
 	}
 }
-

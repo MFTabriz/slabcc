@@ -7,11 +7,11 @@
 
 void write_vec2file(const vector<double>& input, const string& output_file) {
 	ofstream out_file;
+	auto log = spdlog::get("loggers");
+	log->trace("Started writing " + output_file);
+
 	out_file.open(output_file);
-	out_file << fixed << showpos << setprecision(10);
-	if (is_active(verbosity::more_digits)) {
-		out_file << setprecision(15);
-	}
+	out_file << fixed << showpos << setprecision(15);
 	for (const auto& i : input) {
 		out_file << i << endl;
 	}
@@ -36,18 +36,6 @@ char int2xyz(const unsigned int& i) {
 	return dir_map.at(i);
 }
 
-string timing() {
-	if (is_active(verbosity::timing)) {
-		stringstream streamObj;
-		const auto time_diff_h = chrono::duration_cast<chrono::hours>(chrono::steady_clock::now() - t0);
-		const auto time_diff_m = chrono::duration_cast<chrono::minutes>(chrono::steady_clock::now() - t0);
-		const auto time_diff_s = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - t0);
-		streamObj << fixed << setfill('0');
-		streamObj << setw(2) << time_diff_h.count() << ":" << setw(2) << time_diff_m.count() % 60 << ":" << setw(2) << time_diff_s.count() % 60 << " ";
-		return streamObj.str();
-	}
-	return "";
-}
 
 string tolower(string in_str) noexcept {
 	for (char& c : in_str) {
@@ -56,7 +44,7 @@ string tolower(string in_str) noexcept {
 	return in_str;
 }
 
-void parse_cli(int argc, char *argv[], string& input_file, string &output_file) {
+void parse_cli(int argc, char *argv[], string& input_file, string &output_file, string &log_file) {
 
 	bool showHelp = false, showManual = false, showVer = false, showAttr = false;
 	auto cli = clara::Help(showHelp) |
@@ -66,6 +54,9 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 		clara::Opt(output_file, "input_file")
 		["-o"]["--output"]
 		("slabcc output file name") |
+		clara::Opt(log_file, "log_file")
+		["-l"]["--log"]
+		("slabcc log file name") |
 		clara::Opt(showManual)
 		["-m"]["--man"]
 		("show quick start guide") |
@@ -90,10 +81,9 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 	}
 
 	if (showVer) {
-		cout << "SLAB Charge Correction (slabcc)\n"
-			   "Version: " << version_major << "." << version_minor << "." << version_patch << endl;
+		cout << "SLAB Charge Correction (slabcc)" << endl;
+		cout << "Version: " << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "." << SLABCC_VERSION_PATCH << endl;
 		cout << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
-
 		exit(0);
 	}
 
@@ -118,10 +108,10 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 			"The source code and all the documentations are available under The 2-Clause BSD License. For more information see LICENSE.TXT.\n\n"
 			"Included libraries\n\n"
 			"-Armadillo C++ Linear Algebra Library: licensed under the Apache License 2.0\n"
-			"  Copyright 2008 - 2018 Conrad Sanderson\n"
-			"  Copyright 2008 - 2016 National ICT Australia (NICTA)\n"
-			"  Copyright 2017 - 2018 Arroyo Consortium\n"
-			"  Copyright 2017 - 2018 Data61, CSIRO\n"
+			"  Copyright 2008-2018, Conrad Sanderson\n"
+			"  Copyright 2008-2016, National ICT Australia (NICTA)\n"
+			"  Copyright 2017-2018, Arroyo Consortium\n"
+			"  Copyright 2017-2018, Data61, CSIRO\n"
 			"  This product includes software developed by Conrad Sanderson\n"
 			"  This product includes software developed at National ICT Australia (NICTA)\n"
 			"  This product includes software developed at Arroyo Consortium\n"
@@ -129,11 +119,56 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file) 
 			"-inih(INI Not Invented Here): licensed under the 3-clause BSD license\n"
 			"  (c) 2009, Ben Hoyt, et al.\n\n"
 			"-clara: licensed under the Boost Software License 1.0\n"
-			"  (c) 2017-2018 Phil Nash, Martin Horenovsky, et al.\n\n"
+			"  (c) 2017-2018, Phil Nash, Martin Horenovsky, et al.\n\n"
 			"-Spline (Cubic Spline Interpolation): licensed under the Beer-Ware License 42\n"
 			"  (c) 2011, Devin Lane\n\n"
 			"-NLOPT: licensed under GNU Lesser General Public License (LGPL)\n"
-			"  (c) 2007-2010, Massachusetts Institute of Technology\n";
+			"  (c) 2007-2010, Massachusetts Institute of Technology\n\n"
+			"spdlog: licensed under the MIT License\n"
+		    "  (c) 2016, Gabi Melman\n";
 		exit(0);
 	}
+}
+
+
+void initialize_logger(string log_file) {
+
+	vector<spdlog::sink_ptr> sinks;
+	sinks.push_back(make_shared<spdlog::sinks::stdout_color_sink_mt>());
+	sinks.push_back(make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, true));
+	sinks.push_back(make_shared<spdlog::sinks::basic_file_sink_mt>("MSG", true));
+	auto combined_logger = make_shared<spdlog::logger>("loggers", begin(sinks), end(sinks));
+	sinks.at(2)->set_level(spdlog::level::warn);
+	sinks.at(2)->set_pattern("[%l] %v");
+	combined_logger->set_pattern("%v");
+	combined_logger->set_level(spdlog::level::info);
+	spdlog::register_logger(combined_logger);
+}
+
+void logger_update() {
+
+	auto log = spdlog::get("loggers");
+	string log_pattern = "%v";
+
+	if (is_active(verbosity::info)) {
+		log->set_level(spdlog::level::info);
+	}
+	if (is_active(verbosity::debug)) {
+		log->set_level(spdlog::level::debug);
+		log_pattern = "[%^%l%$] " + log_pattern;
+	}
+	if (is_active(verbosity::trace)){
+		log->set_level(spdlog::level::trace);
+	}
+
+	if (is_active(verbosity::timing)) {
+		log_pattern = "[%H:%M:%S.%e]" + log_pattern;
+	}
+
+	log->set_pattern(log_pattern);
+	log->sinks().at(2)->set_pattern("[%^%l%$] %v");
+}
+
+string to_string(bool& b) {
+	return b ? "yes" : "no";
 }

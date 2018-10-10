@@ -79,13 +79,12 @@ cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigm
 	tie(x, y, z) = ndgrid(x0, y0, z0);
 
 	const cube r2 = square(x) + square(y) + square(z);
-	// this charge distribution is due to the 1st nearest Gaussian image. 
+	// this charge distribution is due to the 1st nearest gaussian image. 
 	// In case of the very small supercells or very diffuse charges (large sigma), the higher order of the image charges must also be included.
 	// But the validity of the correction method for these cases must be checked!
-	const cx_cube charge_dist = cx_cube(Q / pow((sigma * sqrt(2 * PI)), 3) * exp(-r2 / (2 * pow(sigma, 2))), zeros(as_size(slabcc_cell.grid)));
+	const cx_cube charge_dist = cx_cube(Q / pow((sigma * sqrt(2 * PI)), 3) * exp(-r2 / (2 * square(sigma))), zeros(as_size(slabcc_cell.grid)));
 	return charge_dist;
 }
-
 
 cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	auto length = slabcc_cell.vec_lengths;
@@ -116,24 +115,18 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 	const mat GzGzp = Gz0.t() * Gz0;
 	const cx_mat Az = eps33 % GzGzp;
 	cx_cube Vk(arma::size(rhok));
-	cx_mat AG(arma::size(Az));
-	cx_mat eps11_Gx0k2(arma::size(Az));
-	vector<span> spans;
 
-#pragma omp parallel for private(AG, eps11_Gx0k2, spans)
+	#pragma omp parallel for firstprivate(Az,eps11,eps22,rhok)
 	for (uword k = 0; k < Gx0.n_elem; ++k) {
-		eps11_Gx0k2 = eps11 * square(Gx0(k));
+		cx_mat eps11_Gx0k2 = eps11 * square(Gx0(k));
 		for (uword m = 0; m < Gy0.n_elem; ++m) {
-			spans = { span(k), span(m), span() };
+			vector<span> spans = { span(k), span(m), span() };
 			swap(spans.at(slabcc_cell.normal_direction), spans.at(2));
-			AG = Az + eps11_Gx0k2 + eps22 * square(Gy0(m));
-
+			cx_mat AG = Az + eps11_Gx0k2 + eps22 * square(Gy0(m));
 			if ((k == 0) && (m == 0)) { AG(0, 0) = 1; }
-
 			Vk(spans.at(0), spans.at(1), spans.at(2)) = solve(AG, vectorise(rhok(spans.at(0), spans.at(1), spans.at(2))));
 		}
 	}
-
 	// 0,0,0 in k-space corresponds to a constant in the real space: average potential over the supercell.
 	Vk(0, 0, 0) = 0;
 	const cx_cube V = ifft(Vk);
@@ -185,20 +178,25 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 		initial_pot_MSE = pot_MSE;
 	}
 
-	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "-----------------------------------------" << endl;
-		cout << timing() << "> shifted_interfaces=" << x.at(0) << " " << x.at(1) << endl;
-		for (uword i = 0; i < Qd.n_elem; ++i) {
-			cout << timing() << "> charge_sigma=" << sigma(i) << " charge_fraction=" << abs(Qd(i) / accu(Qd)) << endl;
-			cout << timing() << "> shifted_charge_position=" << defcenter(i, 0) << " " << defcenter(i, 1) << " " << defcenter(i, 2) << endl;
-		}
-		cout << timing() << "Potential Root Mean Square Error: " << sqrt(pot_MSE) << endl;
+	auto log = spdlog::get("loggers");
+
+	log->debug("-----------------------------------------");
+	log->debug("> shifted_interfaces=" + ::to_string(x.at(0)) + " " + ::to_string(x.at(1)));
+
+	for (uword i = 0; i < Qd.n_elem; ++i) {
+		log->debug("> shifted_charge_position=" + ::to_string(defcenter.row(i)));
+		log->debug("> charge_sigma=" + ::to_string(sigma(i)));
+		if (Qd.n_elem > 1) {
+			log->debug("> charge_fraction=" + to_string(abs(Qd(i) / accu(Qd))));
+		}		
 	}
+	log->debug("Potential Root Mean Square Error: " + to_string(sqrt(pot_MSE)));
 
 	return pot_MSE;
 }
 
 double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge, const bool &optimize_interfaces) {
+	auto log = spdlog::get("loggers");
 	double pot_MSE_min = 0;
 	auto opt_algorithm = nlopt::LN_COBYLA;
 	if (opt_algo == "BOBYQA") {
@@ -207,7 +205,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 		}
 		else {
 			//BOBYQA in NLOPT 2.4.2 does not support the constraints!
-			cout << timing() << "BOBYQA does not support the models with multiple charges! COBYLA will be used instead!" << endl;
+			log->warn("BOBYQA does not support the models with multiple charges! COBYLA will be used instead!");
 		}
 	}
 
@@ -231,30 +229,26 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 		opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-8);
 	}
 
-	if (is_active(verbosity::basic_steps)) {
-		const int var_per_charge = (opt_vars.Qd.n_elem == 1) ? 4 : 5;
-		const int opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interfaces;
-		cout << timing() << "Started optimizing " << opt_parameters << " model parameters" << endl;
-		cout << timing() << "Optimization algorithm: " << string(opt.get_algorithm_name()) << endl;
-	}
+	const int var_per_charge = (opt_vars.Qd.n_elem == 1) ? 4 : 5;
+	const int opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interfaces;
+	log->trace("Started optimizing {} model parameters", opt_parameters);
+	log->trace("Optimization algorithm: " + string(opt.get_algorithm_name()));
 	try {
 		const nlopt::result nlopt_final_result = opt.optimize(opt_param, pot_MSE_min);
-
+		log->debug("-----------------------------------------");
 		if (nlopt_final_result == nlopt::MAXEVAL_REACHED) {
-			cout << endl << timing() << ">> WARNING <<: optimization ended after " << max_eval << " steps before reaching the requested accuracy!" << endl << endl;
+			log->warn("Optimization ended after {} steps before reaching the requested accuracy!", max_eval);
 		}
 		else if (nlopt_final_result == nlopt::MAXTIME_REACHED) {
-			cout << endl << timing() << ">> WARNING <<: optimization ended after " << max_time << " minutes of search before reaching the requested accuracy!" << endl << endl;
+			log->warn("Optimization ended after {} minutes of search before reaching the requested accuracy!", max_time);
 		}
 	}
 	catch (exception &e) {
-		cerr << timing() << "Parameters optimization failed: " << e.what() << endl;
+		log->error("Parameters optimization failed: " + string(e.what()));
 	}
 
 	optimizer_unpacker(opt_param, opt_vars);
-	if (is_active(verbosity::basic_steps)) {
-		cout << timing() << "Optimization ended." << endl;
-	}
+	log->trace("Optimization ended.");
 
 	return pot_MSE_min;
 }
@@ -281,7 +275,6 @@ tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt
 				upp_b.push_back(opt_vars.charge_position(i, j));
 			}
 		}
-
 		opt_param.push_back(opt_vars.sigma(i));
 		opt_param.push_back(opt_vars.Qd(i));
 		const auto min_charge = min(0.0, accu(opt_vars.Qd));
@@ -330,8 +323,7 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_
 
 
 void check_inputs(input_data input_set) {
-
-	//all of these must be positive
+	auto log = spdlog::get("loggers");
 	input_set.sigma = abs(input_set.sigma);
 	input_set.max_eval = abs(input_set.max_eval);
 	input_set.max_time = abs(input_set.max_time);
@@ -350,65 +342,64 @@ void check_inputs(input_data input_set) {
 
 	if (input_set.opt_tol > 1) {
 		input_set.opt_tol = 0.001;
-		cout << endl << timing() << ">> WARNING <<: The optimization tolerance is not defined properly" << endl;
-		cout << timing() << "Will use optimize_tolerance=" << input_set.opt_tol << endl << endl;
+		log->warn("The optimization tolerance is not defined properly");
+		log->warn("Will use optimize_tolerance=" + to_string(input_set.opt_tol));
 	}
 
 	if (input_set.sigma.n_elem != input_set.charge_position.n_rows) {
 		input_set.sigma = rowvec(input_set.charge_position.n_rows, fill::ones);
-		cout << endl << timing() << ">> WARNING <<: number of the defined Gaussian charges and the sigma values does not match!" << endl;
-		cout << timing() << "Will use charge_sigma=" << input_set.sigma << endl << endl;
+		log->warn("Number of the defined Gaussian charges and the sigma values does not match!");
+		log->warn("Will use charge_sigma=" + to_string(input_set.sigma));
 	}
 	if (input_set.Qd.n_elem != input_set.sigma.n_elem) {
 		input_set.Qd = rowvec(input_set.charge_position.n_rows, fill::ones);
-		cout << endl << timing() << ">> WARNING <<: number of the charge_fraction and charges_sigma does not match!" << endl;
-		cout << timing() << "Equal charge fractions will be assumed!" << endl << endl;
+		log->warn("Number of the charge_fraction and charges_sigma does not match!");
+		log->warn("Equal charge fractions will be assumed!");
 
 	}
 	if (input_set.charge_position.n_cols != 3) {
-		cerr << "ERROR: incorrect definition format for the charge positions!" << endl;
-		cerr << "Positions should be defined as: charge_position = 0.1 0.2 0.3; 0.1 0.2 0.4;" << endl;
+		log->critical("Incorrect definition of charge positions!");
+		log->critical("Positions should be defined as: charge_position = 0.1 0.2 0.3; 0.1 0.2 0.4;" );
 		exit(1);
 	}
 
 	if ((max(input_set.diel_in < 0)) || (max(input_set.diel_out < 0))) {
-		cerr << "ERROR: dielectric tensor is not defined properly!" << endl;
+		log->critical("The dielectric tensor is not defined properly!" );
 		exit(1);
 	}
 
 	if (!file_exists(input_set.CHGCAR_NEU) || !file_exists(input_set.CHGCAR_CHG)
 		|| !file_exists(input_set.LOCPOT_NEU) || !file_exists(input_set.LOCPOT_CHG)) {
-		cerr << "ERROR: One or more of the input files could not be found!" << endl;
+		log->critical("One or more of the input files could not be found!");
 		exit(1);
 	}
 
 	if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA")) {
 		input_set.opt_algo = "COBYLA";
-		cout << endl << timing() << ">> WARNING <<: Unknown optimization algorithm is selected! " << input_set.opt_algo << " will be used instead!" << endl << endl;
+		log->warn("Unknown optimization algorithm is selected! {} will be used instead!", input_set.opt_algo);
 
 	}
 
 	if (input_set.extrapol_steps_num < 3) {
-		cout << endl << timing() << ">> WARNING <<: Extrapolation cannot be done with steps < 3" << endl << endl;
+		log->warn("Extrapolation cannot be done with steps < 3" );
 		input_set.extrapol_steps_num = 3;
 	}
 
-	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Input parameters verified!" << endl;
-	}
+	log->trace("Input parameters verified!");
+
 
 }
 
 void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set) {
-
+	auto log = spdlog::get("loggers");
 	INIReader reader(input_file);
-
 	if (reader.ParseError() < 0) {
-		cerr << "Cannot load '" << input_file << "'" << endl;
+		log->critical("Cannot load '{}'", input_file);
 		exit(1);
 	}
 
 	verbos = reader.GetInteger("verbosity", 1);
+
 	input_set.CHGCAR_NEU = reader.GetStr("CHGCAR_neutral", "CHGCAR.N");
 	input_set.LOCPOT_NEU = reader.GetStr("LOCPOT_neutral", "LOCPOT.N");
 	input_set.LOCPOT_CHG = reader.GetStr("LOCPOT_charged", "LOCPOT.C");
@@ -441,6 +432,7 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data)
 {
+	auto log = spdlog::get("loggers");
 	rowvec2 interfaces;
 	rowvec sigma, Qd;
 	mat defcenter;
@@ -451,13 +443,12 @@ double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void
 	const auto Q0 = d->Q0;
 	Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 	const auto constraint = -Qd(Qd.n_elem - 1)  * Q0;
-	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "Charge in each Gaussian:" << Qd << endl;
-	}
+	log->debug("Charge in each Gaussian:" + ::to_string(Qd));
 	return constraint;
 }
 
 tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &Qd, const rowvec &sigma, const double &grid_multiplier) {
+	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
 	const mat33 cell_size0 = slabcc_cell.size;
@@ -500,13 +491,12 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 		rhoM -= Q / prod(slabcc_cell.vec_lengths);
 		const auto V = poisson_solver_3D(rhoM, diels);
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
-		if (is_active(verbosity::intermediate_steps)) {
-			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction);
-			for (auto i = 0; i < charge_position_shifted.n_rows; ++i) {
-				cout << "\t" << charge_position_shifted(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
-			}
-			cout << endl;
+		const rowvec2 interface_pos = interfaces_ext * slabcc_cell.vec_lengths(normal_direction);
+		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + to_string(interface_pos);
+		for (auto i = 0; i < charge_position_shifted.n_rows; ++i) {
+			extrapolation_info +=  "\t" + to_string(charge_position_shifted(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
 		}
+		log->debug(extrapolation_info);
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
 
@@ -516,7 +506,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 }
 
 tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &Qd, const rowvec &sigma, const double &grid_multiplier) {
-
+	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
 	const mat33 cell_size0 = slabcc_cell.size;
@@ -546,13 +536,12 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 		const auto V = poisson_solver_3D(rhoM, diels);
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 
-		if (is_active(verbosity::intermediate_steps)) {
-			cout << timing() << extrapol_factor << "\t\t" << EperModel << "\t" << interfaces_ext(0) * slabcc_cell.vec_lengths(normal_direction) << "\t" << interfaces_ext(1) * slabcc_cell.vec_lengths(normal_direction);
-			for (auto i = 0; i < charge_position_ext.n_rows; ++i) {
-				cout << "\t" << charge_position_ext(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
-			}
-			cout << endl;
+		const rowvec2 interface_pos = interfaces_ext * slabcc_cell.vec_lengths(normal_direction);
+		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + to_string(interface_pos);
+		for (auto i = 0; i < charge_position_ext.n_rows; ++i) {
+			extrapolation_info += "\t" + to_string(charge_position_ext(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
 		}
+		log->debug(extrapolation_info);
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
 
@@ -563,6 +552,7 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 
 
 vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data) {
+	auto log = spdlog::get("loggers");
 	double fit_MSE = 0;
 	vector<double> fit_parameters = { 1, 1, 1, 1 };
 	const auto opt_algorithm = nlopt::LN_COBYLA;
@@ -576,7 +566,7 @@ vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data
 		const nlopt::result nlopt_final_result = opt.optimize(fit_parameters, fit_MSE);
 	}
 	catch (exception &e) {
-		cerr << timing() << "Nonlinear fitting failed: " << e.what() << endl;
+		log->error("Nonlinear fitting failed: " + string(e.what()));
 	}
 
 	return fit_parameters;
@@ -595,17 +585,19 @@ double fit_eval(const vector<double> &c, vector<double> &grad, void *data)
 
 void check_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell, const input_data& input_set) {
 
+	auto log = spdlog::get("loggers");
+
 	// equal cell size
 	if (!approx_equal(Neutral_supercell.cell_vectors * Neutral_supercell.scaling,
 		Charged_supercell.cell_vectors * Charged_supercell.scaling, "reldiff", 0.001)) {
-		cerr << "ERROR: Size vectors of the input files does not match!" << endl;
+		log->critical("Size vectors of the input files does not match!");
 		exit(1);
 	}
 
 	// cell needs rotation or is not orthogonal
 	const vec cellvec_nonzeros = nonzeros(Neutral_supercell.cell_vectors);
 	if (cellvec_nonzeros.n_elem != 3) {
-		cerr << "ERROR: unsupported supercell shape!" << endl;
+		log->critical("unsupported supercell shape!");
 		exit(1);
 	}
 
@@ -615,11 +607,9 @@ void check_cells(const supercell& Neutral_supercell, const supercell& Charged_su
 		(input_grid != arma::size(Charged_supercell.charge)) ||
 		(input_grid != arma::size(Neutral_supercell.charge))) {
 
-		cerr << "ERROR: Data grids of the CHGCAR or LOCPOT files does not match!" << endl;
+		log->critical("Data grids of the CHGCAR or LOCPOT files does not match!");
 		exit(1);
 	}
 
-	if (is_active(verbosity::detailed_progress)) {
-		cout << timing() << "All files are loaded and cross-checked!" << endl;
-	}
+	log->trace("All files are loaded and cross-checked!");
 }
