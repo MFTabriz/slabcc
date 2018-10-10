@@ -24,23 +24,19 @@ int INIReader::ParseError() const noexcept {
 string INIReader::Get(const string& name, const string default_value) const {
 
 	const string key = "=" + tolower(name);
-	// Use _values.find() here instead of _values.at() to support pre C++11 compilers
 	return _values.count(key) ? _values.find(key)->second : default_value;
 }
 
 void INIReader::dump_parsed(std::ofstream& out_file) const {
-
+	auto log = spdlog::get("loggers");
 	std::sort(_parsed.begin(), _parsed.end(), [](const auto& lhs, const auto& rhs) {
 		return tolower(rhs.at(0)) > tolower(lhs.at(0));
 	});
-
-	if (is_active(verbosity::basic_steps)) {
-		cout << timing() << "-------------slabcc parameters-------------" << endl;
-		for (const auto &i : _parsed) {
-			cout << timing() << i.at(0) << " = " << i.at(1) << endl;
-		}
-		cout << timing() << "-----------------------------------------" << endl;
+	log->info( "-------------slabcc parameters-------------");
+	for (const auto &i : _parsed) {
+		log->info(i.at(0) + " = " + i.at(1));
 	}
+	log->info("-----------------------------------------");
 
 	out_file << "# Parameters read from the file or their default values:" << endl;
 	for (const auto &i : _parsed) {
@@ -48,6 +44,7 @@ void INIReader::dump_parsed(std::ofstream& out_file) const {
 	}
 
 	out_file.flush();
+	logger_update();
 
 	for (const auto &val : _values) {
 		string param_file = val.first;
@@ -60,7 +57,7 @@ void INIReader::dump_parsed(std::ofstream& out_file) const {
 			}
 		}
 		if (!has_parsed) {
-			cout << endl << timing() << ">> WARNING <<: Unrecognized parameter in the input file: " << param_file << endl << endl;
+			log->warn("Unrecognized parameter in the input file: " + param_file);
 		}
 	}
 }
@@ -115,12 +112,11 @@ double INIReader::GetReal(const string& name, const double default_value) const
 	char* end;
 	const double n = strtod(value, &end);
 	const double result = end > value ? n : default_value;
-	_parsed.push_back({ name, to_string(result) });
+	_parsed.push_back({ name, ::to_string(result) });
 	return result;
 }
 
 bool INIReader::GetBoolean(const string& name, const bool default_value) const {
-	// Convert to lower case to make string comparisons case-insensitive
 	const string valstr = tolower(Get(name));
 	bool result = default_value;
 
@@ -129,7 +125,7 @@ bool INIReader::GetBoolean(const string& name, const bool default_value) const {
 	else if (valstr == ".false." || valstr == "false" || valstr == "no" || valstr == "off" || valstr == "0")
 		result = false;
 
-	_parsed.push_back({ name, std::to_string(result) });
+	_parsed.push_back({ name, to_string(result) });
 	return result;
 }
 
@@ -142,12 +138,6 @@ int INIReader::ValueHandler(void* user, const char* section, const char* name,
 		reader->_values[key] += "\n";
 	reader->_values[key] += value;
 	return 1;
-}
-
-std::string INIReader::to_string(const double& d) {
-	std::ostringstream output;
-	output << std::setprecision(12) << d;
-	return output.str();
 }
 
 void INIReader::replace(std::string& str, const std::string from, const std::string to) const {

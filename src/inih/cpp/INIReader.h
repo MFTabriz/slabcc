@@ -53,38 +53,11 @@ public:
 	// and valid false values are "false", "no", "off", "0" (not case sensitive).
 	bool GetBoolean(const std::string& name, const bool default_value) const;
 
-
-	//writes the parsed variables to the output file and also cout
+	//writes the parsed variables to the output file and also log
 	void dump_parsed(std::ofstream& out_file) const;
-
-	//double to string convertion with more digits!
-	static std::string to_string(const double& d);
 
 	//replace all occurrences of the "from" string with "to" string inside "str" recursively
 	void replace(std::string& str, const std::string from, const std::string to) const;
-
-	//Row to string convertion with more digits!
-	template<class T>
-	std::string to_string(const arma::Row<T>& c) const {
-		std::ostringstream output;
-		output << std::setprecision(12);
-		for (const auto& i : c) {
-			output << i << " ";
-		}
-		std::string output_s = output.str();
-		return output_s.substr(0, output_s.size() - 1);
-	}
-
-	//Mat to string convertion with more digits!
-	template<class T>
-	std::string to_string(const arma::Mat<T>& c) const {
-		std::string output;
-		for (int i = 0; i < c.n_rows; ++i) {
-			output += to_string(arma::rowvec(c.row(i))) + "; ";
-		}
-		return output;
-	}
-
 
 protected:
 	mutable std::vector<std::vector<std::string>> _parsed;
