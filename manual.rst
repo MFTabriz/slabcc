@@ -581,7 +581,7 @@ Included libraries
 
 - `clara <https://github.com/catchorg/Clara>`_ licensed under the Boost Software License 1.0
  
- - © 2014, Phil Nash, Martin Horenovsky, `et al. <https://github.com/catchorg/Clara/contributors>`__
+ - © 2014, Phil Nash, Martin Hořeňovský, `et al. <https://github.com/catchorg/Clara/contributors>`__
  
 - `spline <https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/>`_ (Cubic Spline Interpolation) licensed under the Beer-Ware License 42
  
@@ -590,10 +590,11 @@ Included libraries
 - `NLOPT <https://nlopt.readthedocs.io>`_ licensed under the GNU LGPL
 
  - © 2007-2014, Massachusetts Institute of Technology
+ - © 2007-2014, Steven G. Johnson `et al. <https://github.com/stevengj/nlopt/contributors>`__
 
 - `spdlog <https://github.com/gabime/spdlog>`_ licensed under the MIT License
 
- - © 2016, Gabi Melman
+ - © 2016, Gabi Melman, `et al. <https://github.com/gabime/spdlog/contributors>`__
 
 Linked libraries
 ---------------------
