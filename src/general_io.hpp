@@ -45,6 +45,11 @@ inline bool is_active(const verbosity& action) noexcept {
 	return verbos >= static_cast<int>(verbosity(action));
 }
 
+inline bool file_is_empty(ifstream& file)
+{
+	return file.peek() == ifstream::traits_type::eof();
+}
+
 string tolower(string in_str) noexcept;
 
 // reads the command line and sets the input_file and output_file

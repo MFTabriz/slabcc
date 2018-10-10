@@ -370,8 +370,10 @@ int main(int argc, char *argv[])
 	log->flush();
 	const string msgs_file = "MSG";
 	ifstream messages_list(msgs_file);
-	output_fstream << endl << "[Messages]" << endl;
-	output_fstream << messages_list.rdbuf();
+	if (!file_is_empty(messages_list)) {
+		output_fstream << endl << "[Messages]" << endl;
+		output_fstream << messages_list.rdbuf();
+	}
 	messages_list.close();
 	
 	output_fstream << endl << "[Results]" << endl;
