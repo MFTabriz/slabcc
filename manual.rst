@@ -1,7 +1,7 @@
 **Note**: github does not support math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 18 Sep 2018
-:version: 0.3.4
+:Last updated: 10 Oct. 2018
+:version: 0.4.0
 
 .. sectnum::
 
@@ -151,6 +151,8 @@ Installation
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
 
+**Note**: By default, the code will be compiled for the specific architecture of your machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
+
 =======================
 Command-line parameters
 =======================
@@ -159,6 +161,7 @@ You can run slabcc without any additional options. Alternatively, you can use th
 -h, --help					Display usage information (this list)
 -i, --input <input_file>			slabcc input file name
 -o, --output <input_file>			slabcc output file name
+-l, --log <log_file>			slabcc log file name
 -m, --manual					Show quick start guide
 -v, --version					Show version and compilation date
 -c, --copyright					Show copyright information and the attributions
@@ -315,21 +318,22 @@ The input file is processed as follows:
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Verbosity of the program [#]_                          |               |
 | ``verbosity``                |                                                       |       1       |
-|                              |0: no extra output. Will only write output file and    |               |
-|                              |minimum parameters to standard output.                 |               |
+|                              |0: No extra info. Only write the output file.          |               |
+|                              |Logging is disabled.                                   |               |
 |                              |                                                       |               |
-|                              |1: display calculation steps and execution walltime    |               |
-|                              |(hh:mm:ss). Will also write the planar averaged        |               |
-|                              |potential and charge for the Gaussian model charge and |               |
-|                              |the extra charge in the input files in the direction   |               |
-|                              |normal to the slab surface.                            |               |
+|                              |1: Display calculated energy correction terms.         |               |
+|                              |Write the planar averaged potential and charge for the |               |
+|                              |Gaussian model charge and the extra-charge of QM       |               |
+|                              |calculations in the direction normal to the slab       |               |
+|                              |surface.                                               |               |
 |                              |                                                       |               |
-|                              |2: write extra charge density, extra charge potential  |               |
-|                              |and dielectric profiles to the disk.                   |               |
+|                              |2: Write extra-charge density, extra-charge potential  |               |
+|                              |and dielectric profiles. Display debug info.           |               |
 |                              |                                                       |               |
-|                              |3: write all the planar averaged files to the disk.    |               |
+|                              |3: Write the planar averaged files in all directions.  |               |
 |                              |                                                       |               |
-|                              |4: show more digits and behind the scene! (debug mode) |               |
+|                              |4: Display execution walltime (hh:mm:ss) and the       |               |
+|                              |calculation steps (trace mode)                         |               |
 +------------------------------+-------------------------------------------------------+---------------+
 
 .. [#] extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.
@@ -545,6 +549,7 @@ Known issues and limitations
 Release history
 ===============
 * 2018-07-29: version 0.3 - First public release
+* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
 
 ===========================
 Copyright and attributions
@@ -561,10 +566,10 @@ Included libraries
 
 - `Armadillo C++ Linear Algebra Library <http://arma.sourceforge.net>`_ licensed under the Apache License 2.0
  
- - Copyright 2008 - 2018 Conrad Sanderson
- - Copyright 2008 - 2016 National ICT Australia (NICTA)
- - Copyright 2017 - 2018 Arroyo Consortium
- - Copyright 2017 - 2018 Data61, CSIRO
+ - Copyright 2008-2018, Conrad Sanderson
+ - Copyright 2008-2016, National ICT Australia (NICTA)
+ - Copyright 2017-2018, Arroyo Consortium
+ - Copyright 2017-2018, Data61, CSIRO
  - This product includes software developed by Conrad Sanderson
  - This product includes software developed at National ICT Australia (NICTA)
  - This product includes software developed at Arroyo Consortium
@@ -584,7 +589,11 @@ Included libraries
  
 - `NLOPT <https://nlopt.readthedocs.io>`_ licensed under the GNU LGPL
 
- - © 2007-2014 Massachusetts Institute of Technology
+ - © 2007-2014, Massachusetts Institute of Technology
+
+- `spdlog <https://github.com/gabime/spdlog>`_ licensed under the MIT License
+
+ - © 2016, Gabi Melman
 
 Linked libraries
 ---------------------

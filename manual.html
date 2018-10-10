@@ -1075,10 +1075,10 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Last updated:</th><td class="field-body">18 Sep 2018</td>
+<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">10 Oct. 2018</td>
 </tr>
-<tr class="field"><th class="field-name">version:</th><td class="field-body">0.3.4</td>
-</tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>0.4.0</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1231,11 +1231,11 @@ q is the total extra charge and ΔV is the difference between the potential of t
 <h1><a class="toc-backref" href="#id25">2&nbsp;&nbsp;&nbsp;Quick start guide</a></h1>
 <p>To calculate the charge correction slabcc needs the following files:</p>
 <ul class="simple">
-<li>Input parameters file (default: <code>slabcc.in</code>)</li>
-<li>CHGCAR of the neutral system from the VASP calculation (default: <code>CHGCAR.N</code>)</li>
-<li>CHGCAR of the charged system from the VASP calculation (default: <code>CHGCAR.C</code>)</li>
-<li>LOCPOT of the neutral system from the VASP calculation (default: <code>LOCPOT.N</code>)</li>
-<li>LOCPOT of the charged system from the VASP calculation (default: <code>LOCPOT.C</code>)</li>
+<li>Input parameters file (default: <tt class="docutils literal">slabcc.in</tt>)</li>
+<li>CHGCAR of the neutral system from the VASP calculation (default: <tt class="docutils literal">CHGCAR.N</tt>)</li>
+<li>CHGCAR of the charged system from the VASP calculation (default: <tt class="docutils literal">CHGCAR.C</tt>)</li>
+<li>LOCPOT of the neutral system from the VASP calculation (default: <tt class="docutils literal">LOCPOT.N</tt>)</li>
+<li>LOCPOT of the charged system from the VASP calculation (default: <tt class="docutils literal">LOCPOT.C</tt>)</li>
 </ul>
 <p>Input parameters file for a slab should minimally include (all in relative scale [0 1]):</p>
 <ul class="simple">
@@ -1246,7 +1246,7 @@ q is the total extra charge and ΔV is the difference between the potential of t
 </ul>
 <div class="section" id="example">
 <h2><a class="toc-backref" href="#id26">2.1&nbsp;&nbsp;&nbsp;Example</a></h2>
-<p>The following examples list the <a class="reference internal" href="#input-parameters">input parameters</a> to be defined in <code>slabcc.in</code> file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory.</p>
+<p>The following examples list the <a class="reference internal" href="#input-parameters">input parameters</a> to be defined in <tt class="docutils literal">slabcc.in</tt> file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory.</p>
 <ol class="arabic">
 <li><p class="first"><strong>Minimum input</strong>: The program models the extra charge with a Gaussian charge distribution localized around the position (<tt class="docutils literal">charge_position= 0.24&nbsp; 0.56&nbsp; 0.65</tt>) in a slab model with normal direction of (<tt class="docutils literal">normal_direction = y</tt>) and surfaces at (<tt class="docutils literal">interfaces = 0.25&nbsp; 0.75</tt>). The dielectric tensor inside of the slab is assumed to be isotropic (<tt class="docutils literal">diel_in = 4.8</tt>):</p>
 <pre class="literal-block">
@@ -1312,10 +1312,11 @@ optimize_interfaces = no
 <li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS for the matrix operations inside slabcc but it is highly recommended to use OpenBLAS/MKL instead. If you don't have OpenBLAS/BLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a></li>
 </ol>
 </blockquote>
-<ol class="arabic" start="2">
-<li><p class="first"><strong>Configuration:</strong> You must edit the <code>src/makefile</code> to choose your compiler and add the paths to FFTW and OpenBLAS libraries.</p>
-</li>
-<li><p class="first"><strong>Compilation:</strong> Run the command <code>make</code> in the <code>src/</code> to compile the slabcc. 
+<ol class="arabic simple" start="2">
+<li><strong>Configuration:</strong> You must edit the <tt class="docutils literal">src/makefile</tt> to choose your compiler and add the paths to FFTW and OpenBLAS libraries.</li>
+<li><strong>Compilation:</strong> Run the command <tt class="docutils literal">make</tt> in the <tt class="docutils literal">src/</tt> to compile the slabcc.</li>
+</ol>
+<p><strong>Note</strong>: By default, the code will be compiled for the specific architecture of your machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the <tt class="docutils literal"><span class="pre">-march</span></tt> flag.</p>
 </div>
 <div class="section" id="command-line-parameters">
 <h1><a class="toc-backref" href="#id29">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></h1>
@@ -1335,6 +1336,10 @@ optimize_interfaces = no
 <kbd><span class="option">-o</span>, <span class="option">--output <var>&lt;input_file&gt;</var></span></kbd></td>
 </tr>
 <tr><td>&nbsp;</td><td>slabcc output file name</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-l</span>, <span class="option">--log <var>&lt;log_file&gt;</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>slabcc log file name</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-m</span>, <span class="option">--manual</span></kbd></td>
 <td>Show quick start guide</td></tr>
@@ -1350,7 +1355,7 @@ optimize_interfaces = no
 </div>
 <div class="section" id="input-parameters">
 <h1><a class="toc-backref" href="#id30">5&nbsp;&nbsp;&nbsp;Input parameters</a></h1>
-<p>slabcc reads all its parameters from the input file (by default: <code>slabcc.in</code>) You can change the input file's name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.
+<p>slabcc reads all its parameters from the input file (by default: <tt class="docutils literal">slabcc.in</tt>) You can change the input file's name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.
 The input file is processed as follows:</p>
 <ul class="simple">
 <li>Lines starting with # will be treated as comments. Inline comments are also allowed</li>
@@ -1550,17 +1555,18 @@ for root mean square error of the model potential</td>
 </tr>
 <tr><td><tt class="docutils literal">verbosity</tt></td>
 <td><p class="first">Verbosity of the program <a class="footnote-reference" href="#id9" id="id5">[4]</a></p>
-<p>0: no extra output. Will only write output file and
-minimum parameters to standard output.</p>
-<p>1: display calculation steps and execution walltime
-(hh:mm:ss). Will also write the planar averaged
-potential and charge for the Gaussian model charge and
-the extra charge in the input files in the direction
-normal to the slab surface.</p>
-<p>2: write extra charge density, extra charge potential
-and dielectric profiles to the disk.</p>
-<p>3: write all the planar averaged files to the disk.</p>
-<p class="last">4: show more digits and behind the scene! (debug mode)</p>
+<p>0: No extra info. Only write the output file.
+Logging is disabled.</p>
+<p>1: Display calculated energy correction terms.
+Write the planar averaged potential and charge for the
+Gaussian model charge and the extra-charge of QM
+calculations in the direction normal to the slab
+surface.</p>
+<p>2: Write extra-charge density, extra-charge potential
+and dielectric profiles. Display debug info.</p>
+<p>3: Write the planar averaged files in all directions.</p>
+<p class="last">4: Display execution walltime (hh:mm:ss) and the
+calculation steps (trace mode)</p>
 </td>
 <td>1</td>
 </tr>
@@ -1656,126 +1662,126 @@ Energy correction for model charge (Eiso-Eper-q*dV) = 0.559635314929
 </tr>
 </thead>
 <tbody valign="top">
-<tr><td><code>slabcc_CXCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_CXCHG.dat</tt></td>
 <td>Planar average of charged CHGCAR file in X direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_CXPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_CXPOT.dat</tt></td>
 <td>Planar average of charged LOCPOT file in X direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_CYCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_CYCHG.dat</tt></td>
 <td>Planar average of charged CHGCAR file in Y direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_CYPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_CYPOT.dat</tt></td>
 <td>Planar average of charged LOCPOT file in Y direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_CZCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_CZCHG.dat</tt></td>
 <td>Planar average of charged CHGCAR file in Z direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_CZPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_CZPOT.dat</tt></td>
 <td>Planar average of charged LOCPOT file in Z direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_D.CHGCAR</code></td>
+<tr><td><tt class="docutils literal">slabcc_D.CHGCAR</tt></td>
 <td>Difference in the neutral and charged CHGCAR files</td>
 <td>2</td>
 </tr>
-<tr><td><code>slabcc_D.LOCPOT</code></td>
+<tr><td><tt class="docutils literal">slabcc_D.LOCPOT</tt></td>
 <td>Difference in the neutral and charged LOCPOT files</td>
 <td>2</td>
 </tr>
-<tr><td><code>slabcc_DIEL.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DIEL.dat</tt></td>
 <td>Generated dielectric profile (ε<sub>11</sub> ε<sub>22</sub>
 ε<sub>33</sub>) along the normal axis to the surface</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_DXCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DXCHG.dat</tt></td>
 <td>Planar average of extra charge (neutral and charged
 difference) CHGCAR file in X direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_DXPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DXPOT.dat</tt></td>
 <td>Planar average of extra charge (neutral and charged
 difference) LOCPOT file in X direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_DYCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DYCHG.dat</tt></td>
 <td>Planar average of extra charge (neutral and charged
 difference) CHGCAR file in Y direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_DYPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DYPOT.dat</tt></td>
 <td>Planar average of extra charge (neutral and charged
 difference) LOCPOT file in Y direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_DZCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DZCHG.dat</tt></td>
 <td>Planar average of extra charge (neutral and charged
 difference) CHGCAR file in Z direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_DZPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_DZPOT.dat</tt></td>
 <td>Planar average of extra charge (neutral and charged
 difference) LOCPOT file in Z direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_M.CHGCAR</code></td>
+<tr><td><tt class="docutils literal">slabcc_M.CHGCAR</tt></td>
 <td>CHGCAR of the Gaussian model</td>
 <td>2</td>
 </tr>
-<tr><td><code>slabcc_M.LOCPOT</code></td>
+<tr><td><tt class="docutils literal">slabcc_M.LOCPOT</tt></td>
 <td>LOCPOT of the Gaussian model</td>
 <td>2</td>
 </tr>
-<tr><td><code>slabcc_MXCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_MXCHG.dat</tt></td>
 <td>Planar average of model charge in X direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_MXPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_MXPOT.dat</tt></td>
 <td>Planar average of model potential in X direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_MYCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_MYCHG.dat</tt></td>
 <td>Planar average of model charge in Y direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_MYPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_MYPOT.dat</tt></td>
 <td>Planar average of model potential in Y direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_MZCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_MZCHG.dat</tt></td>
 <td>Planar average of model charge in Z direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_MZPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_MZPOT.dat</tt></td>
 <td>Planar average of model potential in Z direction</td>
 <td><a class="reference internal" href="#avg-note">3</a></td>
 </tr>
-<tr><td><code>slabcc_NXCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_NXCHG.dat</tt></td>
 <td>Planar average of neutral CHGCAR file in X direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_NXPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_NXPOT.dat</tt></td>
 <td>Planar average of neutral LOCPOT file in X direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_NYCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_NYCHG.dat</tt></td>
 <td>Planar average of neutral CHGCAR file in Y direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_NYPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_NYPOT.dat</tt></td>
 <td>Planar average of neutral LOCPOT file in Y direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_NZCHG.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_NZCHG.dat</tt></td>
 <td>Planar average of neutral CHGCAR file in Z direction</td>
 <td>3</td>
 </tr>
-<tr><td><code>slabcc_NZPOT.dat</code></td>
+<tr><td><tt class="docutils literal">slabcc_NZPOT.dat</tt></td>
 <td>Planar average of neutral LOCPOT file in Z direction</td>
 <td>3</td>
 </tr>
@@ -1810,7 +1816,7 @@ After obtaining the files for your charged system, do the calculation again <em>
 <li><strong>How accurate are the slabcc results?</strong> The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few <a class="reference internal" href="#known-issues-and-limitations">known issues and limitations</a> to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the <a class="reference internal" href="#license">license</a> explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.</li>
 </ol>
 <ol class="arabic simple" id="check" start="10">
-<li><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <code>slabcc_MZCHG.dat</code> and <code>slabcc_MZPOT.dat</code>, with <code>slabcc_DZCHG.dat</code> and <code>slabcc_DZPOT.dat</code>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
+<li><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <tt class="docutils literal">slabcc_MZCHG.dat</tt> and <tt class="docutils literal">slabcc_MZPOT.dat</tt>, with <tt class="docutils literal">slabcc_DZCHG.dat</tt> and <tt class="docutils literal">slabcc_DZPOT.dat</tt>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
 </ol>
 <blockquote>
 Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</blockquote>
@@ -1840,6 +1846,7 @@ X 0 0
 <h1><a class="toc-backref" href="#id35">9&nbsp;&nbsp;&nbsp;Release history</a></h1>
 <ul class="simple">
 <li>2018-07-29: version 0.3 - First public release</li>
+<li>2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.</li>
 </ul>
 </div>
 <div class="section" id="copyright-and-attributions">
@@ -1847,7 +1854,7 @@ X 0 0
 <p>Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz</p>
 <p>The source codes and all the documentations are available under The 2-Clause BSD License. For more information see <a class="reference internal" href="#license">license</a>.</p>
 <div class="line-block">
-<div class="line">This code uses several open source components each of which are located under a separate sub-directory in the <code>src/</code>. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.</div>
+<div class="line">This code uses several open source components each of which are located under a separate sub-directory in the <tt class="docutils literal">src/</tt>. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.</div>
 <div class="line">The attributions are also present in the binary file and can be accessed using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.</div>
 </div>
 <div class="section" id="included-libraries">
@@ -1857,10 +1864,10 @@ X 0 0
 </ul>
 <blockquote>
 <ul class="simple">
-<li>Copyright 2008 - 2018 Conrad Sanderson</li>
-<li>Copyright 2008 - 2016 National ICT Australia (NICTA)</li>
-<li>Copyright 2017 - 2018 Arroyo Consortium</li>
-<li>Copyright 2017 - 2018 Data61, CSIRO</li>
+<li>Copyright 2008-2018, Conrad Sanderson</li>
+<li>Copyright 2008-2016, National ICT Australia (NICTA)</li>
+<li>Copyright 2017-2018, Arroyo Consortium</li>
+<li>Copyright 2017-2018, Data61, CSIRO</li>
 <li>This product includes software developed by Conrad Sanderson</li>
 <li>This product includes software developed at National ICT Australia (NICTA)</li>
 <li>This product includes software developed at Arroyo Consortium</li>
@@ -1896,7 +1903,15 @@ X 0 0
 </ul>
 <blockquote>
 <ul class="simple">
-<li>© 2007-2014 Massachusetts Institute of Technology</li>
+<li>© 2007-2014, Massachusetts Institute of Technology</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/gabime/spdlog">spdlog</a> licensed under the MIT License</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2016, Gabi Melman</li>
 </ul>
 </blockquote>
 </div>
