@@ -134,7 +134,7 @@ Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
 The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
 
 | This code uses several open source components each of which are located under a separate sub-directory in the `src/`. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.
-| The attributions are also present in the binary file and can be accessed using the `command-line parameters`_.
+| The attributions are also present in the binary file and can be accessed using the command-line parameters.
 
 Included libraries
 ------------------
