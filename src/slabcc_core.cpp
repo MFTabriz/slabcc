@@ -47,13 +47,13 @@ void UpdateCell(const mat33& size, const urowvec3& grid) {
 }
 
 
-cx_cube gaussian_charge(const double& q, const vec3& rel_pos, const double& sigma) {
+cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigma) {
 
 	rowvec x0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(0) - slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0), slabcc_cell.grid(0));
 	rowvec y0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(1) - slabcc_cell.vec_lengths(1) / slabcc_cell.grid(1), slabcc_cell.grid(1));
 	rowvec z0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(2) - slabcc_cell.vec_lengths(2) / slabcc_cell.grid(2), slabcc_cell.grid(2));
 
-	// shift the axis reference to position of the gaussian charge center
+	// shift the axis reference to position of the Gaussian charge center
 	x0 -= accu(slabcc_cell.size.col(0) * rel_pos(0));
 	y0 -= accu(slabcc_cell.size.col(1) * rel_pos(1));
 	z0 -= accu(slabcc_cell.size.col(2) * rel_pos(2));
@@ -80,9 +80,9 @@ cx_cube gaussian_charge(const double& q, const vec3& rel_pos, const double& sigm
 
 	const cube r2 = square(x) + square(y) + square(z);
 	// this charge distribution is due to the 1st nearest gaussian image. 
-	// in case of the very small supercells or very diffuse charges (large sigma), the higher order of the image charges must also be included.
-	// but the validity of the correction method for these cases must be checked!
-	const cx_cube charge_dist = cx_cube(q / pow((sigma * sqrt(2 * pi)), 3) * exp(-r2 / (2 * square(sigma))), zeros(as_size(slabcc_cell.grid)));
+	// In case of the very small supercells or very diffuse charges (large sigma), the higher order of the image charges must also be included.
+	// But the validity of the correction method for these cases must be checked!
+	const cx_cube charge_dist = cx_cube(Q / pow((sigma * sqrt(2 * PI)), 3) * exp(-r2 / (2 * square(sigma))), zeros(as_size(slabcc_cell.grid)));
 	return charge_dist;
 }
 
