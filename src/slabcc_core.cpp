@@ -37,10 +37,10 @@ mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const
 	return diels;
 }
 
-void UpdateCell(const mat33& size, const urowvec3& grid) {
-	slabcc_cell.size = size;
+void UpdateCell(const mat33& vectors, const urowvec3& grid) {
+	slabcc_cell.vectors = vectors;
 	for (uword i = 0; i < 3; ++i) {
-		slabcc_cell.vec_lengths(i) = norm(size.col(i));
+		slabcc_cell.vec_lengths(i) = norm(vectors.col(i));
 	}
 	slabcc_cell.grid = grid;
 	slabcc_cell.voxel_vol = prod(slabcc_cell.vec_lengths / grid);
@@ -54,9 +54,9 @@ cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const double& sigm
 	rowvec z0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(2) - slabcc_cell.vec_lengths(2) / slabcc_cell.grid(2), slabcc_cell.grid(2));
 
 	// shift the axis reference to position of the Gaussian charge center
-	x0 -= accu(slabcc_cell.size.col(0) * rel_pos(0));
-	y0 -= accu(slabcc_cell.size.col(1) * rel_pos(1));
-	z0 -= accu(slabcc_cell.size.col(2) * rel_pos(2));
+	x0 -= accu(slabcc_cell.vectors.col(0) * rel_pos(0));
+	y0 -= accu(slabcc_cell.vectors.col(1) * rel_pos(1));
+	z0 -= accu(slabcc_cell.vectors.col(2) * rel_pos(2));
 
 	//handle the minimum distance from the mirror charges
 	for (auto &pos : x0) {
@@ -451,15 +451,15 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const mat33 cell_size0 = slabcc_cell.size;
+	const mat33 cell_vectors0 = slabcc_cell.vectors;
 	const urowvec grid0 = slabcc_cell.grid;
-	const rowvec3 grid_ext = grid_multiplier * conv_to<rowvec>::from(grid0);
-	const urowvec3 grid_ext_u = { (uword)grid_ext(0),(uword)grid_ext(1),(uword)grid_ext(2) };
+	const rowvec3 extrapolation_grid_size = grid_multiplier * conv_to<rowvec>::from(grid0);
+	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0),(uword)extrapolation_grid_size(1),(uword)extrapolation_grid_size(2) };
 	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 
 		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 
-		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);
+		UpdateCell(cell_vectors0 * extrapol_factor, extrapolation_grid);
 
 		//extrapolated interfaces
 		rowvec2 interfaces_ext = interfaces;
@@ -509,17 +509,17 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const mat33 cell_size0 = slabcc_cell.size;
+	const mat33 cell_vectors0 = slabcc_cell.vectors;
 	const urowvec grid0 = slabcc_cell.grid;
-	const rowvec3 grid_ext = grid_multiplier * conv_to<rowvec>::from(grid0);
-	const urowvec3 grid_ext_u = { (uword)grid_ext(0), (uword)grid_ext(1), (uword)grid_ext(2) };
-	UpdateCell(cell_size0, grid_ext_u);
+	const rowvec3 extrapolation_grid_size = grid_multiplier * conv_to<rowvec>::from(grid0);
+	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
+	UpdateCell(cell_vectors0, extrapolation_grid);
 	const mat diels0 = dielectric_profiles(interfaces, diel_in, diel_out, diel_erf_beta);
 
 	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 
 		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
-		UpdateCell(cell_size0 * extrapol_factor, grid_ext_u);
+		UpdateCell(cell_vectors0 * extrapol_factor, extrapolation_grid);
 		//extrapolated interfaces
 		const rowvec2 interfaces_ext = interfaces / extrapol_factor;
 

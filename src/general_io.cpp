@@ -12,9 +12,7 @@ void write_vec2file(const vector<double>& input, const string& output_file) {
 
 	out_file.open(output_file);
 	out_file << fixed << showpos << setprecision(15);
-	for (const auto& i : input) {
-		out_file << i << endl;
-	}
+	for (const auto& i : input) { out_file << i << endl; }
 	out_file.close();
 
 }
@@ -83,7 +81,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 	if (showVer) {
 		cout << "SLAB Charge Correction (slabcc)" << endl;
 		cout << "Version: " << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "." << SLABCC_VERSION_PATCH << endl;
-		cout << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
+		cout << "Compilation: " << __DATE__ << " " << __TIME__ << endl;
 		exit(0);
 	}
 

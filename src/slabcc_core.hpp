@@ -19,8 +19,8 @@ struct slabcc_cell_type {
 	// lengths of the basis vectors in Bohr
 	rowvec3 vec_lengths = { 0, 0, 0 };
 
-	// size of the supercell in Bohr
-	mat33 size = zeros(3, 3);
+	// supercell vectors in Bohr
+	mat33 vectors = zeros(3, 3);
 
 	//calculation grid size
 	urowvec3 grid = { 1, 1, 1 };
@@ -74,7 +74,7 @@ struct nonlinear_fit_data {
 mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta);
 
 //Sets the global struct slabcc_cell parameters from cell vectors "size" (in Bohr) and grid density "grid"
-void UpdateCell(const mat33& size, const urowvec3& grid);
+void UpdateCell(const mat33& vectors, const urowvec3& grid);
 
 //Produces Gaussian charge distribution in real space
 // Q is total charge, rel_pos is the relative position of the center of Gaussian charge,

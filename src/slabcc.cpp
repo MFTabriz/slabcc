@@ -26,10 +26,10 @@ int main(int argc, char *argv[])
 	
 	// default values should be defined in the parser function
 
-	string CHGCAR_NEU = "";			//charge density of neutral system
-	string LOCPOT_NEU = "";			//potential of neutral system
-	string LOCPOT_CHG = "";			//potential of charged system
-	string CHGCAR_CHG = "";			//charge density of charged system
+	string CHGCAR_neutral = "";
+	string LOCPOT_neutral = "";
+	string LOCPOT_charged = "";
+	string CHGCAR_charged = "";
 	string opt_algo = "";			//optimization algorithm
 	mat charge_position;			//center of each Gaussian model charge
 	rowvec Qd;						//charge of each Gaussian model charge
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	
 	// parameters read from the input file
 	const input_data input_file_variables = {
-		CHGCAR_NEU, LOCPOT_CHG, LOCPOT_NEU, CHGCAR_CHG,
+		CHGCAR_neutral, LOCPOT_charged, LOCPOT_neutral, CHGCAR_charged,
 		opt_algo, charge_position, Qd, sigma, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
 		opt_tol, optimize_charge, optimize_interfaces, extrapol_slab, opt_grid_x,
@@ -66,8 +66,7 @@ int main(int argc, char *argv[])
 	log->debug("NLOPT library: version {}.{}.{}", nlopt::version_major(), nlopt::version_minor(), nlopt::version_bugfix());
 	log->debug("SPDLOG library: version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
 
-	//calculation results to be written to the slabcc output file
-	vector<pair<string, string>> results;
+	vector<pair<string, string>> calculation_results;
 
 	check_inputs(input_file_variables);
 
@@ -77,13 +76,13 @@ int main(int argc, char *argv[])
 	//promises for async file writing (can be replaced by a deque if the number of files increases)
 	vector<future<void>> future_files;
 
-	future_cells.push_back(async(launch::async, read_CHGPOT, CHGCAR_NEU));
-	future_cells.push_back(async(launch::async, read_CHGPOT, CHGCAR_CHG));
-	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_NEU));
-	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_CHG));
+	future_cells.push_back(async(launch::async, read_CHGPOT, CHGCAR_neutral));
+	future_cells.push_back(async(launch::async, read_CHGPOT, CHGCAR_charged));
+	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_neutral));
+	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_charged));
 
-	supercell Neutral_supercell = read_POSCAR(CHGCAR_NEU);
-	supercell Charged_supercell = read_POSCAR(CHGCAR_CHG);
+	supercell Neutral_supercell = read_POSCAR(CHGCAR_neutral);
+	supercell Charged_supercell = read_POSCAR(CHGCAR_charged);
 
 	Neutral_supercell.charge = future_cells.at(0).get();
 	Charged_supercell.charge = future_cells.at(1).get();
@@ -93,19 +92,17 @@ int main(int argc, char *argv[])
 	check_cells(Neutral_supercell, Charged_supercell, input_file_variables);
 
 	//cell vectors of the CHGCAR and LOCPOT files (bohr)
-	const mat33 cell_size = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
+	const mat33 cell_vectors = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
 
-	//grid density of the CHGCAR and LOCPOT files
-	const urowvec3 grid = SizeVec(Neutral_supercell.charge);
-	UpdateCell(cell_size, grid);
+	const urowvec3 input_grid_size = SizeVec(Neutral_supercell.charge);
+	UpdateCell(cell_vectors, input_grid_size);
 
 	//slabcc_cell volume in bohr^3 (only works in the orthogonal case!)
 	const auto volume = prod(slabcc_cell.vec_lengths);
 
 	const rowvec3 relative_shift = 0.5 - slabcenter;
 
-	//relative shifts rounded to the nearest grid point
-	const rowvec3 rounded_relative_shift = round(grid % relative_shift) / grid;
+	const rowvec3 rounded_relative_shift = round(input_grid_size % relative_shift) / input_grid_size;
 
 	interfaces = fmod(interfaces + rounded_relative_shift(normal_direction), 1);
 	shift_structure(Neutral_supercell, rounded_relative_shift);
@@ -135,8 +132,8 @@ int main(int argc, char *argv[])
 	const auto Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
 	// convert charge fractions to actual charges
 	Qd *= Q0 / accu(Qd);
-	//dielectric profile
-	mat diels = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
+
+	mat dielectric_profiles = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
 
 	// model charge distribution (e/bohr^3), negative for presence of the electron 
 	cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
@@ -145,11 +142,10 @@ int main(int argc, char *argv[])
 	cx_cube V(arma::size(rhoM));
 	//difference of the potential resulted from the model charge and the QM calculation (VASP) results (eV)
 	cube V_diff(arma::size(V));
-	//mean squared potential error in 3D
-	double pot_MSE = 0;
 
-	//potential MSE returned from the 1st step of evaluation
-	double initial_pot_MSE = -1;
+	double potential_MSE = 0;
+
+	double initial_potential_MSE = -1;
 
 	// variables to optimize
 	opt_vars opt_vars = { interfaces, sigma, Qd, charge_position };
@@ -165,10 +161,10 @@ int main(int argc, char *argv[])
 		log->debug("Optimization grid size: " + to_string(SizeVec(interpolated_potential)));
 
 		//data needed for potential error calculation
-		opt_data optimize_data = { Q0, diel_erf_beta, diel_in, diel_out, interpolated_potential, diels, rhoM, V, V_diff, initial_pot_MSE };
-		UpdateCell(cell_size, SizeVec(interpolated_potential));
-		pot_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interfaces);
-		UpdateCell(cell_size, grid);
+		opt_data optimize_data = { Q0, diel_erf_beta, diel_in, diel_out, interpolated_potential, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
+		UpdateCell(cell_vectors, SizeVec(interpolated_potential));
+		potential_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interfaces);
+		UpdateCell(cell_vectors, input_grid_size);
 		//add back the last Gaussian charge (removed in the optimization)
 		Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 
@@ -193,7 +189,7 @@ int main(int argc, char *argv[])
 		//make sure the parameters after the optimization still make sense
 		check_inputs(input_file_variables);
 
-		if (initial_pot_MSE * (opt_tol + 1) < pot_MSE) {
+		if (initial_potential_MSE * (opt_tol + 1) < potential_MSE) {
 			// Don't panic! either NLOPT seems to be malfunctioning
 			// or we are not correctly logging/checking the result
 			log->critical("Optimization failed!");
@@ -202,12 +198,12 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-	opt_data optimized_data = { Q0, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, diels, rhoM, V, V_diff, initial_pot_MSE };
+	opt_data optimized_data = { Q0, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
 	auto local_param = optimizer_packer(opt_vars);
 	vector<double> grads = {};
-	pot_MSE = potential_eval(get<0>(local_param), grads, &optimized_data);
+	potential_MSE = potential_eval(get<0>(local_param), grads, &optimized_data);
 
-	if (pot_MSE > 1) {
+	if (potential_MSE > 1) {
 		log->warn("MSE of the model charge potential is large. The calculated correction energies may not be accurate!");
 	}
 
@@ -228,7 +224,7 @@ int main(int argc, char *argv[])
 
 	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
 	log->debug("Cell dimensions (bohr): " + to_string(slabcc_cell.vec_lengths));
-	log->debug("Grid size: " + to_string(grid));
+	log->debug("Grid size: " + to_string(input_grid_size));
 	log->debug("Volume (bohr^3): {}", volume);
 
 
@@ -243,7 +239,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (is_active(verbosity::write_dielectric_file)) {
-		write_mat2file(diels, "slabcc_DIEL.dat");
+		write_mat2file(dielectric_profiles, "slabcc_DIEL.dat");
 	}
 	if (is_active(verbosity::write_planarAvg_file)) {
 		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * slabcc_cell.voxel_vol, "N");
@@ -260,16 +256,11 @@ int main(int argc, char *argv[])
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= Q / volume;
 	//index of the element least affected by the extra charge
-	uword index_far = 0;
-	if (Q < 0) {
-		index_far = real(V).index_max();
-	}
-	else {
-		index_far = real(V).index_min();
-	}
+	uword index_far = Q < 0 ? real(V).index_max() : real(V).index_min();
+
 	const auto dV = V_diff(index_far);
 	log->info("Potential alignment (dV=): " + ::to_string(dV));
-	results.emplace_back("dV", ::to_string(dV));
+	calculation_results.emplace_back("dV", ::to_string(dV));
 
 	if (abs(dV) > 0.05) {
 		log->warn("The potential alignment term (dV) is relatively large." );
@@ -280,7 +271,7 @@ int main(int argc, char *argv[])
 
 	const auto EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 	log->info("E_periodic of the model charge: " + ::to_string(EperModel0));
-	results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
+	calculation_results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
 
 	const rowvec max_size = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
 	if (min(slabcc_cell.grid * extrapol_grid_x / max_size) < 1) {
@@ -297,9 +288,9 @@ int main(int argc, char *argv[])
 			"Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
 			"The present charge correction method is not suitable for these cases!");
 	}
-	const rowvec3 grid_ext = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
-	const urowvec3 grid_ext_u = { (uword)grid_ext(0), (uword)grid_ext(1), (uword)grid_ext(2) };
-	log->debug("Extrapolation grid size: " + to_string(grid_ext_u));
+	const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
+	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
+	log->debug("Extrapolation grid size: " + to_string(extrapolation_grid));
 	log->debug("--------------------------------------------------------");
 	log->debug("Scaling\tE_periodic\t\tinterfaces\t\tcharge position");
 	const rowvec2 interface_pos = interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
@@ -354,8 +345,8 @@ int main(int argc, char *argv[])
 			", c2=" + ::to_string(cs.at(2)) +
 			", c3=" + ::to_string(cs.at(3));
 		log->info("Non-linear fit parameters:" + fit_params);
-		results.emplace_back("Non-linear fit parameters", fit_params);
-		results.emplace_back("Madelung constant", ::to_string(madelung_const));
+		calculation_results.emplace_back("Non-linear fit parameters", fit_params);
+		calculation_results.emplace_back("Madelung constant", ::to_string(madelung_const));
 
 		E_isolated = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
 		E_correction = E_isolated - EperModel0 - Q * dV;
@@ -363,10 +354,10 @@ int main(int argc, char *argv[])
 
 
 	log->info("E_isolated from extrapolation with "+ to_string(extrapol_steps_num) + "x" + to_string(extrapol_steps_size) + " steps: " + ::to_string(E_isolated) );
-	results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
+	calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
 
 	log->info("Energy correction for the model charge (E_iso-E_per-q*dV=): " + ::to_string(E_correction) );
-	results.emplace_back("Energy correction for the model charge (E_iso-E_per-q*dV)", ::to_string(E_correction));
+	calculation_results.emplace_back("Energy correction for the model charge (E_iso-E_per-q*dV)", ::to_string(E_correction));
 	log->flush();
 	const string msgs_file = "MSG";
 	ifstream messages_list(msgs_file);
@@ -377,7 +368,7 @@ int main(int argc, char *argv[])
 	messages_list.close();
 	
 	output_fstream << endl << "[Results]" << endl;
-	for (const auto &i : results) { output_fstream << i.first << " = " << i.second << endl; }
+	for (const auto &i : calculation_results) { output_fstream << i.first << " = " << i.second << endl; }
 	output_fstream.close();
 	
 	//making sure all the files are written
