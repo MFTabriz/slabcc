@@ -41,8 +41,8 @@ BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm 
 # due to changes of the float-point operations
 
 OPT      = -O2
-MARCH   := -march=native #change this if the architceture of the machine compiling and running the program is not the same
-EXTRAOPT = #add yours own (wise) optimzation flags here!
+MARCH    = -march=native #change this if the architecture of the machine compiling and running the program is not the same
+EXTRAOPT = #add yours own (wise) optimization flags here!
 OPTFLAGS = $(OPT) $(MARCH) $(EXTRAOPT)
 
 

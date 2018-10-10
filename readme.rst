@@ -1,5 +1,5 @@
-:Last updated: 18 Sep 2018
-:version: 0.3.4
+:Last updated: 10 Oct. 2018
+:version: 0.4.0
 
 .. sectnum::
 
@@ -103,7 +103,9 @@ Installation
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside slabcc but it is highly recommended to use OpenBLAS/MKL instead. If you don't have OpenBLAS/BLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
-3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc. 
+3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
+
+**Note**: By default, the code will be compiled for the specific architecture of your machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
 ==================================
 Known issues and limitations
@@ -122,6 +124,7 @@ Known issues and limitations
 Release history
 ===============
 * 2018-07-29: version 0.3 - First public release
+* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
 
 ===========================
 Copyright and attributions
@@ -138,10 +141,10 @@ Included libraries
 
 - `Armadillo C++ Linear Algebra Library <http://arma.sourceforge.net>`_ licensed under the Apache License 2.0
  
- - Copyright 2008 - 2018 Conrad Sanderson
- - Copyright 2008 - 2016 National ICT Australia (NICTA)
- - Copyright 2017 - 2018 Arroyo Consortium
- - Copyright 2017 - 2018 Data61, CSIRO
+ - Copyright 2008-2018, Conrad Sanderson
+ - Copyright 2008-2016, National ICT Australia (NICTA)
+ - Copyright 2017-2018, Arroyo Consortium
+ - Copyright 2017-2018, Data61, CSIRO
  - This product includes software developed by Conrad Sanderson
  - This product includes software developed at National ICT Australia (NICTA)
  - This product includes software developed at Arroyo Consortium
@@ -161,7 +164,11 @@ Included libraries
  
 - `NLOPT <https://nlopt.readthedocs.io>`_ licensed under the GNU LGPL
 
- - © 2007-2014 Massachusetts Institute of Technology
+ - © 2007-2014, Massachusetts Institute of Technology
+ 
+- `spdlog <https://github.com/gabime/spdlog>`_ licensed under the MIT License
+
+ - © 2016, Gabi Melman
 
 Linked libraries
 ---------------------
