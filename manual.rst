@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 10 Oct. 2018
-:version: 0.4.0
+:Last updated: 18 Mar. 2019
+:version: 0.5.0
 
 .. sectnum::
 
@@ -21,10 +21,18 @@ The energy correction is calculated as:
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
 
 where, E\ :sub:`corr` \ is the total energy correction for the model, 
-E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and is determined by extrapolation.
+E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
 q is the total extra charge and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
 
-| The code have been initially developed for `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
+The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:
+
+ Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: `10.1103/PhysRevX.4.031044 <https://doi.org/10.1103/PhysRevX.4.031044>`_ `(Erratum) <https://doi.org/10.1103/PhysRevX.8.039902>`_ 
+ 
+And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
+
+ Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
+
+| SLABCC have been initially developed for `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
 
 Algorithm
 ----------
@@ -185,6 +193,10 @@ The input file is processed as follows:
 +------------------------------+-------------------------------------------------------+---------------+
 | Parameter                    | Description and options / ``example``                 | Default value |
 +==============================+=======================================================+===============+
+|  ``2d_model``                | Calculate the charge correction for a 2D model        |  false        |
+|                              |                                                       |               |
+|                              |                                                       |               |
++------------------------------+-------------------------------------------------------+---------------+
 |                              |Fraction of the extra charge in each localized Gaussian|*The extra     |
 |                              |model charge (in the case of multiple Gaussian charges)|charge will be |
 | ``charge_fraction``          |                                                       |equally divided|
@@ -224,6 +236,11 @@ The input file is processed as follows:
 +------------------------------+-------------------------------------------------------+---------------+
 | ``diel_taper``               |The steepness of the transition between diel_in and    |       1       |
 |                              |diel_out (β in the dielectric profile formula)         |               |
++------------------------------+-------------------------------------------------------+---------------+
+| ``extrapolate``              |Calculate the isolated energy using the extrapolation  |true for the   |
+|                              |method                                                 |slab models,   |
+|                              |                                                       |and false for  |
+|                              |                                                       |the 2D model   |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Extrapolation grid size multiplier.                    |               |
 |                              |                                                       |               |
@@ -543,18 +560,18 @@ Known issues and limitations
 
 - BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- Current extrapolation algorithm for the E\ :sub:`isolated` \ is not suitable for the monolayer models!
 
 ===============
 Release history
 ===============
 * 2018-07-29: version 0.3 - First public release
 * 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
+* 2019-03-18: version 0.5 - Added 2D model support.
 
 ===========================
 Copyright and attributions
 ===========================
-Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 
 The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
 
@@ -604,7 +621,7 @@ Linked libraries
 
 License
 -------
-Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

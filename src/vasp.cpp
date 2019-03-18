@@ -1,4 +1,4 @@
-// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
@@ -7,8 +7,8 @@
 void write_POSCAR(const supercell& structure, const string& file_name) {
 	ofstream out_file;
 	out_file.open(file_name);
-	out_file << structure.label << endl;
-	out_file << "   " << fixed << setprecision(15) << structure.scaling << endl;
+	out_file << structure.label << '\n';
+	out_file << "   " << fixed << showpos << setprecision(16) << structure.scaling << '\n';
 	structure.cell_vectors.t().raw_print(out_file);
 	vector<int> defs = structure.atoms.definition_order;
 	const auto end = unique(defs.begin(), defs.end(), [](const int& l, const int& r) noexcept { return  l == r; });
@@ -18,7 +18,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 		const auto pos = distance(structure.atoms.definition_order.begin(), it);
 		out_file << " " << structure.atoms.type.at(pos);
 	}
-	out_file << endl;
+	out_file << '\n' << noshowpos;
 
 	int counter = 0;
 	int counted = 0;
@@ -30,15 +30,15 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 		out_file << " " << counter - counted;
 		counted = counter;
 	}
-	out_file << endl;
+	out_file << '\n';
 
 	if (structure.selective_dynamics) {
-		out_file << "Selective dynamics" << endl;
+		out_file << "Selective dynamics\n";
 	}
-	out_file << structure.coordination_system << endl;
+	out_file << structure.coordination_system << '\n';
 
 	for (uword number = 0; number < structure.atoms_number; ++number) {
-		out_file << rowvec(structure.atoms.position.row(number));
+		out_file << " " << structure.atoms.position.row(number);
 		if (structure.selective_dynamics) {
 			for (auto qq2 = 0; qq2 < 3; ++qq2) {
 				if (structure.atoms.constrains.at(number).at(qq2)) {
@@ -49,7 +49,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 				}
 			}
 		}
-		out_file << endl;
+		out_file << '\n';
 	}
 
 	out_file.close();
@@ -62,22 +62,24 @@ rowvec3 direct_cord(const supercell& structure, const rowvec3& cartesians) {
 }
 
 void normalize_positions(supercell& structure) {
+	auto log = spdlog::get("loggers");
 	if (structure.coordination_system == "direct") {
 		structure.atoms.position = fmod_p(structure.atoms.position, 1);
 	}
 	else {
 		//I'm lying here! > It can be converted to direct coordinates, normalized and converted back.
-		cout << "WARNING: positions in the Cartesian coordinates cannot be normalized!" << endl;
+		log->warn("positions in the Cartesian coordinates cannot be normalized!");
 	}
 }
 
 supercell read_POSCAR(const string& file_name) {
+	auto log = spdlog::get("loggers");
 	supercell structure;
 	ifstream infile;
 	string temp_line;
 	infile.open(file_name);
 	if (!infile) {
-		cerr << "While opening the POSCAR file an error is encountered!" << endl;
+		log->critical("Could not open the "+ file_name);
 		return structure;
 	}
 
@@ -130,7 +132,7 @@ supercell read_POSCAR(const string& file_name) {
 		structure.coordination_system = "direct"; //in VASP it means relative!!
 	}
 	else {
-		cerr << "ERROR: Unknown coordination system type!" << endl;
+		log->critical("Unknown coordination system type in "+ file_name);
 		return structure;
 	}
 
@@ -219,12 +221,12 @@ void write_CHGPOT(const string& type, const string& file_name, const supercell& 
 	else if (type == "LOCPOT") {
 		CHGPOT = structure.potential;
 	}
-	out_file << endl << SizeVec(CHGPOT) << endl;
+	out_file << '\n' << SizeVec(CHGPOT) << '\n';
 	out_file << fixed << showpos << scientific << setprecision(10);
 	for (uword i = 0; i < CHGPOT.n_elem; ++i) {
 		out_file << CHGPOT(i) << " ";
 		if (i % 5 == 4) {
-			out_file << endl;
+			out_file << '\n';
 		}
 	}
 	out_file.close();

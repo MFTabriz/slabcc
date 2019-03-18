@@ -1,4 +1,4 @@
-// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 

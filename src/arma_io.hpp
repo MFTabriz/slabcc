@@ -1,9 +1,11 @@
-// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
 #pragma once
 #include <armadillo>
+#include <iomanip>
+#include <iostream>
 
 using namespace std;
 using namespace arma;
@@ -11,23 +13,24 @@ using namespace arma;
 //single-line output for vec
 template<typename T>
 ostream &operator << (ostream &o, const Row<T> &vec) {
-	stringstream ss;
-	ss << setprecision(12);
-	vec.for_each([&ss](const T &elem) { ss << elem << " "; });
-	string st = ss.str();
-	st.pop_back();
-	o << st;
+	for (uword elem = 0; elem < vec.n_elem; ++elem) {
+		o << vec(elem);
+		if (elem != vec.n_elem - 1) {
+			o << " ";
+		}
+	}
 	return o;
 }
 
 template<typename T>
 ostream &operator << (ostream &o, const subview<T> &vec) {
-	stringstream ss;
-	ss << setprecision(12);
-	vec.for_each([&ss](const T &elem) { ss << elem << " "; });
-	string st = ss.str();
-	st.pop_back();
-	o << st;
+	for (uword elem = 0; elem < vec.n_elem; ++elem) {
+		o << vec(elem);
+		if (elem != vec.n_elem - 1) {
+			o  << " ";
+		}
+	}
+
 	return o;
 }
 
@@ -65,7 +68,7 @@ istream &operator >> (istream &o, Mat<T> &m) {
 template <typename T>
 string to_string(T input) {
 	ostringstream output;
-	output << setprecision(12);
+	output << setprecision(15);
 	output << input;
 	return output.str();
 }

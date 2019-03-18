@@ -1,4 +1,4 @@
-// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
@@ -12,7 +12,7 @@ void write_vec2file(const vector<double>& input, const string& output_file) {
 
 	out_file.open(output_file);
 	out_file << fixed << showpos << setprecision(15);
-	for (const auto& i : input) { out_file << i << endl; }
+	for (const auto& i : input) { out_file << i << '\n'; }
 	out_file.close();
 
 }
@@ -67,7 +67,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 
 	auto cli_result = cli.parse(clara::Args(argc, argv));
 	if (!cli_result) {
-		cerr << "Error in command line: " << cli_result.errorMessage() << endl;
+		cerr << "Error in command line: " << cli_result.errorMessage() << '\n';
 		exit(1);
 	}
 
@@ -79,9 +79,9 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 	}
 
 	if (showVer) {
-		cout << "SLAB Charge Correction (slabcc)" << endl;
-		cout << "Version: " << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "." << SLABCC_VERSION_PATCH << endl;
-		cout << "Compilation: " << __DATE__ << " " << __TIME__ << endl;
+		cout << "SLAB Charge Correction (slabcc)" << '\n';
+		cout << "Version: " << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "." << SLABCC_VERSION_PATCH << '\n';
+		cout << "Compilation: " << __DATE__ << " " << __TIME__ << '\n';
 		exit(0);
 	}
 
@@ -102,7 +102,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 	}
 
 	if (showAttr) {
-		cout << "Copyright (c) 2018, Bremen Center for Computational Materials Science (BCCMS), M. Farzalipour Tabriz\n"
+		cout << "Copyright (c) 2018-2019, Bremen Center for Computational Materials Science (BCCMS), M. Farzalipour Tabriz\n"
 			"The source code and all the documentations are available under The 2-Clause BSD License. For more information see LICENSE.TXT.\n\n"
 			"Included libraries\n\n"
 			"-Armadillo C++ Linear Algebra Library: licensed under the Apache License 2.0\n"

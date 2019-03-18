@@ -1,9 +1,10 @@
-// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
 #include "stdafx.h"
 #include "slabcc_core.hpp"
+#include "isolated.hpp"
 #include "vasp.hpp"
 using namespace std;
 
@@ -49,14 +50,15 @@ int main(int argc, char *argv[])
 	double extrapol_steps_size = 0; //size of each extrapolation step with respect to the initial supercell size
 	bool optimize_charge = false;	//optimize the charge_position and sigma
 	bool optimize_interfaces = false;//optimize the position of interfaces
-	bool extrapol_slab = true;		//extrapolate the slab thickness or not!
+	bool extrapolate = false;		//use the extrapolation for E-isolated calculations
+	bool model_2D = false;		//the model is 2D
 	
 	// parameters read from the input file
 	const input_data input_file_variables = {
 		CHGCAR_neutral, LOCPOT_charged, LOCPOT_neutral, CHGCAR_charged,
 		opt_algo, charge_position, Qd, sigma, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
-		opt_tol, optimize_charge, optimize_interfaces, extrapol_slab, opt_grid_x,
+		opt_tol, optimize_charge, optimize_interfaces, extrapolate, model_2D, opt_grid_x,
 		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
 	parse_input_params(input_file, output_fstream, input_file_variables);
@@ -89,7 +91,7 @@ int main(int argc, char *argv[])
 	Neutral_supercell.potential = future_cells.at(2).get();
 	Charged_supercell.potential = future_cells.at(3).get();
 
-	check_cells(Neutral_supercell, Charged_supercell, input_file_variables);
+	verify_cells(Neutral_supercell, Charged_supercell);
 
 	//cell vectors of the CHGCAR and LOCPOT files (bohr)
 	const mat33 cell_vectors = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
@@ -130,6 +132,10 @@ int main(int argc, char *argv[])
 
 	// total extra charge of the VASP calculation
 	const auto Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
+	if (abs(Q0) < 0.001) {
+		log->debug("Total extra charge: {}", Q0);
+		log->warn("Total extra charge seems to be very small. Please make sure the path to the input CHGCAR files are set properly!");
+	}
 	// convert charge fractions to actual charges
 	Qd *= Q0 / accu(Qd);
 
@@ -151,12 +157,14 @@ int main(int argc, char *argv[])
 	opt_vars opt_vars = { interfaces, sigma, Qd, charge_position };
 
 	if (optimize_charge || optimize_interfaces) {
-		//interpolation grid
-		const rowvec vx = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(0));
-		const rowvec vy = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(1));
-		const rowvec vz = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(2));
-		//interpolated defect potential for the optimization process
-		cube interpolated_potential = interp3(Defect_supercell.potential, vx, vy, vz);
+		const auto interfaces0 = interfaces;
+		const auto charge_position0 = charge_position;
+
+		const rowvec optimization_grid_x = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(0));
+		const rowvec optimization_grid_y = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(1));
+		const rowvec optimization_grid_z = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(2));
+
+		cube interpolated_potential = interp3(Defect_supercell.potential, optimization_grid_x, optimization_grid_y, optimization_grid_z);
 		interpolated_potential -= accu(interpolated_potential) / interpolated_potential.n_elem;
 		log->debug("Optimization grid size: " + to_string(SizeVec(interpolated_potential)));
 
@@ -169,10 +177,13 @@ int main(int argc, char *argv[])
 		Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
 
 		//write the unshifted optimized values to the file
-		output_fstream << endl << "[Optimized_model_parameters]" << endl;
+		output_fstream << "\n[Optimized_model_parameters]\n";
 		if (optimize_interfaces) {
 			const rowvec2 original_interfaces = fmod_p(interfaces - rounded_relative_shift(normal_direction), 1);
-			output_fstream << "interfaces_optimized = " << original_interfaces << endl;
+			output_fstream << "interfaces_optimized = " << original_interfaces << '\n';
+			// need a clever way to check the change in the interface positions
+			// the order may change and also the interfaces may move from one supercell to the next
+			// if there is too much change, warn the user
 		}
 
 		if (optimize_charge) {
@@ -180,13 +191,20 @@ int main(int argc, char *argv[])
 			if (Qd.n_elem > 1) {
 				output_fstream << "charge_fraction_optimized =" << abs(Qd / accu(Qd));
 			}
-			output_fstream << "charge_sigma_optimized = " << sigma << endl;
-			output_fstream << "charge_position_optimized = " << orig_charge_position << endl;
+			output_fstream << "charge_sigma_optimized = " << sigma << '\n';
+			output_fstream << "charge_position_optimized = " << orig_charge_position << '\n';
+
+
+			const mat charge_position_change = abs(charge_position0 - charge_position);
+			if (charge_position_change.max() > 0.1) {
+				log->warn("The optimized position for the extra charge is significantly different from the initial value.");
+				log->warn("Please make sure that the final position of the extra charge have been estimated correctly!");
+				log->trace("Charge position changes: ", to_string(charge_position_change));
+			}
 		}
 
 		output_fstream.flush();
 
-		//make sure the parameters after the optimization still make sense
 		check_inputs(input_file_variables);
 
 		if (initial_potential_MSE * (opt_tol + 1) < potential_MSE) {
@@ -200,10 +218,10 @@ int main(int argc, char *argv[])
 	}
 	opt_data optimized_data = { Q0, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
 	auto local_param = optimizer_packer(opt_vars);
-	vector<double> grads = {};
-	potential_MSE = potential_eval(get<0>(local_param), grads, &optimized_data);
+	vector<double> gradients = {};
+	potential_MSE = potential_eval(get<0>(local_param), gradients, &optimized_data);
 
-	if (potential_MSE > 1) {
+	if (potential_MSE > 0.01) {
 		log->warn("MSE of the model charge potential is large. The calculated correction energies may not be accurate!");
 	}
 
@@ -255,10 +273,9 @@ int main(int argc, char *argv[])
 	const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= Q / volume;
-	//index of the element least affected by the extra charge
-	uword index_far = Q < 0 ? real(V).index_max() : real(V).index_min();
+	uword farthest_element_index = Q < 0 ? real(V).index_max() : real(V).index_min();
 
-	const auto dV = V_diff(index_far);
+	const auto dV = V_diff(farthest_element_index);
 	log->info("Potential alignment (dV=): " + ::to_string(dV));
 	calculation_results.emplace_back("dV", ::to_string(dV));
 
@@ -267,7 +284,7 @@ int main(int argc, char *argv[])
 		log->warn("The constructed model may not be accurate!");
 	}
 
-	log->debug("Alignment term calculation grid point: " + to_string(ind2sub(as_size(slabcc_cell.grid), index_far)));
+	log->debug("Alignment term calculation grid point: " + to_string(ind2sub(as_size(slabcc_cell.grid), farthest_element_index)));
 
 	const auto EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 	log->info("E_periodic of the model charge: " + ::to_string(EperModel0));
@@ -276,7 +293,7 @@ int main(int argc, char *argv[])
 	const rowvec max_size = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
 	if (min(slabcc_cell.grid * extrapol_grid_x / max_size) < 1) {
 		log->warn("The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate.");
-		log->warn("The energy of the largest extrapolated model will be calculated with " + to_string(min(slabcc_cell.grid * extrapol_grid_x / max_size)) + " points/bohr grid");
+		log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(slabcc_cell.grid * extrapol_grid_x / max_size));
 		log->warn("You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps.");
 	}
 
@@ -288,73 +305,93 @@ int main(int argc, char *argv[])
 			"Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
 			"The present charge correction method is not suitable for these cases!");
 	}
-	const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
-	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
-	log->debug("Extrapolation grid size: " + to_string(extrapolation_grid));
-	log->debug("--------------------------------------------------------");
-	log->debug("Scaling\tE_periodic\t\tinterfaces\t\tcharge position");
-	const rowvec2 interface_pos = interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
-	string extrapolation_info = to_string(1.0) + "\t" + ::to_string(EperModel0) + "\t" + to_string(interface_pos);
-	for (auto i = 0; i < charge_position.n_rows; ++i) {
-		extrapolation_info+= "\t" + to_string(charge_position(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
-	}
-	log->debug(extrapolation_info);
-	rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
 	double E_isolated = 0;
 	double E_correction = 0;
-	if (extrapol_slab) {
-		tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-			interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
-
-		const colvec pols = polyfit(sizes, Es, 1);
-		const colvec evals = polyval(pols, sizes.t());
-		const auto linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;
-		const rowvec slopes = diff(Es) / diff(sizes);
-		const auto extrapol_error_periodic = abs(slopes(0) - slopes(slopes.n_elem - 1));
+	if (extrapolate) {
+		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
+		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
+		log->debug("Extrapolation grid size: " + to_string(extrapolation_grid));
 		log->debug("--------------------------------------------------------");
-		log->debug("Linear fit: Eper(Model) = " + ::to_string(pols(0)) + "/scaling + " + ::to_string(pols(1)));
-		log->debug("Linear fit Root Mean Square Error: " + ::to_string(sqrt(linearfit_MSE)));
-		log->debug("Polyfit evaluated energies: " + ::to_string(evals));
-		log->debug("Linear fit error for the periodic model: " + ::to_string(extrapol_error_periodic));
-
-		if (extrapol_error_periodic > 0.05) {
-			log->error("The extrapolated energies are not scaling linearly!");
-			log->error("The extrapolation steps/size may be too large for the grid size or the slab thickness in too small for this extrapolation algorithm");
-			log->error("You may need to use larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
-			log->error("Extrapolation energy slopes: " + to_string(slopes));
+		log->debug("Scaling\tE_periodic\t\tinterfaces\t\tcharge position");
+		const rowvec2 interface_pos = interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
+		string extrapolation_info = to_string(1.0) + "\t" + ::to_string(EperModel0) + "\t" + to_string(interface_pos);
+		for (auto i = 0; i < charge_position.n_rows; ++i) {
+			extrapolation_info += "\t" + to_string(charge_position(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
 		}
+		log->debug(extrapolation_info);
+		rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
 
-		E_isolated = EperModel0 - pols(0);
-		E_correction = -pols(0) - Q * dV;
+		if (model_2D) {
+			tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
+				interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+			const rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
+			const auto radius = 10.0;
+			const auto ewald_shells = generate_shells(unit_cell, radius);
+			const auto madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
+			auto madelung_term = -pow(Q, 2) * madelung_const / 2;
+			nonlinear_fit_data fit_data = { Es ,sizes, madelung_term };
+			const auto cs = nonlinear_fit(1e-12, fit_data);
+
+			log->info("Madelung constant = " + ::to_string(madelung_const));
+			const string fit_params = "c0= " + ::to_string(cs.at(0)) +
+				", c1=" + ::to_string(cs.at(1)) +
+				", c2=" + ::to_string(cs.at(2)) +
+				", c3=" + ::to_string(cs.at(3));
+			log->info("Non-linear fit parameters:" + fit_params);
+			calculation_results.emplace_back("Non-linear fit parameters", fit_params);
+			calculation_results.emplace_back("Madelung constant", ::to_string(madelung_const));
+
+			E_isolated = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
+			E_correction = E_isolated - EperModel0 - Q * dV;
+		}
+		else {
+			tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
+				interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+
+			const colvec pols = polyfit(sizes, Es, 1);
+			const colvec evals = polyval(pols, sizes.t());
+			const auto linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;
+			const rowvec slopes = diff(Es) / diff(sizes);
+			const auto extrapol_error_periodic = abs(slopes(0) - slopes(slopes.n_elem - 1));
+			log->debug("--------------------------------------------------------");
+			log->debug("Linear fit: Eper(Model) = " + ::to_string(pols(0)) + "/scaling + " + ::to_string(pols(1)));
+			log->debug("Linear fit Root Mean Square Error: " + ::to_string(sqrt(linearfit_MSE)));
+			log->debug("Polyfit evaluated energies: " + ::to_string(evals));
+			log->debug("Linear fit error for the periodic model: " + ::to_string(extrapol_error_periodic));
+
+			if (extrapol_error_periodic > 0.05) {
+				log->error("The extrapolated energies are not scaling linearly!");
+				log->error("The extrapolation steps/size may be too large for the grid size or the slab thickness in too small for this extrapolation algorithm");
+				log->error("You may need to use larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
+				log->error("For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file");
+				log->error("Extrapolation energy slopes: " + to_string(slopes));
+			}
+
+			E_isolated = EperModel0 - pols(0);
+			E_correction = -pols(0) - Q * dV;
+
+		}
+		log->info("E_isolated from extrapolation with " + to_string(extrapol_steps_num) + "x" + to_string(extrapol_steps_size) + " steps: " + ::to_string(E_isolated));
+		calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
 
 	}
 	else {
-		tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-			interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
-		const rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
-		const auto radius = 10.0;
-		const auto ewald_shells = generate_shells(unit_cell, radius);
-		const auto madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
-		auto madelung_term = -pow(Q, 2) * madelung_const / 2;
-		nonlinear_fit_data fit_data = { Es ,sizes, madelung_term };
-		const auto cs = nonlinear_fit(1e-12, fit_data);
+		if (model_2D) {
+			// TODO: implement multiple charges
+			const mat dielectric_profiles = dielectric_profiles_gen(interfaces, diel_in, diel_out, diel_erf_beta);
+			E_isolated = Eiso_bessel(Qd(0), charge_position(0, normal_direction) * slabcc_cell.vec_lengths(normal_direction), sigma(0), dielectric_profiles);
+			E_correction = E_isolated - EperModel0 - Q * dV;
+			log->info("E_isolated from the Bessel expansion of the Poisson equation: " + ::to_string(E_isolated));
+			calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
 
-		log->info("Madelung constant = " + ::to_string(madelung_const));
-		const string fit_params = "c0= " + ::to_string(cs.at(0)) +
-			", c1=" + ::to_string(cs.at(1)) +
-			", c2=" + ::to_string(cs.at(2)) +
-			", c3=" + ::to_string(cs.at(3));
-		log->info("Non-linear fit parameters:" + fit_params);
-		calculation_results.emplace_back("Non-linear fit parameters", fit_params);
-		calculation_results.emplace_back("Madelung constant", ::to_string(madelung_const));
+		}
+		else {
+			log->error("There is no algorithm other than extrapolation for E_isolated calculation of the slab models in this version of the slabcc!");
+		}
 
-		E_isolated = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
-		E_correction = E_isolated - EperModel0 - Q * dV;
 	}
 
 
-	log->info("E_isolated from extrapolation with "+ to_string(extrapol_steps_num) + "x" + to_string(extrapol_steps_size) + " steps: " + ::to_string(E_isolated) );
-	calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
 
 	log->info("Energy correction for the model charge (E_iso-E_per-q*dV=): " + ::to_string(E_correction) );
 	calculation_results.emplace_back("Energy correction for the model charge (E_iso-E_per-q*dV)", ::to_string(E_correction));
@@ -362,20 +399,19 @@ int main(int argc, char *argv[])
 	const string msgs_file = "MSG";
 	ifstream messages_list(msgs_file);
 	if (!file_is_empty(messages_list)) {
-		output_fstream << endl << "[Messages]" << endl;
+		output_fstream << "\n[Messages]\n";
 		output_fstream << messages_list.rdbuf();
 	}
 	messages_list.close();
 	
-	output_fstream << endl << "[Results]" << endl;
-	for (const auto &i : calculation_results) { output_fstream << i.first << " = " << i.second << endl; }
+	output_fstream << "\n[Results]\n";
+	for (const auto &i : calculation_results) { output_fstream << i.first << " = " << i.second << '\n'; }
 	output_fstream.close();
 	
 	//making sure all the files are written
-	for (auto &k : future_files) { k.get(); }
+	for (auto &promise : future_files) { promise.get(); }
 
 	log->trace("Calculations successfully ended!");
-	log->~logger();
 	remove(msgs_file.c_str());
 	return 0;
 }

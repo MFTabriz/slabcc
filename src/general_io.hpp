@@ -1,4 +1,4 @@
-// Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
@@ -45,8 +45,7 @@ inline bool is_active(const verbosity& action) noexcept {
 	return verbos >= static_cast<int>(verbosity(action));
 }
 
-inline bool file_is_empty(ifstream& file)
-{
+inline bool file_is_empty(ifstream& file) {
 	return file.peek() == ifstream::traits_type::eof();
 }
 

@@ -1075,10 +1075,10 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">10 Oct. 2018</td>
+<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">18 Mar. 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.4.0</td></tr>
+<td>0.5.0</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1122,10 +1122,16 @@ The energy correction is calculated as:</p>
 <blockquote>
 E<sub>corr</sub>  = E<sub>isolated</sub> - E<sub>periodic</sub> - qΔV</blockquote>
 <p>where, E<sub>corr</sub> is the total energy correction for the model,
-E<sub>periodic</sub> is the energy of the model charge, calculated by solving the periodic Poisson equation. E<sub>isolated</sub> is the energy of the model charge embedded in the dielectric medium and is determined by extrapolation.
+E<sub>periodic</sub> is the energy of the model charge, calculated by solving the periodic Poisson equation. E<sub>isolated</sub> is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
 q is the total extra charge and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.</p>
+<p>The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:</p>
+<blockquote>
+Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: <a class="reference external" href="https://doi.org/10.1103/PhysRevX.4.031044">10.1103/PhysRevX.4.031044</a> <a class="reference external" href="https://doi.org/10.1103/PhysRevX.8.039902">(Erratum)</a></blockquote>
+<p>And by the cylindrical Bessel expansion of the Poisson equation as proposed in:</p>
+<blockquote>
+Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: <a class="reference external" href="https://doi.org/10.1063/1.4978238">10.1063/1.4978238</a></blockquote>
 <div class="line-block">
-<div class="line">The code have been initially developed for <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
+<div class="line">SLABCC have been initially developed for <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
 </div>
 <div class="section" id="algorithm">
 <h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
@@ -1380,6 +1386,10 @@ The input file is processed as follows:</p>
 </tr>
 </thead>
 <tbody valign="top">
+<tr><td><tt class="docutils literal">2d_model</tt></td>
+<td>Calculate the charge correction for a 2D model</td>
+<td>false</td>
+</tr>
 <tr><td><tt class="docutils literal">charge_fraction</tt></td>
 <td><p class="first">Fraction of the extra charge in each localized Gaussian
 model charge (in the case of multiple Gaussian charges)</p>
@@ -1436,6 +1446,14 @@ outside of the slab</td>
 <td>The steepness of the transition between diel_in and
 diel_out (β in the dielectric profile formula)</td>
 <td>1</td>
+</tr>
+<tr><td><tt class="docutils literal">extrapolate</tt></td>
+<td>Calculate the isolated energy using the extrapolation
+method</td>
+<td>true for the
+slab models,
+and false for
+the 2D model</td>
 </tr>
 <tr><td><tt class="docutils literal">extrapolate_grid_x</tt></td>
 <td><p class="first">Extrapolation grid size multiplier.</p>
@@ -1838,8 +1856,6 @@ X 0 0
 </li>
 <li><p class="first">Maximum line length of the input file (slabcc.in) is 4000 bytes.</p>
 </li>
-<li><p class="first">Current extrapolation algorithm for the E<sub>isolated</sub> is not suitable for the monolayer models!</p>
-</li>
 </ul>
 </div>
 <div class="section" id="release-history">
@@ -1847,11 +1863,12 @@ X 0 0
 <ul class="simple">
 <li>2018-07-29: version 0.3 - First public release</li>
 <li>2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.</li>
+<li>2019-03-18: version 0.5 - Added 2D model support.</li>
 </ul>
 </div>
 <div class="section" id="copyright-and-attributions">
 <h1><a class="toc-backref" href="#id36">10&nbsp;&nbsp;&nbsp;Copyright and attributions</a></h1>
-<p>Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz</p>
+<p>Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz</p>
 <p>The source codes and all the documentations are available under The 2-Clause BSD License. For more information see <a class="reference internal" href="#license">license</a>.</p>
 <div class="line-block">
 <div class="line">This code uses several open source components each of which are located under a separate sub-directory in the <tt class="docutils literal">src/</tt>. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.</div>
@@ -1925,7 +1942,7 @@ X 0 0
 </div>
 <div class="section" id="license">
 <h2><a class="toc-backref" href="#id39">10.3&nbsp;&nbsp;&nbsp;License</a></h2>
-<p>Copyright (c) 2018, University of Bremen, M. Farzalipour Tabriz</p>
+<p>Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz</p>
 <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
 <ol class="arabic simple">
 <li>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>

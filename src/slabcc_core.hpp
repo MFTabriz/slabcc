@@ -3,12 +3,11 @@
 #include "general_io.hpp"
 #include "nlopt.hpp"
 #include "INIReader.h"
-#include "madelung.hpp"
 
 extern const double Hartree_to_eV;
 
 // These functions are providing the basic functions needed in various stages of calculation:
-// generating a 1D dielectric profile
+// generating the 1D dielectric profiles
 // generating a 3D Gaussian charge distribution
 // solving the Poisson equation
 // estimating the average error of the model potential
@@ -33,7 +32,7 @@ struct slabcc_cell_type {
 
 //input data for checker
 struct input_data {
-	string &CHGCAR_NEU, &LOCPOT_CHG, &LOCPOT_NEU, &CHGCAR_CHG, &opt_algo;
+	string &CHGCAR_neutral, &LOCPOT_charged, &LOCPOT_neutral, &CHGCAR_charged, &opt_algo;
 	mat &charge_position;
 	rowvec &Qd, &sigma;
 	rowvec3 &slabcenter;
@@ -41,7 +40,7 @@ struct input_data {
 	uword &normal_direction;
 	rowvec2 &interfaces;
 	double &diel_erf_beta, &opt_tol;
-	bool &optimize_charge, &optimize_interface, &extrapol_slab;
+	bool &optimize_charge, &optimize_interface, &extrapolate, &model_2D;
 	double &opt_grid_x, &extrapol_grid_x;
 	int &max_eval, &max_time, &extrapol_steps_num;
 	double &extrapol_steps_size;
@@ -52,11 +51,11 @@ struct opt_data {
 	const double &Q0, &diel_erf_beta;
 	const rowvec &diel_in, &diel_out;
 	const cube &defect_potential;
-	mat &diels;
+	mat &dielectric_profiles;
 	cx_cube& rhoM;
 	cx_cube& V;
 	cube& V_diff;
-	double &initial_pot_MSE;
+	double &initial_potential_MSE;
 };
 
 struct opt_vars {
@@ -65,13 +64,9 @@ struct opt_vars {
 	mat &charge_position;
 };
 
-struct nonlinear_fit_data {
-	rowvec &energies, &sizes;
-	double &madelung_term;
-};
 // generates dielectric profile matrix with each column representing the 
 // dielectric tensor elements' variation in the normal direction.
-mat dielectric_profiles(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta);
+mat dielectric_profiles_gen(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta);
 
 //Sets the global struct slabcc_cell parameters from cell vectors "size" (in Bohr) and grid density "grid"
 void UpdateCell(const mat33& vectors, const urowvec3& grid);
@@ -110,8 +105,8 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_
 //sanity check on the input parameters
 void check_inputs(input_data input_set);
 
-//check or enforce some conditions on the supercell grid sizes and the shape
-void check_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell, const input_data& input_set);
+//check conditions and consistency of the supercell grid sizes and the shape
+void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell);
 
 //parse the parameters from the input file
 void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set);
@@ -119,12 +114,3 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 //optimization constraint to ensure all the Gaussian charges have the same sign
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data);
 
-// returns the extrapolated sizes and the energies
-tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &Qd, const rowvec &sigma, const double &grid_multiplier);
-tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &Qd, const rowvec &sigma, const double &grid_multiplier);
-
-// evaluates the MSE for fitting to the 2nd-order + exponential function as described in the Erratum of the paper
-double fit_eval(const vector<double> &x, vector<double> &grad, void *data);
-
-// fit the extrapolated energies to customized (2nd-order + exponential) function form (needed for non-linear energies of the extrapolate_2D)
-vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data);
