@@ -237,10 +237,10 @@ The input file is processed as follows:
 | ``diel_taper``               |The steepness of the transition between diel_in and    |       1       |
 |                              |diel_out (β in the dielectric profile formula)         |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``extrapolate``              |Calculate the isolated energy using the extrapolation  |true for the   |
-|                              |method                                                 |slab models,   |
-|                              |                                                       |and false for  |
-|                              |                                                       |the 2D model   |
+| ``extrapolate``              |Calculate the isolated energy using the extrapolation  |opposite of the|
+|                              |method                                                 |``2d_model``   |
+|                              |                                                       |parameter      |
+|                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Extrapolation grid size multiplier.                    |               |
 |                              |                                                       |               |
