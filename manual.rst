@@ -564,9 +564,9 @@ Known issues and limitations
 ===============
 Release history
 ===============
-* 2018-07-29: version 0.3 - First public release
-* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
 * 2019-03-18: version 0.5 - Added 2D model support.
+* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
+* 2018-07-29: version 0.3 - First public release
 
 ===========================
 Copyright and attributions
