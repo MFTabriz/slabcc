@@ -101,10 +101,10 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     LOCPOT_neutral = UNCHARGED_LOCPOT
     CHGCAR_charged = CHARGED_CHGCAR
     CHGCAR_neutral = UNCHARGED_CHGCAR
-	2D_model = yes
+    2D_model = yes
     charge_position = 0.5 0.4 0.56
-	interfaces =  0.66 0.46
-	normal_direction = z
+    interfaces =  0.66 0.46
+    normal_direction = z
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
