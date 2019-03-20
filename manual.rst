@@ -141,6 +141,19 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     diel_out = 4.8
     optimize_interfaces = no
 
+4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poission equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
+
+    LOCPOT_charged = CHARGED_LOCPOT
+    LOCPOT_neutral = UNCHARGED_LOCPOT
+    CHGCAR_charged = CHARGED_CHGCAR
+    CHGCAR_neutral = UNCHARGED_CHGCAR
+	2D_model = yes
+    charge_position = 0.5 0.4 0.56
+	interfaces =  0.66 0.46
+	normal_direction = z
+    diel_in = 6.28 6.28 1.83
+    diel_out = 1
+
 
 Test set
 --------
