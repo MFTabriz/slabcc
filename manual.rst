@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 18 Mar. 2019
+:Last updated: 23 Mar. 2019
 :version: 0.5.0
 
 .. sectnum::
@@ -210,11 +210,12 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Fraction of the extra charge in each localized Gaussian|*The extra     |
-|                              |model charge (in the case of multiple Gaussian charges)|charge will be |
-| ``charge_fraction``          |                                                       |equally divided|
-|                              |``charge_fraction = 0.4 0.6``                          |among all      |
-|                              |                                                       |positions*     |
+|                              |Fraction of the total extra charge in each localized   |*The extra     |
+|                              |Gaussian model charge (in the case of multiple Gaussian|charge will be |
+| ``charge_fraction``          |charges)                                               |equally divided|
+|                              |                                                       |among all      |
+|                              |``charge_fraction = 0.4 0.6``                          |positions*     |
+|                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Position of the model Gaussian charges                 |               |
 | ``charge_position``          |                                                       |               |
@@ -559,9 +560,10 @@ __ check_
 
 .. _cite:
 
-11. **How should I cite slabcc?**
+11. **How should I cite slabcc?**  (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
 
-
+ Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications (2019), DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
+  
 ==================================
 Known issues and limitations
 ==================================
@@ -626,6 +628,12 @@ Included libraries
 
  - © 2016, Gabi Melman, `et al. <https://github.com/gabime/spdlog/contributors>`__
 
+- `Boost.Predef <https://github.com/boostorg/predef>`_ licensed under the Boost Software License
+
+ - © 2005-2018 Rene Rivera
+ - © 2015 Charly Chevalier
+ - © 2015 Joel Falcou, `et al. <https://github.com/boostorg/predef/contributors>`__
+ 
 Linked libraries
 ---------------------
 

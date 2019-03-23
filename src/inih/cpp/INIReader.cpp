@@ -27,11 +27,85 @@ string INIReader::Get(const string& name, const string default_value) const {
 	return _values.count(key) ? _values.find(key)->second : default_value;
 }
 
-void INIReader::dump_parsed(std::ofstream& out_file) const {
+void INIReader::dump_compiler_info() const {
+	auto log = spdlog::get("loggers");
+	log->debug("-------------compilation info--------------");
+	#if defined(BOOST_ARCH_X86_64_AVAILABLE) {
+		log->debug("Architecture: {}", BOOST_ARCH_X86_64_NAME);
+	#endif
+	#if defined(BOOST_HW_SIMD_AVAILABLE)
+		string simd_features = "";
+		if (BOOST_HW_SIMD_X86 >= BOOST_HW_SIMD_X86_SSE3_VERSION) { simd_features = "SSE3 "; }
+		if (BOOST_HW_SIMD_X86 >= BOOST_HW_SIMD_X86_SSE4_1_VERSION) { simd_features = "SSE4.1 "; }
+		if (BOOST_HW_SIMD_X86 >= BOOST_HW_SIMD_X86_SSE4_2_VERSION) { simd_features = "SSE4.2 "; }
+		if (BOOST_HW_SIMD_X86 >= BOOST_HW_SIMD_X86_AVX_VERSION) { simd_features += "AVX "; }
+		if (BOOST_HW_SIMD_X86 >= BOOST_HW_SIMD_X86_FMA3_VERSION) { simd_features += "FMA "; }
+		if (BOOST_HW_SIMD_X86 >= BOOST_HW_SIMD_X86_AVX2_VERSION) { simd_features += "AVX2 "; }
+		log->debug("SIMD features: {}", simd_features);
+	#endif
+
+	#if defined(BOOST_OS_WINDOWS_AVAILABLE)
+		log->debug("OS: {}", BOOST_OS_WINDOWS_NAME);
+	#endif
+	#if defined(BOOST_OS_LINUX_AVAILABLE)
+		log->debug("OS: {}", BOOST_OS_LINUX_NAME);
+	#endif
+
+	#if defined(BOOST_COMP_INTEL_AVAILABLE) 
+		log->debug("Compiler: {} version {}", BOOST_COMP_INTEL_NAME, __INTEL_COMPILER);
+	#endif
+	#if defined(BOOST_COMP_GNUC_AVAILABLE) 
+		log->debug("Compiler: {} version {}", BOOST_COMP_GNUC_NAME, __GNUC__);
+	#endif
+	#if defined(BOOST_COMP_CLANG_AVAILABLE) 
+		log->debug("Compiler: {} version {}", BOOST_COMP_CLANG_NAME, __clang__);
+	#endif
+	#if defined(BOOST_COMP_MSVC_AVAILABLE)
+		log->debug("Compiler: {} version {}", BOOST_COMP_MSVC_NAME, _MSC_VER);
+	#endif
+
+}
+
+void INIReader::dump_env_info() const {
+	auto log = spdlog::get("loggers");
+	log->debug("-----------enviroment variables------------");
+	const vector<string> env_variables = { "OMP_DYNAMIC", "OMP_SCHEDULE","OMP_NUM_THREADS", "MKL_NUM_THREADS", "KMP_AFFINITY", "OMP_PROC_BIND", "OMP_PLACES", "GOMP_CPU_AFFINITY" };
+	const vector<string> slurm_vars = { "SLURM_JOB_ID", "SLURM_SUBMIT_DIR", "SLURM_NTASKS", "SLURM_JOB_NODELIST" };
+	const vector<string> pbs_vars = { "PBS_JOBID", "PBS_O_WORKDIR", "PBS_NP", "PBS_NODEFILE" };
+
+	if (const char* env_p = getenv(slurm_vars.at(0).c_str())) {
+		for (const auto &var : slurm_vars) {
+			if (const char* env_p = getenv(var.c_str())) {
+				log->debug(">> {}={}", var, env_p);
+			}
+		}
+	}
+
+	if (const char* env_p = getenv(pbs_vars.at(0).c_str())) {
+		for (const auto &var : pbs_vars) {
+			if (const char* env_p = getenv(var.c_str())) {
+				log->debug(">> {}={}", var, env_p);
+			}
+		}
+	}
+
+	for (const auto &var : env_variables) {
+		if (const char* env_p = getenv(var.c_str())) {
+			log->debug(">> {}={}", var, env_p);
+		}
+	}
+}
+
+void INIReader::dump_all(std::ofstream& out_file) const {
+
 	auto log = spdlog::get("loggers");
 	std::sort(_parsed.begin(), _parsed.end(), [](const auto& lhs, const auto& rhs) {
 		return tolower(rhs.at(0)) > tolower(lhs.at(0));
 	});
+	logger_update();
+	dump_compiler_info();
+	dump_env_info();
+
 	log->info( "-------------slabcc parameters-------------");
 	for (const auto &i : _parsed) {
 		log->info(i.at(0) + " = " + i.at(1));
@@ -44,7 +118,6 @@ void INIReader::dump_parsed(std::ofstream& out_file) const {
 	}
 
 	out_file.flush();
-	logger_update();
 
 	for (const auto &val : _values) {
 		string param_file = val.first;

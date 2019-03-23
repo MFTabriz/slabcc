@@ -148,12 +148,12 @@ double Eiso_bessel(double Q, double z0, double sigma, mat diel) {
 	logger->debug("Isolated energy integration limits in the k-space: {}:{}", K_min, K_max);
 	//integration grid
 	rowvec K;
-	//generate adaptive grid based on the derivative of the Uk ~~log(k)
+	//hand-tuned adaptive grid based on the derivative of the Uk ~~log(k)
 	for (int ki = 0; ki < K_max; ++ki) {
 		const int grid_density = int(pow(10, -log((ki + 1) / 100.0)) / 5.0) + 1;
 		K = join_horiz(K, linspace<rowvec>(ki + K_min, ki + 1, grid_density));
 	}
-	logger->debug("k-space integration grid points: {}", K.n_elem);
+	logger->debug("Number of k-space integration grid points: {}", K.n_elem);
 
 	// eq. 7 in the SI (Supplementary Information for `First-principles electrostatic potentials for reliable alignment at interfaces and defects`)
 	const rowvec integrand = K % exp(-square(K) * pow(sigma, 2)) % Uk(K, z0, sigma, diel);
@@ -196,9 +196,9 @@ rowvec Uk(rowvec k, double z0, double sigma, mat diel) {
 	const auto cosGL_2 = cos(Gz0 * length(normal) / 2.0);
 	for (int i = 0; i < k.n_elem; ++i) {
 		const cx_mat Ag = Ag12 + Ag1p * pow(k(i), 2);
-		const double keff = k(i);		
+		const double keff = k(i);
 		const mat Kinvg = diagmat(dielbulk * length(normal) * (pow(keff, 2) + Gz02) / (1 - exp(-keff * length(normal) / 2.0) * cosGL_2));
-		const cx_mat Dg = Kinvg + length(normal) * Ag;	
+		const cx_mat Dg = Kinvg + length(normal) * Ag;
 		const auto VGz = solve(Dg, rhok_t);
 		const auto Vz = ifft(VGz) * LGz;
 		Uk(i) = real(accu(Vz % rho));

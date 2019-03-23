@@ -449,7 +449,7 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 	input_set.extrapol_steps_num = reader.GetInteger("extrapolate_steps_number", 4);
 	input_set.extrapol_steps_size = reader.GetReal("extrapolate_steps_size", 0.5);
 
-	reader.dump_parsed(output_fstream);
+	reader.dump_all(output_fstream);
 
 	slabcc_cell.normal_direction = input_set.normal_direction;
 }

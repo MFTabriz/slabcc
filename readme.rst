@@ -1,4 +1,4 @@
-:Last updated: 18 Mar. 2019
+:Last updated: 23 Mar. 2019
 :version: 0.5.0
 
 .. sectnum::
@@ -191,6 +191,12 @@ Included libraries
 - `spdlog <https://github.com/gabime/spdlog>`_ licensed under the MIT License
 
  - © 2016, Gabi Melman, `et al. <https://github.com/gabime/spdlog/contributors>`__
+ 
+- `Boost.Predef <https://github.com/boostorg/predef>`_ licensed under the Boost Software License
+
+ - © 2005-2018 Rene Rivera
+ - © 2015 Charly Chevalier
+ - © 2015 Joel Falcou, `et al. <https://github.com/boostorg/predef/contributors>`__
 
 Linked libraries
 ---------------------

@@ -8,6 +8,7 @@
 #ifndef __INIREADER_H__
 #define __INIREADER_H__
 
+#include <boost/predef.h>
 #include <cctype>
 #include <cstdlib>
 #include <armadillo>
@@ -54,7 +55,9 @@ public:
 	bool GetBoolean(const std::string& name, const bool default_value) const;
 
 	//writes the parsed variables to the output file and also log
-	void dump_parsed(std::ofstream& out_file) const;
+	void dump_all(std::ofstream& out_file) const;
+	void dump_compiler_info() const;
+	void dump_env_info() const;
 
 	//replace all occurrences of the "from" string with "to" string inside "str" recursively
 	void replace(std::string& str, const std::string from, const std::string to) const;

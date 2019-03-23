@@ -67,6 +67,9 @@ int main(int argc, char *argv[])
 	log->debug("Armadillo library: version {}.{}.{}", ARMA_VERSION_MAJOR, ARMA_VERSION_MINOR, ARMA_VERSION_PATCH);
 	log->debug("NLOPT library: version {}.{}.{}", nlopt::version_major(), nlopt::version_minor(), nlopt::version_bugfix());
 	log->debug("SPDLOG library: version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+	log->debug("SLABCC input file: {}", input_file);
+	log->debug("SLABCC output file: {}", output_file);
+	log->debug("SLABCC log file: {}", log_file);
 
 	vector<pair<string, string>> calculation_results;
 
@@ -412,6 +415,7 @@ int main(int argc, char *argv[])
 	for (auto &promise : future_files) { promise.get(); }
 
 	log->trace("Calculations successfully ended!");
+	log->~logger();
 	remove(msgs_file.c_str());
 	return 0;
 }
