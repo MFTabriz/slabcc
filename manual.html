@@ -1134,103 +1134,120 @@ Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentia
 <div class="line">SLABCC have been initially developed for <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
 </div>
 <div class="section" id="algorithm">
-<h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
-<ul class="simple">
-<li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
-<li>The extra charge is modeled by sum of Gaussian charge distributions as:</li>
-</ul>
-<div class="formula">
-<i>ρ</i>(<i>r</i>) = <span class="limits"><sup class="limit"> </sup><span class="limit">⎲</span><span class="limit">⎳</span><sub class="limit"><i>i</i></sub></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i><sub><i>i</i></sub></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><span class="scripts"><sup class="script">3</sup><sub class="script"><i>i</i></sub></span>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
-</div>
-<p>which gives a charge distribution normalized to q<sub>i</sub> with standard deviation of σ<sub>i</sub> (<tt class="docutils literal">charge_sigma</tt>) for each Gaussian distribution i centered at r<sub>i</sub> (<tt class="docutils literal">charge_position</tt>).</p>
-<ul class="simple">
-<li>The generated Gaussian model charge will be embedded in a dielectric medium with profile of the form:</li>
-</ul>
-<div class="formula">
-<i>ϵ</i>(<i>k</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> − <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="text"> erf</span><span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>k</i> − <i>k</i><sub>0</sub></span><span class="ignored">)/(</span><span class="denominator"><i>β</i></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> + <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span>
-</div>
-<p>where k<sub>0</sub> is the interface position in Cartesian k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotropic dielectric tensor as:</p>
-<div class="formula">
-<i>ϵ</i> = <span class="array"><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span></span><span class="environment"><span class="arrayrow">
-<span class="arraycell align-l">
-<i>ϵ</i><sub>11</sub>
-</span>
-<span class="arraycell align-l">
-0
-</span>
-<span class="arraycell align-l">
-0
-</span>
+    <h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
+    <ul class="simple">
+        <li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
+        <li>
+            The extra charge is modeled by sum of Gaussian charge distributions as:
+            <div class="formula">
+                <i>ρ</i>(<i>r</i>) = <span class="limits"><sup class="limit"> </sup><span class="limit">⎲</span><span class="limit">⎳</span><sub class="limit"><i>i</i></sub></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i><sub><i>i</i></sub></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><span class="scripts"><sup class="script">3</sup><sub class="script"><i>i</i></sub></span>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
+            </div>
+            <p>which gives a charge distribution normalized to q<sub>i</sub> with standard deviation of σ<sub>i</sub> (<tt class="docutils literal">charge_sigma</tt>) for each Gaussian distribution i centered at r<sub>i</sub> (<tt class="docutils literal">charge_position</tt>).</p>
+        </li>
+    </ul>
+    <ul class="simple">
+        <li>
+            The generated Gaussian model charge will be embedded in a dielectric medium with profile of the form:
+            <div class="formula">
+                <i>ϵ</i>(<i>k</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> − <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="text"> erf</span><span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>k</i> − <i>k</i><sub>0</sub></span><span class="ignored">)/(</span><span class="denominator"><i>β</i></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> + <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span>
+            </div>
+            <p>where k<sub>0</sub> is the interface position in Cartesian k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotropic dielectric tensor as:</p>
+            <div class="formula">
+                <i>ϵ</i> = <span class="array"><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span></span><span class="environment">
+                    <span class="arrayrow">
+                        <span class="arraycell align-l">
+                            <i>ϵ</i><sub>11</sub>
+                        </span>
+                        <span class="arraycell align-l">
+                            0
+                        </span>
+                        <span class="arraycell align-l">
+                            0
+                        </span>
 
-</span>
-<span class="arrayrow">
-<span class="arraycell align-l">
- 
-</span>
-<span class="arraycell align-l">
- 
-</span>
-<span class="arraycell align-l">
- 
-</span>
+                    </span>
+                    <span class="arrayrow">
+                        <span class="arraycell align-l">
 
-</span>
-<span class="arrayrow">
-<span class="arraycell align-l">
-0
-</span>
-<span class="arraycell align-l">
-<i>ϵ</i><sub>22</sub>
-</span>
-<span class="arraycell align-l">
-0
-</span>
+                        </span>
+                        <span class="arraycell align-l">
 
-</span>
-<span class="arrayrow">
-<span class="arraycell align-l">
- 
-</span>
-<span class="arraycell align-l">
- 
-</span>
-<span class="arraycell align-l">
- 
-</span>
+                        </span>
+                        <span class="arraycell align-l">
 
-</span>
-<span class="arrayrow">
-<span class="arraycell align-l">
-0
-</span>
-<span class="arraycell align-l">
-0
-</span>
-<span class="arraycell align-l">
-<i>ϵ</i><sub>33</sub>
-</span>
+                        </span>
 
-</span>
-</span><span class="array"><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span></span>
-</div>
-<ul class="simple">
-<li>The potential due to the charge distribution ρ under 3D PBC embedded in the dielectric medium ε(k) is calculated by solving the Poisson equation in Fourier space:</li>
-</ul>
-<div class="formula">
-<i>ϵ</i>(<i>k</i>)∇<sup>2</sup><i>V</i>(<i>r</i>) + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>ϵ</i>(<i>k</i>)<span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>V</i>(<i>r</i>) =  − <i>ρ</i>(<i>r</i>)
-</div>
-<ul class="simple">
-<li>A non-linear optimization routine minimizes the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
-<li>The E<sub>periodic</sub> is calculated as:</li>
-</ul>
-<div class="formula">
-<i>E</i> = <span class="fraction"><span class="ignored">(</span><span class="numerator">1</span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="limits"><span class="limit">⌠</span><span class="limit">⌡</span></span><i>V</i>(<i>r</i>)<i>ρ</i>(<i>r</i>) <i>dr</i>
-</div>
-<ul class="simple">
-<li>E<sub>isolated</sub> is calculated the same way as E<sub>periodic</sub> but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium.</li>
-<li>ΔV is calculated at the position least affected by the model charge.</li>
-</ul>
-<p>More information about the algorithm and implementation details can be found <a class="reference internal" href="#cite">here</a>.</p>
+                    </span>
+                    <span class="arrayrow">
+                        <span class="arraycell align-l">
+                            0
+                        </span>
+                        <span class="arraycell align-l">
+                            <i>ϵ</i><sub>22</sub>
+                        </span>
+                        <span class="arraycell align-l">
+                            0
+                        </span>
+
+                    </span>
+                    <span class="arrayrow">
+                        <span class="arraycell align-l">
+
+                        </span>
+                        <span class="arraycell align-l">
+
+                        </span>
+                        <span class="arraycell align-l">
+
+                        </span>
+
+                    </span>
+                    <span class="arrayrow">
+                        <span class="arraycell align-l">
+                            0
+                        </span>
+                        <span class="arraycell align-l">
+                            0
+                        </span>
+                        <span class="arraycell align-l">
+                            <i>ϵ</i><sub>33</sub>
+                        </span>
+
+                    </span>
+                </span><span class="array"><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span></span>
+            </div>
+        </li>
+    </ul>
+    <ul class="simple">
+        <li>The potential due to the charge distribution ρ under 3D PBC embedded in the dielectric medium ε(k) is calculated by solving the Poisson equation in Fourier space:</li>
+    </ul>
+    <div class="formula">
+        <i>ϵ</i>(<i>k</i>)∇<sup>2</sup><i>V</i>(<i>r</i>) + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>ϵ</i>(<i>k</i>)<span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>V</i>(<i>r</i>) =  − <i>ρ</i>(<i>r</i>)
+    </div>
+    <ul class="simple">
+        <li>A non-linear optimization routine minimizes the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
+        <li>The E<sub>periodic</sub> is calculated as:</li>
+    </ul>
+    <div class="formula">
+        <i>E</i> = <span class="fraction"><span class="ignored">(</span><span class="numerator">1</span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="limits"><span class="limit">⌠</span><span class="limit">⌡</span></span><i>V</i>(<i>r</i>)<i>ρ</i>(<i>r</i>) <i>dr</i>
+    </div>
+    <ul class="simple">
+        <li>
+            E<sub>isolated</sub> is calculated the same way as E<sub>periodic</sub> but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for extrapolation [<a class="reference external" href="https://doi.org/10.1103/PhysRevX.8.039902">10.1103/PhysRevX.8.039902</a>]:
+
+            <div class="formula">
+                <i>E</i> = <i>c</i><sub>0</sub> + <i>c</i><sub>1</sub><i>x</i> + <i>c</i><sub>2</sub><i>x</i><sup>2</sup> + <i>d</i><i>e</i><sup> − <i>c</i><sub>3</sub><i>x</i></sup>
+            </div>
+            <p>where c<sub>i</sub> are the fitting parameters and</p>
+            <div class="formula">
+                <i>d</i> = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>c</i><sub>1</sub> − <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>E</i><sub><i>M</i></sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>x</i></span><span class="ignored">)</span></span></span><span class="ignored">)/(</span><span class="denominator"><i>c</i><sub>3</sub></span><span class="ignored">)</span></span>
+            </div>
+            <p>guarantees the correct energy gradient at x(=1/α)→0. E<sub>M</sub> being the Madelung energy.</p>
+        </li>
+    </ul><ul>
+        <li>ΔV is calculated at the position least affected by the model charge.</li>
+    </ul>
+    <p>More information about the algorithm and implementation details can be found <a class="reference internal" href="#cite">here</a>.</p>
 </div>
 </div>
 <div class="section" id="quick-start-guide">

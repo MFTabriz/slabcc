@@ -72,7 +72,17 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 .. math::
 	E = \frac{1}{2} \int V(r) \rho(r) \, dr
 
-* E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium.
+* E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
+
+.. math::
+	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
+
+ where c\ :sub:`i` are the fitting parameters and 
+
+.. math::
+	d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
+
+ guarantees the correct energy gradient at x(=1/α)→0. E\ :sub:`M` being the Madelung energy.
 
 * ΔV is calculated at the position least affected by the model charge.
 
