@@ -407,6 +407,35 @@ void check_inputs(input_data input_set) {
 			log->warn("{} steps will be used instead!", input_set.extrapol_steps_num);
 		}
 	}
+	else {
+		if (input_set.model_2D) {
+			// Bessel expansion limitations
+			if (input_set.Qd.n_elem > 1) {
+				log->error("The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support multiple Gaussian charges. Will use the extrapolation method \"extrapolate=yes\" for this calculation.");
+				input_set.extrapolate = true;
+			}
+			if (any(input_set.diel_out > 1)) {
+				log->error("The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support the models embedded in any dielectric medium other than the vacuum. Will use the extrapolation method \"extrapolate=yes\" for this calculation.");
+				input_set.extrapolate = true;
+			}
+
+			vec2 inplace_diels;
+			for (uword i = 0; i < 3; ++i) {
+				if (i < input_set.normal_direction) {
+					inplace_diels(i) = input_set.diel_in(i);
+				}
+				if (i > input_set.normal_direction) {
+					inplace_diels(i - 1) = input_set.diel_in(i);
+				}
+			}
+
+			if (abs(inplace_diels(0) - inplace_diels(1)) > 0.01) {
+				log->debug("In-plane dielectric constants: {}", ::to_string(inplace_diels));
+				log->error("In-plane dielectric constants are not equal. The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support this model. Will use the extrapolation method \"extrapolate=yes\" for this calculation.");
+				input_set.extrapolate = true;
+			}
+		}
+	}
 
 	log->trace("Input parameters verified!");
 
