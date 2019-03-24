@@ -122,8 +122,13 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 			"  (c) 2011, Devin Lane\n\n"
 			"-NLOPT: licensed under GNU Lesser General Public License (LGPL)\n"
 			"  (c) 2007-2010, Massachusetts Institute of Technology\n\n"
-			"spdlog: licensed under the MIT License\n"
-		    "  (c) 2016, Gabi Melman\n";
+			"-spdlog: licensed under the MIT License\n"
+		    "  (c) 2016, Gabi Melman\n\n"
+			"-Boost.Predef: licensed under the Boost Software License\n"
+			"  (c) 2005-2018 Rene Rivera\n"
+			"  (c) 2015 Charly Chevalier\n"
+			"  (c) 2015 Joel Falcou\n";
+
 		exit(0);
 	}
 }

@@ -52,16 +52,16 @@ void INIReader::dump_compiler_info() const {
 	#endif
 
 	#if defined(BOOST_COMP_INTEL_AVAILABLE) 
-		log->debug("Compiler: {} version {}", BOOST_COMP_INTEL_NAME, __INTEL_COMPILER);
+		log->debug("Available compiler: {} version {}", BOOST_COMP_INTEL_NAME, __INTEL_COMPILER);
 	#endif
 	#if defined(BOOST_COMP_GNUC_AVAILABLE) 
-		log->debug("Compiler: {} version {}", BOOST_COMP_GNUC_NAME, __GNUC__);
+		log->debug("Available compiler: {} version {}", BOOST_COMP_GNUC_NAME, __GNUC__);
 	#endif
 	#if defined(BOOST_COMP_CLANG_AVAILABLE) 
-		log->debug("Compiler: {} version {}", BOOST_COMP_CLANG_NAME, __clang__);
+		log->debug("Available compiler: {} version {}", BOOST_COMP_CLANG_NAME, __clang__);
 	#endif
 	#if defined(BOOST_COMP_MSVC_AVAILABLE)
-		log->debug("Compiler: {} version {}", BOOST_COMP_MSVC_NAME, _MSC_VER);
+		log->debug("Available compiler: {} version {}", BOOST_COMP_MSVC_NAME, _MSC_VER);
 	#endif
 
 }
