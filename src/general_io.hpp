@@ -58,7 +58,7 @@ void initialize_logger(string log_file);
 void logger_update();
 
 // bool to yes/no conversion
-string to_string(bool& b);
+string to_string(const bool& b);
 
 
 

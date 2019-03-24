@@ -82,8 +82,8 @@ mat fmod_p(mat mat_in, const double& denom) noexcept;
 //positive fmod
 double fmod_p(double num, const double& denom) noexcept;
 
-//just a simple square! May Overflow!!
-inline double square(const double& input) {
+//just a simple square! May cause overflows!!
+inline double square(const double& input) noexcept {
 	return input * input;
 }
 

@@ -229,7 +229,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	}
 
 	const int var_per_charge = (opt_vars.Qd.n_elem == 1) ? 4 : 5;
-	const int opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interfaces;
+	const uword opt_parameters = opt_vars.Qd.n_elem * var_per_charge * optimize_charge + 2 * optimize_interfaces;
 	log->trace("Started optimizing {} model parameters", opt_parameters);
 	log->trace("Optimization algorithm: " + string(opt.get_algorithm_name()));
 	try {

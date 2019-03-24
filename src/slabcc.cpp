@@ -163,9 +163,9 @@ int main(int argc, char *argv[])
 		const auto interfaces0 = interfaces;
 		const auto charge_position0 = charge_position;
 
-		const rowvec optimization_grid_x = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(0));
-		const rowvec optimization_grid_y = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(1));
-		const rowvec optimization_grid_z = regspace<rowvec>(1, 1.0 / opt_grid_x, slabcc_cell.grid(2));
+		const rowvec optimization_grid_x = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(0));
+		const rowvec optimization_grid_y = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(1));
+		const rowvec optimization_grid_z = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(2));
 
 		cube interpolated_potential = interp3(Defect_supercell.potential, optimization_grid_x, optimization_grid_y, optimization_grid_z);
 		interpolated_potential -= accu(interpolated_potential) / interpolated_potential.n_elem;
@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
 	const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= Q / volume;
-	uword farthest_element_index = Q < 0 ? real(V).index_max() : real(V).index_min();
+	const uword farthest_element_index = Q < 0 ? real(V).index_max() : real(V).index_min();
 
 	const auto dV = V_diff(farthest_element_index);
 	log->info("Potential alignment (dV=): " + ::to_string(dV));
@@ -294,9 +294,9 @@ int main(int argc, char *argv[])
 	calculation_results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
 
 	const rowvec max_size = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
-	if (min(slabcc_cell.grid * extrapol_grid_x / max_size) < 1) {
+	if (min(extrapol_grid_x / max_size * slabcc_cell.grid) < 1) {
 		log->warn("The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate.");
-		log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(slabcc_cell.grid * extrapol_grid_x / max_size));
+		log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(extrapol_grid_x / max_size * slabcc_cell.grid));
 		log->warn("You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps.");
 	}
 
@@ -389,7 +389,8 @@ int main(int argc, char *argv[])
 
 		}
 		else {
-			log->error("There is no algorithm other than extrapolation for E_isolated calculation of the slab models in this version of the slabcc!");
+			// input parameter checking function must prevent this from happening!
+			log->error("There is no algorithm other than the extrapolation for E_isolated calculation of the slab models in this version of the slabcc!");
 		}
 
 	}

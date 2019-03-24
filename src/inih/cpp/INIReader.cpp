@@ -30,7 +30,7 @@ string INIReader::Get(const string& name, const string default_value) const {
 void INIReader::dump_compiler_info() const {
 	auto log = spdlog::get("loggers");
 	log->debug("-------------compilation info--------------");
-	#if defined(BOOST_ARCH_X86_64_AVAILABLE) {
+	#if defined(BOOST_ARCH_X86_64_AVAILABLE)
 		log->debug("Architecture: {}", BOOST_ARCH_X86_64_NAME);
 	#endif
 	#if defined(BOOST_HW_SIMD_AVAILABLE)
@@ -73,27 +73,38 @@ void INIReader::dump_env_info() const {
 	const vector<string> slurm_vars = { "SLURM_JOB_ID", "SLURM_SUBMIT_DIR", "SLURM_NTASKS", "SLURM_JOB_NODELIST" };
 	const vector<string> pbs_vars = { "PBS_JOBID", "PBS_O_WORKDIR", "PBS_NP", "PBS_NODEFILE" };
 
-	if (const char* env_p = getenv(slurm_vars.at(0).c_str())) {
-		for (const auto &var : slurm_vars) {
-			if (const char* env_p = getenv(var.c_str())) {
-				log->debug(">> {}={}", var, env_p);
+	size_t value_size = 0;
+	const int MAX_SIZE = 40;
+	char value[MAX_SIZE] = "";
+	getenv_s(&value_size, nullptr, 0, slurm_vars.at(0).c_str());
+	if (value_size != 0) {
+		for (const auto &variable : slurm_vars) {
+			getenv_s(&value_size, value, MAX_SIZE - 1, variable.c_str());
+			if (value_size != 0) {
+				log->debug(">> {}={}", variable, value);
 			}
 		}
 	}
 
-	if (const char* env_p = getenv(pbs_vars.at(0).c_str())) {
-		for (const auto &var : pbs_vars) {
-			if (const char* env_p = getenv(var.c_str())) {
-				log->debug(">> {}={}", var, env_p);
+
+	getenv_s(&value_size, nullptr, 0, pbs_vars.at(0).c_str());
+	if (value_size != 0) {
+		for (const auto &variable : pbs_vars) {
+			getenv_s(&value_size, value, MAX_SIZE - 1, variable.c_str());
+			if (value_size != 0) {	
+				log->debug(">> {}={}", variable, value);
 			}
 		}
 	}
 
-	for (const auto &var : env_variables) {
-		if (const char* env_p = getenv(var.c_str())) {
-			log->debug(">> {}={}", var, env_p);
+
+	for (const auto &variable : env_variables) {
+		getenv_s(&value_size, value, MAX_SIZE - 1, variable.c_str());
+		if (value_size != 0) {
+			log->debug(">> {}={}", variable, value);
 		}
 	}
+
 }
 
 void INIReader::dump_all(std::ofstream& out_file) const {

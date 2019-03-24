@@ -121,7 +121,7 @@ vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data
 	try {
 		const nlopt::result nlopt_final_result = opt.optimize(fit_parameters, fit_MSE);
 	}
-	catch (exception &e) {
+	catch (const exception &e) {
 		log->error("Nonlinear fitting failed: " + string(e.what()));
 	}
 
@@ -150,7 +150,7 @@ double Eiso_bessel(double Q, double z0, double sigma, mat diel) {
 	rowvec K;
 	//hand-tuned adaptive grid based on the derivative of the Uk ~~log(k)
 	for (int ki = 0; ki < K_max; ++ki) {
-		const int grid_density = int(pow(10, -log((ki + 1) / 100.0)) / 5.0) + 1;
+		const int grid_density = static_cast<int>(pow(10, -log((ki + 1) / 100.0)) / 5.0) + 1;
 		K = join_horiz(K, linspace<rowvec>(ki + K_min, ki + 1, grid_density));
 	}
 	logger->debug("Number of k-space integration grid points: {}", K.n_elem);
@@ -176,7 +176,7 @@ rowvec Uk(rowvec k, double z0, double sigma, mat diel) {
 	Gz0 = ifftshift(Gz0);
 	const rowvec Gz02 = square(Gz0);
 
-	uword LGz = Gz0.n_elem;
+	const uword LGz = Gz0.n_elem;
 	const double dielbulk = 1;				// bulk response far away in vaccum!
 	const cx_mat dielsG = fft(diel - dielbulk);
 	const cx_mat dielGz = circ_toeplitz(dielsG.col(normal)) / LGz;

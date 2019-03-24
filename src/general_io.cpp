@@ -167,6 +167,6 @@ void logger_update() {
 	log->sinks().at(2)->set_pattern("[%^%l%$] %v");
 }
 
-string to_string(bool& b) {
+string to_string(const bool& b) {
 	return b ? "yes" : "no";
 }
