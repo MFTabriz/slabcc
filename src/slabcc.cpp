@@ -416,7 +416,6 @@ int main(int argc, char *argv[])
 	for (auto &promise : future_files) { promise.get(); }
 
 	log->trace("Calculations successfully ended!");
-	log->~logger();
 	remove(msgs_file.c_str());
 	return 0;
 }
