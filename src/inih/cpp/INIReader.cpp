@@ -29,7 +29,7 @@ string INIReader::Get(const string& name, const string default_value) const {
 
 void INIReader::dump_compiler_info() const {
 	auto log = spdlog::get("loggers");
-	log->debug("-------------compilation info--------------");
+	log->debug("------------compilation machine------------");
 	#if defined(BOOST_ARCH_X86_64_AVAILABLE)
 		log->debug("Architecture: {}", BOOST_ARCH_X86_64_NAME);
 	#endif
