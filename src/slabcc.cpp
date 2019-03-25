@@ -293,13 +293,6 @@ int main(int argc, char *argv[])
 	log->info("E_periodic of the model charge: " + ::to_string(EperModel0));
 	calculation_results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
 
-	const rowvec max_size = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
-	if (min(extrapol_grid_x / max_size * slabcc_cell.grid) < 1) {
-		log->warn("The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate.");
-		log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(extrapol_grid_x / max_size * slabcc_cell.grid));
-		log->warn("You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps.");
-	}
-
 	log->debug("Difference of the charge in the input files: " + ::to_string( Q0));
 	log->debug("Total charge of the model: " + ::to_string(Q));
 	if (abs(Q - Q0) > 0.05) {
@@ -311,6 +304,12 @@ int main(int argc, char *argv[])
 	double E_isolated = 0;
 	double E_correction = 0;
 	if (extrapolate) {
+		const rowvec max_sizes = slabcc_cell.vec_lengths * (1 + extrapol_steps_size * (extrapol_steps_num - 1));
+		if (min(extrapol_grid_x / max_sizes % slabcc_cell.grid) < 1) {
+			log->warn("The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate.");
+			log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(extrapol_grid_x / max_sizes % slabcc_cell.grid));
+			log->warn("You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps.");
+		}
 		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
 		log->debug("Extrapolation grid size: " + to_string(extrapolation_grid));
