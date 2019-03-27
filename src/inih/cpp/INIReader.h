@@ -56,7 +56,7 @@ public:
 
 	//writes the parsed variables to the output file and also log
 	void dump_all(std::ofstream& out_file) const;
-	void dump_compiler_info() const;
+	void dump_compilation_info() const;
 	void dump_env_info() const;
 
 	//replace all occurrences of the "from" string with "to" string inside "str" recursively

@@ -27,7 +27,7 @@ string INIReader::Get(const string& name, const string default_value) const {
 	return _values.count(key) ? _values.find(key)->second : default_value;
 }
 
-void INIReader::dump_compiler_info() const {
+void INIReader::dump_compilation_info() const {
 	auto log = spdlog::get("loggers");
 	log->debug("------------compilation machine------------");
 	#if defined(BOOST_ARCH_X86_64_AVAILABLE)
@@ -103,10 +103,10 @@ void INIReader::dump_all(std::ofstream& out_file) const {
 		return tolower(rhs.at(0)) > tolower(lhs.at(0));
 	});
 	logger_update();
-	dump_compiler_info();
+	dump_compilation_info();
 	dump_env_info();
 
-	log->info( "-------------slabcc parameters-------------");
+	log->info("-------------slabcc parameters-------------");
 	for (const auto &i : _parsed) {
 		log->info(i.at(0) + " = " + i.at(1));
 	}

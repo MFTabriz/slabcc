@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	rowvec diel_out;				//diagonal elements of vacuum dielectric tensor
 	rowvec3 slabcenter;
 	uword normal_direction = 0;		//index of the normal direction (0/1/2)
-	rowvec2 interfaces;				//interfaces in relative coordinates
+	rowvec2 interfaces;				//interfaces in relative coordinates, ordered as the user input 
 	double diel_erf_beta = 0;		//beta value of the erf for dielectric profile generation
 	double opt_tol = 0;				//relative optimization tolerance
 	double extrapol_grid_x = 0;		//extrapolation grid size multiplier
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
 	const rowvec3 rounded_relative_shift = round(input_grid_size % relative_shift) / input_grid_size;
 
-	interfaces = fmod(interfaces + rounded_relative_shift(normal_direction), 1);
+	rowvec2 shifted_interfaces = fmod(interfaces + rounded_relative_shift(normal_direction), 1);
 	shift_structure(Neutral_supercell, rounded_relative_shift);
 	shift_structure(Charged_supercell, rounded_relative_shift);
 	charge_position += repmat(rounded_relative_shift, charge_position.n_rows, 1);
@@ -157,11 +157,11 @@ int main(int argc, char *argv[])
 	double initial_potential_MSE = -1;
 
 	// variables to optimize
-	opt_vars opt_vars = { interfaces, sigma, Qd, charge_position };
+	opt_vars opt_vars = { shifted_interfaces, sigma, Qd, charge_position };
 
 	if (optimize_charge || optimize_interfaces) {
-		const auto interfaces0 = interfaces;
-		const auto charge_position0 = charge_position;
+		const rowvec2 shifted_interfaces0 = shifted_interfaces;
+		const mat charge_position0 = charge_position;
 
 		const rowvec optimization_grid_x = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(0));
 		const rowvec optimization_grid_y = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(1));
@@ -182,8 +182,10 @@ int main(int argc, char *argv[])
 		//write the unshifted optimized values to the file
 		output_fstream << "\n[Optimized_model_parameters]\n";
 		if (optimize_interfaces) {
-			const rowvec2 original_interfaces = fmod_p(interfaces - rounded_relative_shift(normal_direction), 1);
-			output_fstream << "interfaces_optimized = " << original_interfaces << '\n';
+			const rowvec2 optimized_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(normal_direction), 1);
+			output_fstream << "interfaces_optimized = " << optimized_interfaces << '\n';
+			
+
 			// need a clever way to check the change in the interface positions
 			// the order may change and also the interfaces may move from one supercell to the next
 			// if there is too much change, warn the user
@@ -209,6 +211,7 @@ int main(int argc, char *argv[])
 		output_fstream.flush();
 
 		check_inputs(input_file_variables);
+		verify_optimization(fmod_p(shifted_interfaces0 - rounded_relative_shift(normal_direction), 1), fmod_p(shifted_interfaces - rounded_relative_shift(normal_direction), 1));
 
 		if (initial_potential_MSE * (opt_tol + 1) < potential_MSE) {
 			// Don't panic! either NLOPT seems to be malfunctioning
@@ -315,7 +318,7 @@ int main(int argc, char *argv[])
 		log->debug("Extrapolation grid size: " + to_string(extrapolation_grid));
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tinterfaces\t\tcharge position");
-		const rowvec2 interface_pos = interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
+		const rowvec2 interface_pos = shifted_interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
 		string extrapolation_info = to_string(1.0) + "\t" + ::to_string(EperModel0) + "\t" + to_string(interface_pos);
 		for (auto i = 0; i < charge_position.n_rows; ++i) {
 			extrapolation_info += "\t" + to_string(charge_position(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
@@ -325,7 +328,7 @@ int main(int argc, char *argv[])
 
 		if (model_2D) {
 			tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-				interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+				shifted_interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
 			const rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
 			const auto radius = 10.0;
 			const auto ewald_shells = generate_shells(unit_cell, radius);
@@ -348,7 +351,7 @@ int main(int argc, char *argv[])
 		}
 		else {
 			tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-				interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+				shifted_interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
 
 			const colvec pols = polyfit(sizes, Es, 1);
 			const colvec evals = polyval(pols, sizes.t());
@@ -380,7 +383,7 @@ int main(int argc, char *argv[])
 	else {
 		if (model_2D) {
 			// TODO: implement multiple charges
-			const mat dielectric_profiles = dielectric_profiles_gen(interfaces, diel_in, diel_out, diel_erf_beta);
+			const mat dielectric_profiles = dielectric_profiles_gen(shifted_interfaces, diel_in, diel_out, diel_erf_beta);
 			E_isolated = Eiso_bessel(Qd(0), charge_position(0, normal_direction) * slabcc_cell.vec_lengths(normal_direction), sigma(0), dielectric_profiles);
 			E_correction = E_isolated - EperModel0 - Q * dV;
 			log->info("E_isolated from the Bessel expansion of the Poisson equation: " + ::to_string(E_isolated));

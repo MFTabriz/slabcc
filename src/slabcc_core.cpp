@@ -10,7 +10,7 @@ mat dielectric_profiles_gen(const rowvec2 &interfaces, const rowvec3 &diel_in, c
 	const auto length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
 	const auto n_points = slabcc_cell.grid(slabcc_cell.normal_direction);
 	rowvec2 interfaces_cartesian = interfaces * length;
-	sort(interfaces_cartesian);
+	interfaces_cartesian = sort(interfaces_cartesian);
 	const auto positions = linspace<rowvec>(0, length, n_points + 1);
 	mat dielectric_profiles = zeros(n_points, 3);
 	const rowvec3 diel_sum = diel_in + diel_out;
@@ -538,4 +538,38 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 	}
 
 	log->trace("All files are loaded and cross-checked!");
+}
+
+void verify_optimization(const rowvec2& initial_interfaces, const rowvec2& optimized_interfaces) {
+	const double max_total_safe_movement = 4;
+	const double normal_length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction) / ang_to_bohr;
+	auto log = spdlog::get("loggers");
+
+	const rowvec3 mirroring_template = { -1,0,1 };
+	const mat interface_all_mirrors = repmat(mirroring_template, 2, 1) + repmat(optimized_interfaces.t(), 1, 3);
+	const mat interface_n0_shiftes = abs(interface_all_mirrors - initial_interfaces(0));
+	vec interface_n0_distances = min(interface_n0_shiftes, 1);
+	const mat interface_n1_shiftes = abs(interface_all_mirrors - initial_interfaces(1));
+	vec interface_n1_distances = min(interface_n1_shiftes, 1);
+	const rowvec2 total_changes = { interface_n0_distances(0) + interface_n1_distances(1),  interface_n0_distances(1) + interface_n1_distances(0) };
+	
+	//convert to Ang
+	interface_n0_distances *= normal_length;
+	interface_n1_distances *= normal_length;
+
+	if (total_changes(0) < total_changes(1)) {
+		log->trace("The order of the interfaces has not been swapped!");
+		log->trace("1st interface has moved {} angstrom from {} to {}", interface_n0_distances(0), initial_interfaces(0), optimized_interfaces(0));
+		log->trace("2nd interface has moved {} angstrom from {} to {}", interface_n1_distances(1), initial_interfaces(1), optimized_interfaces(1));
+	}
+	else {
+		log->trace("The order of the interfaces has been swapped!");
+		log->trace("1st interface has moved {} angstrom from {} to {}", interface_n0_distances(1), initial_interfaces(0), optimized_interfaces(1));
+		log->trace("2nd interface has moved {} angstrom from {} to {}", interface_n1_distances(0), initial_interfaces(1), optimized_interfaces(0));
+	}
+
+	if (total_changes(0) * normal_length > max_total_safe_movement) {
+		log->warn("There is a relatively large change in the position of the interfaces after the optimization! Please ensure the correctness of the interfaces.");
+	}
+
 }

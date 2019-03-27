@@ -108,6 +108,9 @@ void check_inputs(input_data input_set);
 //check conditions and consistency of the supercell grid sizes and the shape
 void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell);
 
+//calculate the changes in the interface positions and warn the user if the changes are too big
+void verify_optimization(const rowvec2& initial_interfaces, const rowvec2& optimized_interfaces);
+
 //parse the parameters from the input file
 void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set);
 
