@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 23 Mar. 2019
-:version: 0.5.0
+:Last updated: 04 April 2019
+:version: 0.6.0
 
 .. sectnum::
 
@@ -41,7 +41,13 @@ Algorithm
 
 .. math::
 
-  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right )
+ \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right ) 
+  
+or `trivariate Gaussian <http://mathworld.wolfram.com/TrivariateNormalDistribution.html>`_ charge distributions as:
+
+.. math::
+ 
+ \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i,x}\sigma_{i,y}\sigma_{i,z}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i,x}^{2}}{2\sigma_{i,x}^{2}} - \frac{r_{i,y}^{2}}{2\sigma_{i,y}^{2}}- \frac{r_{i,z}^{2}}{2\sigma_{i,z}^{2}} } \right )
 
 which gives a charge distribution normalized to q\ :sub:`i` \ with standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
 
@@ -86,7 +92,7 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 
 * ΔV is calculated at the position least affected by the model charge.
 
-More information about the algorithm and implementation details can be found `here`__.
+More information about the algorithms and the implementation details can be found `here`__.
 
 __ cite_
 	 
@@ -140,7 +146,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     normal_direction = a
     interfaces = 0.25 0.75
 
-3. **Correction for the uniform dielectric medium e.g. bulk models:** You must have the same dielectric tensor inside and outside and turn off the optimization for the interfaces::
+3. **Correction for the uniform dielectric medium e.g. bulk models:** You must have the same dielectric tensor inside and outside::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -149,9 +155,8 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
     diel_out = 4.8
-    optimize_interfaces = no
 
-4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poission equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
+4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poisson equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -216,7 +221,7 @@ The input file is processed as follows:
 +------------------------------+-------------------------------------------------------+---------------+
 | Parameter                    | Description and options / ``example``                 | Default value |
 +==============================+=======================================================+===============+
-|  ``2d_model``                | Calculate the charge correction for a 2D model        |  false        |
+| ``2d_model``                 | Calculate the charge correction for a 2D model        |  false        |
 |                              |                                                       |               |
 |                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
@@ -227,17 +232,29 @@ The input file is processed as follows:
 |                              |``charge_fraction = 0.4 0.6``                          |positions*     |
 |                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Position of the model Gaussian charges                 |               |
+|                              |Center of the model Gaussian charges                   |               |
 | ``charge_position``          |                                                       |               |
 |                              |``charge_position = 0.2 0.5 0.3``                      |               |
 |                              |                                                       |               |
 |                              |``charge_position = 0.2 0.2 0.2; 0.3 0.4 0.3``         |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Width of each localized Gaussian charge                |               |
-| ``charge_sigma``             |                                                       |1 (for each    |
-|                              |``charge_sigma = 1``                                   |charge)        |
+|                              |Width of each localized Gaussian charge. It can be 1   |               |
+|                              |or in case of trivariate models, 3 parameters per      |               |
+|                              |localized Gaussian charge. For trivariate Gaussian     |               |
+|                              |models, defining a single parameter per charge, sets   |               |
+|                              |the sigma values to be equal in all directions.        |               |
 |                              |                                                       |               |
+|                              |for a single Gaussian charge                           |               |
+| ``charge_sigma``             |``charge_sigma = 1``                                   |1 (for each    |
+|                              |                                                       |charge in each |
+|                              |for multiple Gaussian charges                          |direction)     |
 |                              |``charge_sigma = 1 1.5``                               |               |
+|                              |                                                       |               |
+|                              |for two trivariate Gaussian charges                    |               |
+|                              |``charge_sigma = 1 2 3; 1.5 2.5 3.5;``                 |               |
+|                              |                                                       |               |
++------------------------------+-------------------------------------------------------+---------------+
+| ``charge_trivariate``        |Use trivariate Gaussian model along the main axis      |   false       |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Charge density file (CHGCAR) of the charged system     |               |
 | ``CHGCAR_charged``           |                                                       | CHGCAR.C      |
@@ -283,10 +300,10 @@ The input file is processed as follows:
 |                              |``extrapolate_grid_x = 1.8``                           |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Number of the extrapolation steps in calculation of    |               |
-|``extrapolate_steps_number``  |E\ :sub:`isolated` \ [#]_                              |       4       |
+| ``extrapolate_steps_number`` |E\ :sub:`isolated` \ [#]_                              |       4       |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Size of extrapolation steps with respect to the initial|               |
-|``extrapolate_steps_size``    |supercell size                                         |       0.5     |
+| ``extrapolate_steps_size``   |supercell size                                         |       0.5     |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``interfaces``               |Interfaces of the slab in normal direction             |   0.25 0.75   |
 |                              |                                                       |               |
@@ -312,7 +329,7 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``optimize_algorithm = BOBYQA``                        |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|  ``optimize_charge``         |**true**: find the optimal values for the model charge |     true      |
+| ``optimize_charge``          |**true**: find the optimal values for the model charge |     true      |
 |                              |parameters including charge_position, charge_sigma,    |               |
 |                              |and charge_fraction to construct the best model which  |               |
 |                              |mimics the potential obtained from the VASP calculation|               |
@@ -322,7 +339,7 @@ The input file is processed as follows:
 |                              |Optimization grid size multiplier.                     |               |
 |                              |                                                       |               |
 |                              |optimize_grid_x > 1 will use larger grid in the        |               |
-|``optimize_grid_x``           |extrapolations which will increase the accuracy but    |       0.8     |
+| ``optimize_grid_x``          |extrapolations which will increase the accuracy but    |       0.8     |
 |                              |requires more memory and computational power.          |               |
 |                              |[Normally this is not necessary]                       |               |
 |                              |                                                       |               |
@@ -334,7 +351,7 @@ The input file is processed as follows:
 |                              |the parameters obtained using very small values may    |               |
 |                              |not be very accurate!                                  |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|  ``optimize_interfaces``     |**true**: find the optimal values for the model charge |               |
+| ``optimize_interfaces``      |**true**: find the optimal values for the model charge |               |
 |                              |interfaces to construct the best model which mimics    |     true      |
 |                              |the potential obtained from the VASP calculation       |               |
 |                              |                                                       |               |
@@ -570,27 +587,24 @@ __ check_
 
 .. _cite:
 
-11. **How should I cite slabcc?**  (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
+11. **How should I cite slabcc?** Please cite the slabcc as: (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
 
- Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications (2019), DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
+ Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
   
 ==================================
 Known issues and limitations
 ==================================
-- Shape of the VASP files cell is limited to orthogonal cells with vectors along the main axis::
-
-	X 0 0
-	0 Y 0
-	0 0 Z
-
-- BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges.
+- Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
+- BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
+- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out = 1). Extrapolation method must be used in these cases.
 
 ===============
 Release history
 ===============
-* 2019-03-18: version 0.5 - Added 2D model support.
-* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
+* 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
+* 2019-03-18: version 0.5 - Added 2D model support
+* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements
 * 2018-07-29: version 0.3 - First public release
 
 ===========================
@@ -638,7 +652,7 @@ Included libraries
 
  - © 2016, Gabi Melman, `et al. <https://github.com/gabime/spdlog/contributors>`__
 
-- `Boost.Predef <https://github.com/boostorg/predef>`_ licensed under the Boost Software License
+- `Boost.Predef <https://github.com/boostorg/predef>`_ licensed under the Boost Software License 1.0
 
  - © 2005-2018 Rene Rivera
  - © 2015 Charly Chevalier

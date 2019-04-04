@@ -12,7 +12,7 @@
 
 using namespace std;
 
-extern int verbos;
+extern int verbosity_level;
 
 //defines the minimum verbosity level for each type of action
 enum class verbosity :int {
@@ -42,7 +42,7 @@ inline bool file_exists(const string& name) {
 
 //decides if a functionality is active with the current verbosity level
 inline bool is_active(const verbosity& action) noexcept {
-	return verbos >= static_cast<int>(verbosity(action));
+	return verbosity_level >= static_cast<int>(verbosity(action));
 }
 
 inline bool file_is_empty(ifstream& file) {

@@ -1,11 +1,7 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-
 #pragma once
 
 constexpr auto SLABCC_VERSION_MAJOR = 0;
-constexpr auto SLABCC_VERSION_MINOR = 5;
+constexpr auto SLABCC_VERSION_MINOR = 6;
 constexpr auto SLABCC_VERSION_PATCH = 0;
 
 //comment the next line while developing the code! Uncommenting will disable the range checks in Armadillo.

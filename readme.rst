@@ -1,5 +1,5 @@
-:Last updated: 23 Mar. 2019
-:version: 0.5.0
+:Last updated: 04 April 2019
+:version: 0.6.0
 
 .. sectnum::
 
@@ -84,7 +84,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     normal_direction = a
     interfaces = 0.25 0.75
 
-3. **Correction for the uniform dielectric medium e.g. bulk models:** You must have the same dielectric tensor inside and outside and turn off the optimization for the interfaces::
+3. **Correction for the uniform dielectric medium e.g. bulk models:** You must have the same dielectric tensor inside and outside::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -93,9 +93,8 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
     diel_out = 4.8
-    optimize_interfaces = no
 
-4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poission equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
+4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poisson equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -131,20 +130,17 @@ Installation
 ==================================
 Known issues and limitations
 ==================================
-- Shape of the VASP files cell is limited to orthogonal cells with vectors along the main axis::
-
-	X 0 0
-	0 Y 0
-	0 0 Z
-
-- BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges.
+- Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
+- BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
+- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out = 1). Extrapolation method must be used in these cases.
 
 ===============
 Release history
 ===============
-* 2019-03-18: version 0.5 - Added 2D model support.
-* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements.
+* 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
+* 2019-03-18: version 0.5 - Added 2D model support
+* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements
 * 2018-07-29: version 0.3 - First public release
 
 ===========================
@@ -191,13 +187,13 @@ Included libraries
 - `spdlog <https://github.com/gabime/spdlog>`_ licensed under the MIT License
 
  - © 2016, Gabi Melman, `et al. <https://github.com/gabime/spdlog/contributors>`__
- 
-- `Boost.Predef <https://github.com/boostorg/predef>`_ licensed under the Boost Software License
+
+- `Boost.Predef <https://github.com/boostorg/predef>`_ licensed under the Boost Software License 1.0
 
  - © 2005-2018 Rene Rivera
  - © 2015 Charly Chevalier
  - © 2015 Joel Falcou, `et al. <https://github.com/boostorg/predef/contributors>`__
-
+ 
 Linked libraries
 ---------------------
 

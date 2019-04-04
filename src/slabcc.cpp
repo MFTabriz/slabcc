@@ -8,7 +8,7 @@
 #include "vasp.hpp"
 using namespace std;
 
-int verbos = 0;
+int verbosity_level = 0;
 slabcc_cell_type slabcc_cell;
 const double ang_to_bohr = 1e-10 / datum::a_0;  //1.88972612546
 const double Hartree_to_eV = datum::R_inf * datum::h * datum::c_0 / datum::eV * 2; //27.2113860193
@@ -33,8 +33,9 @@ int main(int argc, char *argv[])
 	string CHGCAR_charged = "";
 	string opt_algo = "";			//optimization algorithm
 	mat charge_position;			//center of each Gaussian model charge
-	rowvec Qd;						//charge of each Gaussian model charge
-	rowvec sigma;					//width of the model charges
+	rowvec charge_fraction;			//charge of each Gaussian
+	mat charge_sigma;				//width of each Gaussian model charges
+	bool charge_trivariate = false; //use trivariate Gaussians
 	rowvec diel_in;					//diagonal elements of slab dielectric tensor
 	rowvec diel_out;				//diagonal elements of vacuum dielectric tensor
 	rowvec3 slabcenter;
@@ -48,7 +49,9 @@ int main(int argc, char *argv[])
 	int max_time = 0;				//maximum time for the optimization in minutes
 	int extrapol_steps_num = 0;		//number of extrapolation steps for E_isolated calculation
 	double extrapol_steps_size = 0; //size of each extrapolation step with respect to the initial supercell size
-	bool optimize_charge = false;	//optimize the charge_position and sigma
+	bool optimize_charge_position = false;	//optimize the charge_position 
+	bool optimize_charge_sigma = false;	//optimize the charge_sigma
+	bool optimize_charge_fraction = false;	//optimize the charge_fraction
 	bool optimize_interfaces = false;//optimize the position of interfaces
 	bool extrapolate = false;		//use the extrapolation for E-isolated calculations
 	bool model_2D = false;		//the model is 2D
@@ -56,9 +59,9 @@ int main(int argc, char *argv[])
 	// parameters read from the input file
 	const input_data input_file_variables = {
 		CHGCAR_neutral, LOCPOT_charged, LOCPOT_neutral, CHGCAR_charged,
-		opt_algo, charge_position, Qd, sigma, slabcenter, diel_in, diel_out,
+		opt_algo, charge_position, charge_fraction, charge_sigma, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
-		opt_tol, optimize_charge, optimize_interfaces, extrapolate, model_2D, opt_grid_x,
+		opt_tol, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces, extrapolate, model_2D, charge_trivariate, opt_grid_x,
 		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
 	parse_input_params(input_file, output_fstream, input_file_variables);
@@ -134,13 +137,13 @@ int main(int argc, char *argv[])
 	Defect_supercell.potential *= -1.0;
 
 	// total extra charge of the VASP calculation
-	const auto Q0 = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
-	if (abs(Q0) < 0.001) {
-		log->debug("Total extra charge: {}", Q0);
+	const double total_vasp_charge = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
+	if (abs(total_vasp_charge) < 0.001) {
+		log->debug("Total extra charge: {}", total_vasp_charge);
 		log->warn("Total extra charge seems to be very small. Please make sure the path to the input CHGCAR files are set properly!");
 	}
-	// convert charge fractions to actual charges
-	Qd *= Q0 / accu(Qd);
+	//charge of each Gaussian
+	rowvec charge_q = charge_fraction * total_vasp_charge / accu(charge_fraction);
 
 	mat dielectric_profiles = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
 
@@ -157,9 +160,9 @@ int main(int argc, char *argv[])
 	double initial_potential_MSE = -1;
 
 	// variables to optimize
-	opt_vars opt_vars = { shifted_interfaces, sigma, Qd, charge_position };
+	opt_vars opt_vars = { shifted_interfaces, charge_sigma, charge_q, charge_position };
 
-	if (optimize_charge || optimize_interfaces) {
+	if (optimize_charge_position || optimize_charge_sigma || optimize_charge_fraction || optimize_interfaces) {
 		const rowvec2 shifted_interfaces0 = shifted_interfaces;
 		const mat charge_position0 = charge_position;
 
@@ -172,12 +175,12 @@ int main(int argc, char *argv[])
 		log->debug("Optimization grid size: " + to_string(SizeVec(interpolated_potential)));
 
 		//data needed for potential error calculation
-		opt_data optimize_data = { Q0, diel_erf_beta, diel_in, diel_out, interpolated_potential, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
+		opt_data optimize_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, interpolated_potential, charge_trivariate, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
 		UpdateCell(cell_vectors, SizeVec(interpolated_potential));
-		potential_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge, optimize_interfaces);
+		potential_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces);
 		UpdateCell(cell_vectors, input_grid_size);
 		//add back the last Gaussian charge (removed in the optimization)
-		Qd(Qd.n_elem - 1) = Q0 - accu(Qd);
+		charge_q(charge_q.n_elem - 1) = total_vasp_charge - accu(charge_q);
 
 		//write the unshifted optimized values to the file
 		output_fstream << "\n[Optimized_model_parameters]\n";
@@ -191,15 +194,24 @@ int main(int argc, char *argv[])
 			// if there is too much change, warn the user
 		}
 
-		if (optimize_charge) {
-			const mat orig_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
-			if (Qd.n_elem > 1) {
-				output_fstream << "charge_fraction_optimized =" << abs(Qd / accu(Qd));
+		if (optimize_charge_fraction) {
+			if (charge_q.n_elem > 1) {
+				output_fstream << "charge_fraction_optimized =" << abs(charge_q / accu(charge_q));
 			}
-			output_fstream << "charge_sigma_optimized = " << sigma << '\n';
+		}
+		if (optimize_charge_sigma) {
+			if (charge_trivariate) {
+				output_fstream << "charge_sigma_optimized = " << charge_sigma << '\n';
+			}
+			else {
+				output_fstream << "charge_sigma_optimized = " << charge_sigma.col(0) << '\n';
+			}
+		}
+		if (optimize_charge_position) {
+			const mat orig_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 			output_fstream << "charge_position_optimized = " << orig_charge_position << '\n';
 
-
+			// need a better algorithm to handle the swaps and PBCs
 			const mat charge_position_change = abs(charge_position0 - charge_position);
 			if (charge_position_change.max() > 0.1) {
 				log->warn("The optimized position for the extra charge is significantly different from the initial value.");
@@ -210,8 +222,9 @@ int main(int argc, char *argv[])
 
 		output_fstream.flush();
 
-		check_inputs(input_file_variables);
-		verify_optimization(fmod_p(shifted_interfaces0 - rounded_relative_shift(normal_direction), 1), fmod_p(shifted_interfaces - rounded_relative_shift(normal_direction), 1));
+		if (optimize_interfaces) {
+			verify_interface_optimization(fmod_p(shifted_interfaces0 - rounded_relative_shift(normal_direction), 1), fmod_p(shifted_interfaces - rounded_relative_shift(normal_direction), 1));
+		}
 
 		if (initial_potential_MSE * (opt_tol + 1) < potential_MSE) {
 			// Don't panic! either NLOPT seems to be malfunctioning
@@ -222,13 +235,21 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-	opt_data optimized_data = { Q0, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
+	opt_data optimized_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, charge_trivariate, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
 	auto local_param = optimizer_packer(opt_vars);
 	vector<double> gradients = {};
 	potential_MSE = potential_eval(get<0>(local_param), gradients, &optimized_data);
+	const bool bulk_model = approx_equal(diel_in, diel_out, "absdiff", 0.02);
+	const bool isotropic_screening = (abs(diel_in(0) - diel_in(1)) < 0.02) && (abs(diel_in(0) - diel_in(2)) < 0.02);
 
 	if (potential_MSE > 0.01) {
-		log->warn("MSE of the model charge potential is large. The calculated correction energies may not be accurate!");
+		if (bulk_model && isotropic_screening) {
+			log->debug("MSE of the model charge potential is large but for the bulk models with an isotropic screening (dielectric tensor) "
+			"this shouldn't make much difference in the total correction energy!");
+		}
+		else {
+			log->warn("MSE of the model charge potential is large. The calculated correction energies may not be accurate!");
+		}
 	}
 
 	const auto V_error_x = conv_to<rowvec>::from(planar_average(0, V_diff));
@@ -243,7 +264,8 @@ int main(int argc, char *argv[])
 	if (max(V_error_planars) / min(V_error_planars) > 10) {
 		log->warn("The potential error is highly anisotropic.");
 		log->warn("If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge "
-			"or the chosen dielectric tensor is not a good representation of the actual tensor!");
+			"or the chosen dielectric tensor is not a good representation of the actual tensor! "
+			"This can be fixed by using multiple Gaussian charges, trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model.");
 	}
 
 	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
@@ -276,29 +298,35 @@ int main(int argc, char *argv[])
 		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M", slabcc_cell.normal_direction);
 	}
 	//total charge of the model
-	const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
+	const double total_model_charge = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
-	rhoM -= Q / volume;
-	const uword farthest_element_index = Q < 0 ? real(V).index_max() : real(V).index_min();
+	rhoM -= total_model_charge / volume;
+	const uword farthest_element_index = total_model_charge < 0 ? real(V).index_max() : real(V).index_min();
 
 	const auto dV = V_diff(farthest_element_index);
 	log->info("Potential alignment (dV=): " + ::to_string(dV));
 	calculation_results.emplace_back("dV", ::to_string(dV));
 
 	if (abs(dV) > 0.05) {
-		log->warn("The potential alignment term (dV) is relatively large." );
-		log->warn("The constructed model may not be accurate!");
+		if (bulk_model && isotropic_screening) {
+			log->debug("The potential alignment term (dV) is relatively large. But in the isotropic bulk models "
+			"this should not make much difference in the total energy correction value!");
+		}
+		else {
+			log->warn("The potential alignment term (dV) is relatively large." );
+			log->warn("The constructed model may not be accurate!");
+		}
 	}
 
-	log->debug("Alignment term calculation grid point: " + to_string(ind2sub(as_size(slabcc_cell.grid), farthest_element_index)));
+	log->debug("Calculation grid point for the potential alignment term: " + to_string(ind2sub(as_size(slabcc_cell.grid), farthest_element_index)));
 
 	const auto EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 	log->info("E_periodic of the model charge: " + ::to_string(EperModel0));
 	calculation_results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
 
-	log->debug("Difference of the charge in the input files: " + ::to_string( Q0));
-	log->debug("Total charge of the model: " + ::to_string(Q));
-	if (abs(Q - Q0) > 0.05) {
+	log->debug("Difference of the charge in the input files: " + ::to_string(total_vasp_charge));
+	log->debug("Total charge of the model: " + ::to_string(total_model_charge));
+	if (abs(total_model_charge - total_vasp_charge) > 0.05) {
 		log->warn("Part of the extra charge is missing from the model. "
 			"This usually happens when the size of the supercell is too small and cannot contain the whole "
 			"Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
@@ -328,12 +356,12 @@ int main(int argc, char *argv[])
 
 		if (model_2D) {
 			tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-				shifted_interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+				shifted_interfaces, diel_erf_beta, charge_position, charge_q, charge_sigma, extrapol_grid_x, charge_trivariate);
 			const rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
 			const auto radius = 10.0;
 			const auto ewald_shells = generate_shells(unit_cell, radius);
 			const auto madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
-			auto madelung_term = -pow(Q, 2) * madelung_const / 2;
+			auto madelung_term = -pow(total_model_charge, 2) * madelung_const / 2;
 			nonlinear_fit_data fit_data = { Es ,sizes, madelung_term };
 			const auto cs = nonlinear_fit(1e-12, fit_data);
 
@@ -347,11 +375,11 @@ int main(int argc, char *argv[])
 			calculation_results.emplace_back("Madelung constant", ::to_string(madelung_const));
 
 			E_isolated = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
-			E_correction = E_isolated - EperModel0 - Q * dV;
+			E_correction = E_isolated - EperModel0 - total_model_charge * dV;
 		}
 		else {
 			tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-				shifted_interfaces, diel_erf_beta, charge_position, Qd, sigma, extrapol_grid_x);
+				shifted_interfaces, diel_erf_beta, charge_position, charge_q, charge_sigma, extrapol_grid_x, charge_trivariate);
 
 			const colvec pols = polyfit(sizes, Es, 1);
 			const colvec evals = polyval(pols, sizes.t());
@@ -365,39 +393,33 @@ int main(int argc, char *argv[])
 			log->debug("Linear fit error for the periodic model: " + ::to_string(extrapol_error_periodic));
 
 			if (extrapol_error_periodic > 0.05) {
-				log->error("The extrapolated energies are not scaling linearly!");
-				log->error("The extrapolation steps/size may be too large for the grid size or the slab thickness in too small for this extrapolation algorithm");
+				log->error("The extrapolated energies are not scaling linearly as expected!");
+				log->error("The extrapolation steps/size may be too large for the grid size or the slab thickness is too small for this extrapolation algorithm");
 				log->error("You may need to use larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
-				log->error("For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file");
+				log->error("For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file.");
 				log->error("Extrapolation energy slopes: " + to_string(slopes));
 			}
 
 			E_isolated = EperModel0 - pols(0);
-			E_correction = -pols(0) - Q * dV;
+			E_correction = -pols(0) - total_model_charge * dV;
 
 		}
 		log->info("E_isolated from extrapolation with " + to_string(extrapol_steps_num) + "x" + to_string(extrapol_steps_size) + " steps: " + ::to_string(E_isolated));
-		calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
-
 	}
 	else {
 		if (model_2D) {
-			// TODO: implement multiple charges
 			const mat dielectric_profiles = dielectric_profiles_gen(shifted_interfaces, diel_in, diel_out, diel_erf_beta);
-			E_isolated = Eiso_bessel(Qd(0), charge_position(0, normal_direction) * slabcc_cell.vec_lengths(normal_direction), sigma(0), dielectric_profiles);
-			E_correction = E_isolated - EperModel0 - Q * dV;
+			E_isolated = Eiso_bessel(charge_q(0), charge_position(0, normal_direction) * slabcc_cell.vec_lengths(normal_direction), charge_sigma(0), dielectric_profiles);
+			E_correction = E_isolated - EperModel0 - total_model_charge * dV;
 			log->info("E_isolated from the Bessel expansion of the Poisson equation: " + ::to_string(E_isolated));
-			calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
-
 		}
 		else {
 			// input parameter checking function must prevent this from happening!
-			log->error("There is no algorithm other than the extrapolation for E_isolated calculation of the slab models in this version of the slabcc!");
+			log->critical("There is no algorithm other than the extrapolation for E_isolated calculation of the slab models in this version of the slabcc!");
 		}
 
 	}
-
-
+	calculation_results.emplace_back("E_isolated of the model charge", ::to_string(E_isolated));
 
 	log->info("Energy correction for the model charge (E_iso-E_per-q*dV=): " + ::to_string(E_correction) );
 	calculation_results.emplace_back("Energy correction for the model charge (E_iso-E_per-q*dV)", ::to_string(E_correction));

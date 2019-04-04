@@ -4,7 +4,7 @@
 
 #include "isolated.hpp"
 
-tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &Qd, const rowvec &sigma, const double &grid_multiplier) {
+tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const rowvec &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
@@ -42,7 +42,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(Qd(i), charge_position_shifted.row(i).t(), sigma(i));
+			rhoM += gaussian_charge(charge_q(i), charge_position_shifted.row(i).t(), charge_sigma.row(i), trivariate);
 		}
 		const double Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
@@ -63,7 +63,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 	return make_tuple(Es, sizes);
 }
 
-tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &Qd, const rowvec &sigma, const double &grid_multiplier) {
+tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const rowvec &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
@@ -85,7 +85,7 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(Qd(i), charge_position_ext.row(i).t(), sigma(i));
+			rhoM += gaussian_charge(charge_q(i), charge_position_ext.row(i).t(), charge_sigma.row(i), trivariate);
 		}
 		const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
