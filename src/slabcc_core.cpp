@@ -423,38 +423,41 @@ void check_inputs(input_data input_set) {
 		exit(1);
 	}
 
-		if (input_set.charge_sigma.n_rows == input_set.charge_position.n_rows) {
-			if (input_set.charge_sigma.n_cols == 3) {
-				if (input_set.trivariate) {
-					log->debug("All the charge_sigma values are properly defined!");
+	if (input_set.charge_sigma.n_rows == input_set.charge_position.n_rows) {
+		if (input_set.charge_sigma.n_cols == 3) {
+			if (input_set.trivariate) {
+				log->debug("All the charge_sigma values are properly defined!");
+			}
+			else {
+				//not trivariate but we have 3 values for each sigma!
+				if ((approx_equal(input_set.charge_sigma.col(0), input_set.charge_sigma.col(1), "absdiff", 0.02)) 
+				&& (approx_equal(input_set.charge_sigma.col(1), input_set.charge_sigma.col(2), "absdiff", 0.02))){
+					log->debug("Although the Gaussian models has not been defined as trivariate, but there are 3 charge_sigma values for each Gaussian charge! Regardless, these values seem to be equal!!");
 				}
 				else {
-					//not trivariate but we have 3 values for each sigma!
-					if ((approx_equal(input_set.charge_sigma.col(0), input_set.charge_sigma.col(1), "absdiff", 0.02)) 
-					&& (approx_equal(input_set.charge_sigma.col(1), input_set.charge_sigma.col(2), "absdiff", 0.02))){
-						log->debug("There are 3 charge_sigma values for each Gaussian charge but they seem to be equal!");
-					}
-					else {
-						log->warn("The slabcc Gaussian charges are assumed to be monovariate but there are different sigma values defined for each one of them!");
-						log->warn("If you want to construct a model charge using trivariate Gaussians, use \"charge_trivariate=yes\"");
-						log->warn("Only the 1st set of parameters will be used in this calculation. charge_sigma={}", to_string(input_set.charge_sigma.col(0)));
-					}
+					log->warn("The slabcc Gaussian charges are assumed to be monovariate but there are different sigma values defined for each direction!");
+					log->warn("If you want to construct a model charge using trivariate Gaussians, use \"charge_trivariate=yes\"");
+					log->warn("Only the 1st set of parameters will be used in this calculation. charge_sigma={}", to_string(input_set.charge_sigma.col(0)));
 				}
 			}
-			if (input_set.charge_sigma.n_cols == 1) {
-				input_set.charge_sigma = repmat(input_set.charge_sigma, 1, 3);
+		}
+		else if (input_set.charge_sigma.n_cols == 1) {
+			input_set.charge_sigma = repmat(input_set.charge_sigma, 1, 3);
+			if (input_set.trivariate) {
 				log->debug("Equal values will be assumed for the charge_sigma in all directions!");
 			}
 		}
 		else {
-			if (input_set.charge_sigma.n_cols == input_set.charge_position.n_rows) {
-				input_set.charge_sigma = repmat(input_set.charge_sigma.t(), 1, 3);
-				log->debug("Equal values will be assumed for the charge_sigma in all directions!");
+			log->warn("Number of the defined Gaussian charges and the charge_sigma sets does not match!");
+			input_set.charge_sigma = mat(arma::size(input_set.charge_position), fill::ones);
+			if (input_set.trivariate) {
+				log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma));
+			}
+			else {
+				log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma.col(0)));
 			}
 		}
-
-
-
+	}
 
 	if (input_set.charge_sigma.n_rows != input_set.charge_position.n_rows) {
 		log->debug("Number of charge_sigma sets: {}", input_set.charge_sigma.n_rows);
@@ -552,7 +555,7 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 	input_set.charge_position = reader.GetMat("charge_position", {});
 	input_set.charge_fraction = reader.GetVec("charge_fraction", rowvec(input_set.charge_position.n_rows, fill::ones) / input_set.charge_position.n_rows);
 	input_set.trivariate = reader.GetBoolean("charge_trivariate", false);
-	input_set.charge_sigma = reader.GetMat("charge_sigma", mat(arma::size(input_set.charge_position), fill::ones));
+	input_set.charge_sigma = reader.GetMat("charge_sigma", mat(input_set.charge_position.n_rows, 1, fill::ones));
 	input_set.slabcenter = reader.GetVec("slab_center", { 0.5, 0.5, 0.5 });
 	input_set.normal_direction = xyz2int(reader.GetStr("normal_direction", "z"));
 	input_set.interfaces = reader.GetVec("interfaces", { 0.25, 0.75 });
