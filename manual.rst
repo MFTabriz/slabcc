@@ -412,14 +412,17 @@ Output files
 The parsed input variables or their default values and the calculation results will be written to the output file (by default: slabcc.out) You can change this file’s name using the `command-line parameters`_. A typical output file is shown below::
 
 	# Parameters read from the file or their default values:
+	2d_model = no
 	charge_fraction = 1
 	charge_position = 0.5 0.5 0.37; 
-	charge_sigma = 1
+	charge_sigma = 1;
+	charge_trivariate = no
 	CHGCAR_charged = ../03-V_Cl_pos/CHGCAR
 	CHGCAR_neutral = ../02-V_Cl/CHGCAR
 	diel_in = 2.45
 	diel_out = 1
 	diel_taper = 1
+	extrapolate = yes
 	extrapolate_grid_x = 1
 	extrapolate_steps_number = 4
 	extrapolate_steps_size = 0.5
@@ -428,12 +431,14 @@ The parsed input variables or their default values and the calculation results w
 	LOCPOT_neutral = ../02-V_Cl/LOCPOT
 	normal_direction = z
 	optimize_algorithm = COBYLA
-	optimize_charge = 1
+	optimize_charge_fraction = yes
+	optimize_charge_position = yes
+	optimize_charge_sigma = yes
 	optimize_grid_x = 0.8
-	optimize_interfaces = 1
+	optimize_interfaces = yes
 	optimize_maxsteps = 0
 	optimize_maxtime = 0
-	optimize_tolerance = 0.001
+	optimize_tolerance = 0.01
 	slab_center = 0.5 0.5 0.25
 	verbosity = 5
 
