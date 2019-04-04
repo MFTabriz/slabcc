@@ -1417,7 +1417,7 @@ The input file is processed as follows:</p>
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">Parameter</th>
-<th class="head">Description and options / <tt class="docutils literal">example</tt></th>
+<th class="head">Description and the options / <tt class="docutils literal">example</tt></th>
 <th class="head">Default value</th>
 </tr>
 </thead>
@@ -1554,12 +1554,23 @@ input file's cell vectors</p>
 </td>
 <td>COBYLA</td>
 </tr>
-<tr><td><tt class="docutils literal">optimize_charge</tt></td>
-<td><p class="first"><strong>true</strong>: find the optimal values for the model charge
-parameters including charge_position, charge_sigma,
-and charge_fraction to construct the best model which
-mimics the potential obtained from the VASP calculation</p>
-<p class="last"><strong>false</strong>: do not change the model charge parameters</p>
+<tr><td><tt class="docutils literal">optimize_charge_fraction</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the charge_fraction parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the charge_fraction parameter</p>
+</td>
+<td>true</td>
+</tr>
+</tr>
+<tr><td><tt class="docutils literal">optimize_charge_position</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the charge_position parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the charge_position parameter</p>
+</td>
+<td>true</td>
+</tr>
+</tr>
+<tr><td><tt class="docutils literal">optimize_charge_sigma</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the charge_sigma parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the charge_sigma parameter</p>
 </td>
 <td>true</td>
 </tr>

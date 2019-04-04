@@ -219,7 +219,7 @@ The input file is processed as follows:
 
  
 +------------------------------+-------------------------------------------------------+---------------+
-| Parameter                    | Description and options / ``example``                 | Default value |
+| Parameter                    | Description and the options / ``example``             | Default value |
 +==============================+=======================================================+===============+
 | ``2d_model``                 | Calculate the charge correction for a 2D model        |  false        |
 |                              |                                                       |               |
@@ -329,12 +329,26 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``optimize_algorithm = BOBYQA``                        |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_charge``          |**true**: find the optimal values for the model charge |     true      |
-|                              |parameters including charge_position, charge_sigma,    |               |
-|                              |and charge_fraction to construct the best model which  |               |
-|                              |mimics the potential obtained from the VASP calculation|               |
+| ``optimize_charge_fraction`` |**true**: find the optimal values for the              |     true      |
+|                              |charge_fraction parameter to construct the best model  |               |
+|                              |which mimics the potential obtained from the VASP      |               |
+|                              |calculation                                            |               |
 |                              |                                                       |               |
-|                              |**false**: do not change the model charge parameters   |               |
+|                              |**false**: do not change the charge_fraction parameter |               |
++------------------------------+-------------------------------------------------------+---------------+
+| ``optimize_charge_position`` |**true**: find the optimal values for the model charge |     true      |
+|                              |charge_position parameter to construct the best model  |               |
+|                              |which mimics the potential obtained from the VASP      |               |
+|                              |calculation                                            |               |
+|                              |                                                       |               |
+|                              |**false**: do not change the charge_position parameter |               |
++------------------------------+-------------------------------------------------------+---------------+
+| ``optimize_charge_sigma``    |**true**: find the optimal values for the model charge |     true      |
+|                              |charge_sigma parameter to construct the best model     |               |
+|                              |which mimics the potential obtained from the VASP      |               |
+|                              |calculation                                            |               |
+|                              |                                                       |               |
+|                              |**false**: do not change the charge_sigma parameter    |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Optimization grid size multiplier.                     |               |
 |                              |                                                       |               |
