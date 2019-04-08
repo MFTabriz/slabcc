@@ -5,7 +5,7 @@
 * think this stuff is worth it, you can buy me a beer in return.
 https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/
 
-Code has been converted to Armadillo data type to use in slabcc by https://github.com/MFTabriz
+The code has been converted to use Armadillo data type for slabcc by https://github.com/MFTabriz
 
 */
 #include <vector>
@@ -20,12 +20,12 @@ public:
 	// A spline with x and y values
 	Spline(const arma::Row<X>& x, const arma::Col<X>& y) {
 		if (x.n_elem != y.n_elem) {
-			std::cerr << "X and Y must be the same size " << std::endl;
+			std::cerr << "Spline: X and Y must be the same size!\n";
 			return;
 		}
 
 		if (x.n_elem < 3) {
-			std::cerr << "Must have at least three points for interpolation" << std::endl;
+			std::cerr << "Spline: Must have at least three points for interpolation!\n";
 			return;
 		}
 

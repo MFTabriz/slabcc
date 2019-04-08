@@ -53,6 +53,7 @@ struct opt_data {
 	const rowvec &diel_in, &diel_out;
 	const cube &defect_potential;
 	const bool &trivariate;
+	const rowvec3 &rounded_relative_shift;
 	mat &dielectric_profiles;
 	cx_cube& rhoM;
 	cx_cube& V;

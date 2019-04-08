@@ -2,6 +2,7 @@
 // Copyright(c) 2015 Gabi Melman.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 //
+// K_formatter has been added by https://github.com/MFTabriz/ as a simple timing functionality
 
 #pragma once
 
@@ -27,6 +28,7 @@ namespace details {
 class flag_formatter
 {
 public:
+	std::chrono::system_clock::time_point _init_time = std::chrono::system_clock::now();
     virtual ~flag_formatter() = default;
     virtual void format(const details::log_msg &msg, const std::tm &tm_time, fmt::memory_buffer &dest) = 0;
 };
@@ -265,6 +267,20 @@ class E_formatter final : public flag_formatter
         auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
         fmt_helper::append_int(seconds, dest);
     }
+};
+
+// time since the start in seconds
+class K_formatter final : public flag_formatter
+{
+	void format(const details::log_msg &msg, const std::tm &, fmt::memory_buffer &dest) override
+	{
+		auto duration = msg.time - _init_time;
+		auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+		fmt_helper::pad3(seconds, dest);
+		dest.push_back('.');
+		fmt_helper::pad3(millis - seconds * 1000, dest);
+	}
 };
 
 // AM/PM
@@ -658,6 +674,10 @@ private:
         case ('H'):
             formatters_.push_back(details::make_unique<details::H_formatter>());
             break;
+
+		case ('K'):
+			formatters_.push_back(details::make_unique<details::K_formatter>());
+			break;
 
         case ('I'):
             formatters_.push_back(details::make_unique<details::I_formatter>());

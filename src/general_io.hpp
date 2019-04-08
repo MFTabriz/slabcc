@@ -14,16 +14,21 @@ using namespace std;
 
 extern int verbosity_level;
 
+struct cli_params {
+	string &input_file, output_file, log_file;
+	bool &diff_only;
+};
+
 //defines the minimum verbosity level for each type of action
 enum class verbosity :int {
-	info = 1,
+	info = 1,					//spdlog->info()
 	write_normal_planarAvg = 1, //write the planar average of defect and model LOCPOT files
-	debug = 2,
+	debug = 2,					//spdlog->debug()
 	write_defect_file = 2,		//write extra charge density, extra charge potential
 	write_dielectric_file = 2,	//write the dielectric profile of model
 	write_planarAvg_file = 3,	//write the planar average of the CHGCAR-LOCPOT files for neutral/charged/defect/model 
-	trace = 4,
-	timing = 4,					//log the walltime at the start of each cout line
+	trace = 4,					//spdlog->trace()
+	timing = 4,					//log the time passed from the start of the program
 };
 
 // writes each element of a vector in a separate line inside a text file named "output_file"
@@ -52,7 +57,7 @@ inline bool file_is_empty(ifstream& file) {
 string tolower(string in_str) noexcept;
 
 // reads the command line and sets the input_file and output_file
-void parse_cli(int argc, char *argv[], string& input_file, string &output_file, string &log_file);
+void parse_cli(int argc, char *argv[], cli_params& cli_parameters);
 
 void initialize_logger(string log_file);
 void logger_update();

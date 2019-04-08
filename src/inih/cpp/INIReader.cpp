@@ -4,7 +4,7 @@
 // Go to the project home page for more info:
 // https://github.com/benhoyt/inih
 
-// Modifications: sections parameter is removed from the interface fucntions
+// NOTE: the "sections" parameter is removed from the interface functions
 
 #include "../ini.h"
 #include "INIReader.h"
@@ -94,12 +94,19 @@ void INIReader::dump_env_info() const {
 			log->debug(">> {}={}", var, env_p);
 		}
 	}
+
+	auto start_date_time = chrono::system_clock::now();
+	auto tt = chrono::system_clock::to_time_t(start_date_time);
+	auto timeinfo = localtime(&tt);
+	char time_string_buffer[80];
+	strftime(time_string_buffer, 80, "System clock: %F %T", timeinfo);
+	log->debug(time_string_buffer);
 }
 
 void INIReader::dump_all(std::ofstream& out_file) const {
 
 	auto log = spdlog::get("loggers");
-	std::sort(_parsed.begin(), _parsed.end(), [](const auto& lhs, const auto& rhs) {
+	sort(_parsed.begin(), _parsed.end(), [](const auto& lhs, const auto& rhs) {
 		return tolower(rhs.at(0)) > tolower(lhs.at(0));
 	});
 	logger_update();
@@ -112,25 +119,32 @@ void INIReader::dump_all(std::ofstream& out_file) const {
 	}
 	log->info("-----------------------------------------");
 
-	out_file << "# Parameters read from the file or their default values:" << endl;
+	out_file << "# Parameters read from the file or their default values:\n";
 	for (const auto &i : _parsed) {
-		out_file << i.at(0) << " = " << i.at(1) << endl;
+		out_file << i.at(0) << " = " << i.at(1) << "\n";
 	}
 
 	out_file.flush();
 
+	const vector<string> deprecated_params{"optimize_charge"};
+
 	for (const auto &val : _values) {
-		string param_file = val.first;
+		string param_in_file = val.first;
 		// get rid of the "=" at the start
-		param_file.erase(param_file.begin());
+		param_in_file.erase(param_in_file.begin());
 		bool has_parsed = false;
 		for (auto const &param_parsed : _parsed) {
-			if (tolower(param_parsed.at(0)) == param_file) {
+			if (tolower(param_parsed.at(0)) == param_in_file) {
 				has_parsed = true;
 			}
 		}
 		if (!has_parsed) {
-			log->warn("Unrecognized parameter in the input file: " + param_file);
+			if (find(deprecated_params.begin(), deprecated_params.end(), param_in_file) != deprecated_params.end()) {
+				log->warn("The parameter \"{}\" in deprecated! Please refer to this version of slabcc's manual for a complete list of the supported parameters.", param_in_file);
+			}
+			else {
+				log->warn("Unrecognized parameter in the input file: " + param_in_file);
+			}
 		}
 	}
 }

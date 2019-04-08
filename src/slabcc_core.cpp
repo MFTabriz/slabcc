@@ -146,11 +146,11 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 
 double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data) {
 
-	rowvec2 interfaces;
+	rowvec2 shifted_interfaces;
 	mat charge_sigma;
 	rowvec charge_q;
 	mat charge_position;
-	opt_vars variables = { interfaces, charge_sigma, charge_q, charge_position };
+	opt_vars variables = { shifted_interfaces, charge_sigma, charge_q, charge_position };
 	optimizer_unpacker(x, variables);
 
 	//input data
@@ -161,6 +161,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	const cube &defect_potential = d->defect_potential;
 	const double &total_vasp_charge = d->total_vasp_charge;
 	const bool &trivariate = d->trivariate;
+	const rowvec3 &rounded_relative_shift = d->rounded_relative_shift;
 
 	//rest of the charge goes to the last Gaussian
 	charge_q(charge_q.n_elem - 1) = total_vasp_charge - accu(charge_q);
@@ -172,7 +173,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	cube& V_diff = d->V_diff;
 	auto& initial_potential_MSE = d->initial_potential_MSE;
 
-	dielectric_profiles = dielectric_profiles_gen(interfaces, diel_in, diel_out, diel_erf_beta);
+	dielectric_profiles = dielectric_profiles_gen(shifted_interfaces, diel_in, diel_out, diel_erf_beta);
 
 	rhoM.reset();
 	rhoM = zeros<cx_cube>(as_size(slabcc_cell.grid));
@@ -192,10 +193,14 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	auto log = spdlog::get("loggers");
 
 	log->debug("-----------------------------------------");
-	log->debug("> shifted_interfaces=" + ::to_string(x.at(0)) + " " + ::to_string(x.at(1)));
+	const rowvec2 unshifted_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(slabcc_cell.normal_direction), 1);
+	log->debug("> interfaces=" + ::to_string(unshifted_interfaces));
+
+
+	const mat unshifted_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 
 	for (uword i = 0; i < charge_q.n_elem; ++i) {
-		log->debug("> shifted_charge_position=" + ::to_string(charge_position.row(i)));
+		log->debug("> charge_position=" + ::to_string(unshifted_charge_position.row(i)));
 		if (trivariate) {
 			log->debug("> charge_sigma=" + ::to_string(charge_sigma.row(i)));
 		}
@@ -376,7 +381,7 @@ void check_inputs(input_data input_set) {
 	if ((min(input_set.diel_in) <= 0) || (min(input_set.diel_out) <= 0)) {
 		log->debug("Minimum of the dielectric tensor inside the slab: {}", min(input_set.diel_in));
 		log->debug("Minimum of the dielectric tensor outside the slab: {}", min(input_set.diel_out));
-		log->critical("The dielectric tensor is not defined properly!");
+		log->critical("The dielectric tensor is not defined properly! None of the tensor elements should be negative!");
 		exit(1);
 	}
 	if (approx_equal(input_set.diel_in, input_set.diel_out, "absdiff", 0.02)) {
@@ -409,9 +414,9 @@ void check_inputs(input_data input_set) {
 
 		if ((input_set.opt_tol > 1) || (input_set.opt_tol < 0)) {
 			log->debug("Requested optimization tolerance: {}", input_set.opt_tol);
-			log->warn("The optimization tolerance is unacceptable!");
+			log->warn("The relative optimization tolerance is unacceptable! It must be in choosen in (0-1) range.");
 			input_set.opt_tol = 0.001;
-			log->warn("Will use optimize_tolerance = {}", input_set.opt_tol);
+			log->warn("optimize_tolerance = {} will be used!", input_set.opt_tol);
 		}
 	}
 

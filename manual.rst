@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 04 April 2019
-:version: 0.6.0
+:Last updated: 08 April 2019
+:version: 0.6.1
 
 .. sectnum::
 
@@ -32,7 +32,7 @@ And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
  Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
 
-| SLABCC have been initially developed for `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
+| SLABCC have been initially developed for the `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
 
 Algorithm
 ----------
@@ -194,13 +194,14 @@ Command-line parameters
 =======================
 You can run slabcc without any additional options. Alternatively, you can use the following options to modify its behavior:
 
--h, --help					Display usage information (this list)
+-h, --help						Display the usage information (this list)
 -i, --input <input_file>			slabcc input file name
 -o, --output <input_file>			slabcc output file name
 -l, --log <log_file>			slabcc log file name
--m, --manual					Show quick start guide
--v, --version					Show version and compilation date
--c, --copyright					Show copyright information and the attributions
+-d, --diff						Calculate the charge and the potential differences only
+-m, --manual					Show the quick start guide
+-v, --version					Show the slabcc version and its compilation date
+-c, --copyright					Show the copyright information and the attributions
 
 ======================
 Input parameters
@@ -400,12 +401,15 @@ The input file is processed as follows:
 |                              |surface.                                               |               |
 |                              |                                                       |               |
 |                              |2: Write extra-charge density, extra-charge potential  |               |
-|                              |and dielectric profiles. Display debug info.           |               |
+|                              |and dielectric profiles. Display debug info including  |               |
+|                              |the compilation machine info and a few important       |
+|                              |enviroment variables.                                  |               |
 |                              |                                                       |               |
 |                              |3: Write the planar averaged files in all directions.  |               |
 |                              |                                                       |               |
-|                              |4: Display execution walltime (hh:mm:ss) and the       |               |
-|                              |calculation steps (trace mode)                         |               |
+|                              |4: Display the time passed since the start of slabcc   |               |
+|                              |(in seconds) and a description of each calculation step|               |
+|                              |(trace mode)                                           |               |
 +------------------------------+-------------------------------------------------------+---------------+
 
 .. [#] extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.
@@ -582,11 +586,11 @@ FAQ
 
 2. **Do I need to perform spin polarized calculation in VASP?**  Although, the slabcc only reads the sum of both spins, but for proper description of the charge distribution in your system you may need to perform spin polarized calculation.
 
-3. **How to speed-up the optimization process?** Improving the initial guess, using a smaller grid for optimization (``optimize_grid_x`` < 1), or increasing the optimization convergence criteria (``optimize_tolerance``) can speed up the process but the accuracy of the obtained results must be checked.
+3. **How to speed-up the optimization process?** Improving the initial guess, using a smaller grid for optimization (``optimize_grid_x < 1``), or increasing the optimization convergence criteria (``optimize_tolerance``) can speed up the process but the accuracy of the obtained results must be checked.
 
 4. **Why do I need to provide an initial guess for the parameters which will be optimized?** The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.
 
-5. **How should I decide on the initial guess for the parameters which will be optimized?** As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position.
+5. **How should I decide on the initial guess for the parameters which will be optimized?** As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “–d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages.
 
 6. **Can I turn off the optimization for the input parameters?** Yes. But optimization ensures the model charge mimics the original localized charge in large distances as close as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely `check your results`__.
 
@@ -616,7 +620,7 @@ Known issues and limitations
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
 - BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
-- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out = 1). Extrapolation method must be used in these cases.
+- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============
 Release history

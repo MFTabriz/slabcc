@@ -19,9 +19,12 @@ int main(int argc, char *argv[])
 	string input_file = "slabcc.in";
 	string output_file = "slabcc.out";
 	string log_file = "slabcc.log";
+	bool diff_only = false;
 
-	parse_cli(argc, argv, input_file, output_file, log_file);
+	parse_cli(argc, argv, { input_file, output_file, log_file, diff_only });
 	initialize_logger(log_file);
+	auto log = spdlog::get("loggers");
+
 	ofstream output_fstream(output_file);
 	output_fstream << setprecision(12);
 	
@@ -65,7 +68,7 @@ int main(int argc, char *argv[])
 		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
 	parse_input_params(input_file, output_fstream, input_file_variables);
-	auto log = spdlog::get("loggers");
+	
 	log->debug("SLABCC: version {}.{}.{}", SLABCC_VERSION_MAJOR, SLABCC_VERSION_MINOR, SLABCC_VERSION_PATCH);
 	log->debug("Armadillo library: version {}.{}.{}", ARMA_VERSION_MAJOR, ARMA_VERSION_MINOR, ARMA_VERSION_PATCH);
 	log->debug("NLOPT library: version {}.{}.{}", nlopt::version_major(), nlopt::version_minor(), nlopt::version_bugfix());
@@ -76,7 +79,9 @@ int main(int argc, char *argv[])
 
 	vector<pair<string, string>> calculation_results;
 
-	check_inputs(input_file_variables);
+	if (!diff_only) {
+		check_inputs(input_file_variables);
+	}
 
 	//promises for async read of CHGCAR and POTCAR files
 	vector<future<cube>> future_cells;
@@ -125,9 +130,17 @@ int main(int argc, char *argv[])
 	Defect_supercell.potential = Charged_supercell.potential - Neutral_supercell.potential;
 	Defect_supercell.charge = Charged_supercell.charge - Neutral_supercell.charge;
 
-	if (is_active(verbosity::write_defect_file)) {
+	if (is_active(verbosity::write_defect_file) || diff_only) {
 		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_D.LOCPOT", Defect_supercell));
 		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_D.CHGCAR", Defect_supercell));
+	}
+
+	if (diff_only) {
+		log->debug("Only the extra charge and the potential difference calculation have been requested!");
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D");
+		for (auto &promise : future_files) { promise.get(); }
+		output_fstream.close();
+		exit(0);
 	}
 
 	//normalize the charges and potentials
@@ -175,7 +188,7 @@ int main(int argc, char *argv[])
 		log->debug("Optimization grid size: " + to_string(SizeVec(interpolated_potential)));
 
 		//data needed for potential error calculation
-		opt_data optimize_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, interpolated_potential, charge_trivariate, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
+		opt_data optimize_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, interpolated_potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE};
 		UpdateCell(cell_vectors, SizeVec(interpolated_potential));
 		potential_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces);
 		UpdateCell(cell_vectors, input_grid_size);
@@ -208,8 +221,8 @@ int main(int argc, char *argv[])
 			}
 		}
 		if (optimize_charge_position) {
-			const mat orig_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
-			output_fstream << "charge_position_optimized = " << orig_charge_position << '\n';
+			const mat optimized_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
+			output_fstream << "charge_position_optimized = " << optimized_charge_position << '\n';
 
 			// need a better algorithm to handle the swaps and PBCs
 			const mat charge_position_change = abs(charge_position0 - charge_position);
@@ -235,7 +248,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-	opt_data optimized_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, charge_trivariate, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
+	opt_data optimized_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
 	auto local_param = optimizer_packer(opt_vars);
 	vector<double> gradients = {};
 	potential_MSE = potential_eval(get<0>(local_param), gradients, &optimized_data);
@@ -297,7 +310,7 @@ int main(int argc, char *argv[])
 		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D", slabcc_cell.normal_direction);
 		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M", slabcc_cell.normal_direction);
 	}
-	//total charge of the model
+
 	const double total_model_charge = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= total_model_charge / volume;

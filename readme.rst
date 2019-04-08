@@ -1,5 +1,5 @@
-:Last updated: 04 April 2019
-:version: 0.6.0
+:Last updated: 08 April 2019
+:version: 0.6.1
 
 .. sectnum::
 
@@ -30,7 +30,7 @@ And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
  Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
 
-| SLABCC have been initially developed for `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
+| SLABCC have been initially developed for the `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
 
 Please read the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for more information on the algorithm, input and outputs.
 
@@ -133,7 +133,7 @@ Known issues and limitations
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
 - BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
-- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out = 1). Extrapolation method must be used in these cases.
+- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============
 Release history

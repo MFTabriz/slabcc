@@ -1075,10 +1075,10 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">04 April 2019</td>
+<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">08 April 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.6.0</td></tr>
+<td>0.6.1</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1131,7 +1131,7 @@ Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nie
 <blockquote>
 Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: <a class="reference external" href="https://doi.org/10.1063/1.4978238">10.1063/1.4978238</a></blockquote>
 <div class="line-block">
-<div class="line">SLABCC have been initially developed for <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
+<div class="line">SLABCC have been initially developed for the <a class="reference external" href="http://www.bccms.uni-bremen.de">Bremen Center for Computational Materials Science (BCCMS)</a></div>
 </div>
 <div class="section" id="algorithm">
     <h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
@@ -1369,29 +1369,28 @@ diel_out = 1
 <tbody valign="top">
 <tr><td class="option-group">
 <kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
-<td>Display usage information (this list)</td></tr>
-<tr><td class="option-group" colspan="2">
+<td>Display the usage information (this list)</td></tr>
+<tr><td class="option-group">
 <kbd><span class="option">-i</span>, <span class="option">--input <var>&lt;input_file&gt;</var></span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>slabcc input file name</td></tr>
-<tr><td class="option-group" colspan="2">
+<td>slabcc input file name</td></tr>
+<tr><td class="option-group">
 <kbd><span class="option">-o</span>, <span class="option">--output <var>&lt;input_file&gt;</var></span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>slabcc output file name</td></tr>
-<tr><td class="option-group" colspan="2">
+<td>slabcc output file name</td></tr>
+<tr><td class="option-group">
 <kbd><span class="option">-l</span>, <span class="option">--log <var>&lt;log_file&gt;</var></span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>slabcc log file name</td></tr>
+<td>slabcc log file name</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-d</span>, <span class="option">--diff</span></kbd></td>
+<td>Calculate the charge and the potential differences only</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-m</span>, <span class="option">--manual</span></kbd></td>
-<td>Show quick start guide</td></tr>
+<td>Show the quick start guide</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-v</span>, <span class="option">--version</span></kbd></td>
-<td>Show version and compilation date</td></tr>
-<tr><td class="option-group" colspan="2">
+<td>Show the slabcc version and its compilation date</td></tr>
+<tr><td class="option-group">
 <kbd><span class="option">-c</span>, <span class="option">--copyright</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Show copyright information and the attributions</td></tr>
+<td>Show the copyright information and the attributions</td></tr>
 </tbody>
 </table>
 </div>
@@ -1632,10 +1631,9 @@ Gaussian model charge and the extra-charge of QM
 calculations in the direction normal to the slab
 surface.</p>
 <p>2: Write extra-charge density, extra-charge potential
-and dielectric profiles. Display debug info.</p>
+and dielectric profiles. Display debug info including the compilation machine info and a few important enviroment variables.</p>
 <p>3: Write the planar averaged files in all directions.</p>
-<p class="last">4: Display execution walltime (hh:mm:ss) and the
-calculation steps (trace mode)</p>
+<p class="last">4: Display the time passed since the start of slabcc (in seconds) and a description of each calculation step (trace mode)</p>
 </td>
 <td>1</td>
 </tr>
@@ -1879,9 +1877,9 @@ LCHARG = .TRUE.
 After obtaining the files for your charged system, do the calculation again <em>without relaxing the geometry</em> to get the necessary files for the neutralized system.</blockquote>
 <ol class="arabic simple" start="2">
 <li><strong>Do I need to perform spin polarized calculation in VASP?</strong>  Although, the slabcc only reads the sum of both spins, but for proper description of the charge distribution in your system you may need to perform spin polarized calculation.</li>
-<li><strong>How to speed-up the optimization process?</strong> Improving the initial guess, using a smaller grid for optimization (<tt class="docutils literal">optimize_grid_x</tt> &lt; 1), or increasing the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) can speed up the process but the accuracy of the obtained results must be checked.</li>
+<li><strong>How to speed-up the optimization process?</strong> Improving the initial guess, using a smaller grid for optimization (<tt class="docutils literal">optimize_grid_x &lt; 1</tt>), or increasing the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) can speed up the process but the accuracy of the obtained results must be checked.</li>
 <li><strong>Why do I need to provide an initial guess for the parameters which will be optimized?</strong> The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.</li>
-<li><strong>How should I decide on the initial guess for the parameters which will be optimized?</strong> As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position.</li>
+<li><strong>How should I decide on the initial guess for the parameters which will be optimized?</strong> As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “–d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages.</li>
 <li><strong>Can I turn off the optimization for the input parameters?</strong> Yes. But optimization ensures the model charge mimics the original localized charge in large distances as close as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely <a class="reference internal" href="#check">check your results</a>.</li>
 </ol>
 <ol class="arabic simple" start="7">
@@ -1909,7 +1907,7 @@ Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SL
 </li>
 <li><p class="first">BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.</p>
 </li>
-<li><p class="first">Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (<tt class="docutils literal">diel_out = 1</tt>). Extrapolation method must be used in these cases.</p>
+<li><p class="first">Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (<tt class="docutils literal">diel_out > 1</tt>). Extrapolation method must be used in these cases.</p>
 </li>
 </ul>
 </div>

@@ -42,28 +42,31 @@ string tolower(string in_str) noexcept {
 	return in_str;
 }
 
-void parse_cli(int argc, char *argv[], string& input_file, string &output_file, string &log_file) {
+void parse_cli(int argc, char *argv[], cli_params& cli_parameters) {
 
 	bool showHelp = false, showManual = false, showVer = false, showAttr = false;
 	auto cli = clara::Help(showHelp) |
-		clara::Opt(input_file, "input_file")
+		clara::Opt(cli_parameters.input_file, "input_file")
 		["-i"]["--input"]
 		("slabcc input file name") |
-		clara::Opt(output_file, "input_file")
+		clara::Opt(cli_parameters.output_file, "input_file")
 		["-o"]["--output"]
 		("slabcc output file name") |
-		clara::Opt(log_file, "log_file")
+		clara::Opt(cli_parameters.log_file, "log_file")
 		["-l"]["--log"]
 		("slabcc log file name") |
+		clara::Opt(cli_parameters.diff_only)
+		["-d"]["--diff"]
+		("calculate the charge and the potential differences only") |
 		clara::Opt(showManual)
 		["-m"]["--man"]
-		("show quick start guide") |
+		("show the quick start guide") |
 		clara::Opt(showVer)
 		["-v"]["--version"]
-		("show version and compilation date") |
+		("show the slabcc version and its compilation date") |
 		clara::Opt(showAttr)
 		["-c"]["--copyright"]
-		("show copyright information and the attributions");
+		("show the copyright information and the attributions");
 
 	auto cli_result = cli.parse(clara::Args(argc, argv));
 	if (!cli_result) {
@@ -86,15 +89,15 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 	}
 
 	if (showManual) {
-		cout << "Quick user guide:\n"
-			"To calculate the charge correction slabcc needs the following files:\n"
+		cout << "Quick start guide:\n"
+			"To calculate the charge correction, slabcc needs the following files:\n"
 			" 1. Input parameters file (default: slabcc.in)\n"
 			" 2. CHGCAR of the neutral system\n"
 			" 3. CHGCAR of the charged system\n"
 			" 4. LOCPOT of the neutral system\n"
 			" 5. LOCPOT of the charged system\n\n"
 			"The input parameters file for a slab should minimally include:\n"
-			" - charge_position : approximate position of the localized charge\n"
+			" - charge_position : approximate position of the localized charge center\n"
 			" - diel_in : dielectric constant/tensor of the slab\n"
 			" - normal_direction : direction normal to the surface\n"
 			" - interfaces : surface positions of the slab\n";
@@ -124,7 +127,7 @@ void parse_cli(int argc, char *argv[], string& input_file, string &output_file, 
 			"  (c) 2007-2010, Massachusetts Institute of Technology\n\n"
 			"-spdlog: licensed under the MIT License\n"
 		    "  (c) 2016, Gabi Melman\n\n"
-			"-Boost.Predef: licensed under the Boost Software License\n"
+			"-Boost.Predef: licensed under the Boost Software License 1.0\n"
 			"  (c) 2005-2018 Rene Rivera\n"
 			"  (c) 2015 Charly Chevalier\n"
 			"  (c) 2015 Joel Falcou\n";
@@ -165,7 +168,7 @@ void logger_update() {
 	}
 
 	if (is_active(verbosity::timing)) {
-		log_pattern = "[%H:%M:%S.%e]" + log_pattern;
+		log_pattern = "[%K]" + log_pattern;
 	}
 
 	log->set_pattern(log_pattern);
