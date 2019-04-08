@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
 	string output_file = "slabcc.out";
 	string log_file = "slabcc.log";
 	bool diff_only = false;
-
-	parse_cli(argc, argv, { input_file, output_file, log_file, diff_only });
+	cli_params parameter_list = { input_file, output_file, log_file, diff_only };
+	parse_cli(argc, argv, parameter_list);
 	initialize_logger(log_file);
 	auto log = spdlog::get("loggers");
 
