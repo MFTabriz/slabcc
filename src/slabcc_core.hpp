@@ -64,7 +64,7 @@ struct opt_data {
 struct opt_vars {
 	rowvec2 &interfaces;
 	mat &charge_sigma;
-	rowvec &charge_q;
+	rowvec &charge_fraction;
 	mat &charge_position;
 };
 
@@ -102,7 +102,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 
 //pack the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
 //returned vectors are "optimization parameters", "lower boundaries", "upper boundaries"
-tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge_position = false, const bool optimize_charge_sigma = false, const bool optimize_charge_fraction = false, const bool optimize_interface = false);
+tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge_position = false, const bool optimize_charge_sigma = false, const bool optimize_charge_fraction = false, const bool optimize_interface = false, const bool trivariate = false);
 
 //unpack the optimization variable structure into opt_vars struct variables
 void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_vars);

@@ -46,7 +46,6 @@ void UpdateCell(const mat33& vectors, const urowvec3& grid) {
 	slabcc_cell.voxel_vol = prod(slabcc_cell.vec_lengths / grid);
 }
 
-
 cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const rowvec3& sigma, const bool& trivariate) {
 
 	rowvec x0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(0) - slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0), slabcc_cell.grid(0));
@@ -148,9 +147,9 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 
 	rowvec2 shifted_interfaces;
 	mat charge_sigma;
-	rowvec charge_q;
+	rowvec charge_fraction;
 	mat charge_position;
-	opt_vars variables = { shifted_interfaces, charge_sigma, charge_q, charge_position };
+	opt_vars variables = { shifted_interfaces, charge_sigma, charge_fraction, charge_position };
 	optimizer_unpacker(x, variables);
 
 	//input data
@@ -164,7 +163,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	const rowvec3 &rounded_relative_shift = d->rounded_relative_shift;
 
 	//rest of the charge goes to the last Gaussian
-	charge_q(charge_q.n_elem - 1) = total_vasp_charge - accu(charge_q);
+	charge_fraction(charge_fraction.n_elem - 1) = 1 - accu(charge_fraction);
 
 	//output data
 	mat& dielectric_profiles = d->dielectric_profiles;
@@ -177,8 +176,8 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 
 	rhoM.reset();
 	rhoM = zeros<cx_cube>(as_size(slabcc_cell.grid));
-	for (uword i = 0; i < charge_q.n_elem; ++i) {
-		rhoM += gaussian_charge(charge_q(i), charge_position.row(i).t(), charge_sigma.row(i), trivariate);
+	for (uword i = 0; i < charge_fraction.n_elem; ++i) {
+		rhoM += gaussian_charge(charge_fraction(i) * total_vasp_charge, charge_position.row(i).t(), charge_sigma.row(i), trivariate);
 	}
 
 	V = poisson_solver_3D(rhoM, dielectric_profiles);
@@ -199,7 +198,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 
 	const mat unshifted_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 
-	for (uword i = 0; i < charge_q.n_elem; ++i) {
+	for (uword i = 0; i < charge_fraction.n_elem; ++i) {
 		log->debug("> charge_position=" + ::to_string(unshifted_charge_position.row(i)));
 		if (trivariate) {
 			log->debug("> charge_sigma=" + ::to_string(charge_sigma.row(i)));
@@ -207,8 +206,8 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 		else {
 			log->debug("> charge_sigma=" + ::to_string(charge_sigma(i,0)));
 		}
-		if (charge_q.n_elem > 1) {
-			log->debug("> charge_fraction={}", abs(charge_q(i) / accu(charge_q)));
+		if (charge_fraction.n_elem > 1) {
+			log->debug("> charge_fraction={}", charge_fraction(i));
 		}		
 	}
 	log->debug("Potential Root Mean Square Error: {}", sqrt(potential_MSE));
@@ -220,22 +219,28 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	auto log = spdlog::get("loggers");
 	double pot_MSE_min = 0;
 	auto opt_algorithm = nlopt::LN_COBYLA;
-	if (opt_algo == "BOBYQA") {
-		if (opt_vars.charge_q.n_elem == 1) {
+	
+	if (opt_vars.charge_fraction.n_elem == 1) {
+		if (opt_algo == "BOBYQA") {
 			opt_algorithm = nlopt::LN_BOBYQA;
+		} 
+		else if (opt_algo == "SBPLX") {
+			opt_algorithm = nlopt::LN_SBPLX;
 		}
-		else {
-			//BOBYQA in NLOPT 2.4.2 does not support the constraints!
-			log->warn("BOBYQA optimization algorithm does not support the models with multiple charges! COBYLA will be used instead!");
+	}
+	else {
+		if (opt_algo != "COBYLA") {
+			//SBPLX/BOBYQA in NLOPT 2.4.2 does not support the inequality constraints which is needed to preserve the total charge of the model!
+			log->warn("SBPLX/BOBYQA optimization algorithms does not support the models with multiple charges! COBYLA will be used instead!");
 		}
 	}
 
-	vector<double> opt_param, low_b, upp_b;
-	tie(opt_param, low_b, upp_b) = optimizer_packer(opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces);
+	vector<double> opt_param, low_b, upp_b, step_size;
+	tie(opt_param, low_b, upp_b, step_size) = optimizer_packer(opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces, opt_data.trivariate);
 	nlopt::opt opt(opt_algorithm, opt_param.size());
-
 	opt.set_lower_bounds(low_b);
 	opt.set_upper_bounds(upp_b);
+	opt.set_initial_step(step_size);
 
 	opt.set_min_objective(potential_eval, &opt_data);
 	opt.set_xtol_rel(square(opt_tol));   //tolerance is defined for RMSE in the input, optimizer is checking MSE
@@ -245,16 +250,16 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	if (max_time > 0) {
 		opt.set_maxtime(60.0 * max_time);
 	}
-	if (opt_vars.charge_q.n_elem > 1) {
+	if (opt_vars.charge_fraction.n_elem > 1) {
 		//add constraint to keep the total charge constant
-		opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-8);
+		opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-6);
 	}
 
 	const int sigma_per_charge = opt_data.trivariate ? 3 : 1;
 	const int var_per_charge = static_cast<int>(optimize_charge_position) * 3
 		+ static_cast<int>(optimize_charge_sigma) * sigma_per_charge
 		+ static_cast<int>(optimize_charge_fraction) * 1;
-	const uword opt_parameters = opt_vars.charge_q.n_elem * var_per_charge + 2 * optimize_interfaces;
+	const uword opt_parameters = opt_vars.charge_fraction.n_elem * var_per_charge + 2 * optimize_interfaces;
 	log->trace("Started optimizing {} model parameters", opt_parameters);
 	log->trace("Optimization algorithm: " + string(opt.get_algorithm_name()));
 	try {
@@ -269,6 +274,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	}
 	catch (const exception &e) {
 		log->error("Optimization of the slabcc parameters failed: " + string(e.what()));
+		log->error("Please start with better initial guess for the input parameters or change the optimization algorithm.");
 	}
 
 	optimizer_unpacker(opt_param, opt_vars);
@@ -277,8 +283,15 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	return pot_MSE_min;
 }
 
-tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge_position, const bool optimize_charge_sigma, const bool optimize_charge_fraction, const bool optimize_interface) {
-
+tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge_position, const bool optimize_charge_sigma, const bool optimize_charge_fraction, const bool optimize_interface, const bool trivariate) {
+	//size of the first step for each parameter
+	const double move_step = 1; //Ang
+	const double sigma_step = 0.5;
+	const double fraction_step = 0.2;
+	const rowvec3 relative_move_step = move_step * ang_to_bohr / slabcc_cell.vec_lengths;
+	
+	//------interfaces----
+	vector<double> step_size = { relative_move_step(slabcc_cell.normal_direction) , relative_move_step(slabcc_cell.normal_direction) };
 	vector<double> opt_param = { opt_vars.interfaces(0), opt_vars.interfaces(1) };
 	vector<double> low_b = { 0, 0 };		//lower bounds
 	vector<double> upp_b = { 1, 1 };		//upper bounds
@@ -287,6 +300,8 @@ tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt
 		upp_b = opt_param;
 	}
 
+
+	//------charge positions----
 	for (uword i = 0; i < opt_vars.charge_position.n_rows; ++i) {
 		for (uword j = 0; j < 3; ++j) {
 			opt_param.push_back(opt_vars.charge_position(i, j));
@@ -299,35 +314,50 @@ tuple<vector<double>, vector<double>, vector<double>> optimizer_packer(const opt
 				upp_b.push_back(opt_vars.charge_position(i, j));
 			}
 		}
+		step_size.insert(step_size.end(), { relative_move_step(0), relative_move_step(1), relative_move_step(2) });
+
+		//------charge_sigma----
 		opt_param.insert(opt_param.end(), { opt_vars.charge_sigma(i, 0), opt_vars.charge_sigma(i, 1), opt_vars.charge_sigma(i, 2) });
-		opt_param.push_back(opt_vars.charge_q(i));
+		step_size.insert(step_size.end(), { sigma_step,sigma_step,sigma_step });
+
 		if (optimize_charge_sigma) {
-			low_b.insert(low_b.end(), { 0.1, 0.1, 0.1 });
-			upp_b.insert(upp_b.end(), { 7, 7, 7 });
+			if (trivariate) {
+				low_b.insert(low_b.end(), { 0.1, 0.1, 0.1 });
+				upp_b.insert(upp_b.end(), { 7, 7, 7 });
+			}
+			else {
+				low_b.insert(low_b.end(), { 0.1, opt_vars.charge_sigma(i, 1), opt_vars.charge_sigma(i, 2) });
+				upp_b.insert(upp_b.end(), { 7, opt_vars.charge_sigma(i, 1), opt_vars.charge_sigma(i, 2) });
+			}
+
 		}
 		else {
 			low_b.insert(low_b.end(), { opt_vars.charge_sigma(i, 0), opt_vars.charge_sigma(i, 1), opt_vars.charge_sigma(i, 2) });
 			upp_b.insert(upp_b.end(), { opt_vars.charge_sigma(i, 0), opt_vars.charge_sigma(i, 1), opt_vars.charge_sigma(i, 2) });
 		}
-		const auto min_charge = min(0.0, accu(opt_vars.charge_q));
-		const auto max_charge = max(0.0, accu(opt_vars.charge_q));
+
+		//------charge fractions----
+		opt_param.push_back(opt_vars.charge_fraction(i));
+		step_size.push_back(fraction_step);
+
 		if (optimize_charge_fraction) {
-			low_b.push_back(min_charge);
-			upp_b.push_back(max_charge);
+			low_b.push_back(0);
+			upp_b.push_back(1);
 		}
 		else {
-			low_b.push_back(opt_vars.charge_q(i));
-			upp_b.push_back(opt_vars.charge_q(i));
+			low_b.push_back(opt_vars.charge_fraction(i));
+			upp_b.push_back(opt_vars.charge_fraction(i));
 		}
 	}
 
-	//remove the last charge_q from the parameters 
-	//this gives a better chance to optimizer and also removes the charge_q if we have only one charge
+	//remove the last charge_fraction from the parameters 
+	//this gives a better chance to optimizer and also removes the charge_fraction if we have only one charge
 	opt_param.pop_back();
 	upp_b.pop_back();
 	low_b.pop_back();
+	step_size.pop_back();
 
-	return make_tuple(opt_param, low_b, upp_b);
+	return make_tuple(opt_param, low_b, upp_b, step_size);
 }
 
 void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_vars) {
@@ -338,7 +368,7 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_
 	const uword variable_per_charge = 7;
 	const uword n_charges = optimizer_vars_vec.size() / variable_per_charge;
 	opt_vars.charge_sigma = zeros(n_charges, 3);
-	opt_vars.charge_q = zeros<rowvec>(n_charges);
+	opt_vars.charge_fraction = zeros<rowvec>(n_charges);
 	opt_vars.charge_position = zeros(n_charges, 3);
 	opt_vars.interfaces = { optimizer_vars_vec.at(0), optimizer_vars_vec.at(1) };
 
@@ -348,7 +378,7 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_
 			opt_vars.charge_sigma(i, j) = optimizer_vars_vec.at(5 + i * variable_per_charge + j);
 		}
 		if (i != n_charges - 1) {
-			opt_vars.charge_q(i) = optimizer_vars_vec.at(8 + i * variable_per_charge);
+			opt_vars.charge_fraction(i) = optimizer_vars_vec.at(8 + i * variable_per_charge);
 		}
 	}
 }
@@ -400,10 +430,15 @@ void check_inputs(input_data input_set) {
 		}
 	}
 	if (input_set.optimize_charge_position || input_set.optimize_charge_sigma || input_set.optimize_charge_fraction || input_set.optimize_interface) {
-		if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA")) {
+		if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA") && (input_set.opt_algo != "SBPLX")) {
 			log->debug("Optimization algorithm: {}", input_set.opt_algo);
-			log->warn("Unknown optimization algorithm is selected!");
-			input_set.opt_algo = "COBYLA";
+			log->warn("Unsupported optimization algorithm is selected!");
+			if (input_set.charge_position.n_rows == 1) {
+				input_set.opt_algo = "SBPLX";
+			}
+			else {
+				input_set.opt_algo = "COBYLA";
+			}
 			log->warn("{} will be used instead!", input_set.opt_algo);
 		}
 
@@ -415,7 +450,7 @@ void check_inputs(input_data input_set) {
 		if ((input_set.opt_tol > 1) || (input_set.opt_tol < 0)) {
 			log->debug("Requested optimization tolerance: {}", input_set.opt_tol);
 			log->warn("The relative optimization tolerance is unacceptable! It must be in choosen in (0-1) range.");
-			input_set.opt_tol = 0.001;
+			input_set.opt_tol = 0.01;
 			log->warn("optimize_tolerance = {} will be used!", input_set.opt_tol);
 		}
 	}
@@ -428,55 +463,67 @@ void check_inputs(input_data input_set) {
 		exit(1);
 	}
 
-	if (input_set.charge_sigma.n_rows == input_set.charge_position.n_rows) {
-		if (input_set.charge_sigma.n_cols == 3) {
+	const uword charge_number = input_set.charge_position.n_rows;
+	const uword sigma_rows = input_set.charge_sigma.n_rows;
+	const uword sigma_cols = input_set.charge_sigma.n_cols;
+
+	if (input_set.charge_sigma.n_elem == 1) {
+		input_set.charge_sigma = input_set.charge_sigma(0) * ones(charge_number, 3);
+		log->debug("Only one charge_sigma is defined!");
+
+	}else if (sigma_rows == charge_number) {
+		if (sigma_cols == 3) {
 			if (input_set.trivariate) {
 				log->debug("All the charge_sigma values are properly defined!");
 			}
 			else {
-				//not trivariate but we have 3 values for each sigma!
-				if ((approx_equal(input_set.charge_sigma.col(0), input_set.charge_sigma.col(1), "absdiff", 0.02)) 
-				&& (approx_equal(input_set.charge_sigma.col(1), input_set.charge_sigma.col(2), "absdiff", 0.02))){
-					log->debug("Although the Gaussian models has not been defined as trivariate, but there are 3 charge_sigma values for each Gaussian charge! Regardless, these values seem to be equal!!");
-				}
-				else {
-					log->warn("The slabcc Gaussian charges are assumed to be monovariate but there are different sigma values defined for each direction!");
-					log->warn("If you want to construct a model charge using trivariate Gaussians, use \"charge_trivariate=yes\"");
-					log->warn("Only the 1st set of parameters will be used in this calculation. charge_sigma={}", to_string(input_set.charge_sigma.col(0)));
-				}
+				log->warn("charge_sigma is not defined properly! charge_sigma={} will be used.", to_string(input_set.charge_sigma.col(0)));
 			}
 		}
-		else if (input_set.charge_sigma.n_cols == 1) {
+		else if (sigma_cols == 1) {
 			input_set.charge_sigma = repmat(input_set.charge_sigma, 1, 3);
 			if (input_set.trivariate) {
 				log->debug("Equal values will be assumed for the charge_sigma in all directions!");
 			}
-		}
-		else {
-			log->warn("Number of the defined Gaussian charges and the charge_sigma sets does not match!");
-			input_set.charge_sigma = mat(arma::size(input_set.charge_position), fill::ones);
-			if (input_set.trivariate) {
-				log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma));
-			}
 			else {
-				log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma.col(0)));
+				log->debug("charge_sigma is properly defined!");
 			}
 		}
 	}
-
-	if (input_set.charge_sigma.n_rows != input_set.charge_position.n_rows) {
-		log->debug("Number of charge_sigma sets: {}", input_set.charge_sigma.n_rows);
-		log->debug("Number of Gaussian charges: {}", input_set.charge_position.n_rows);
-		input_set.charge_sigma = mat(arma::size(input_set.charge_position), fill::ones);
+	else if (sigma_cols == charge_number) {
+		if (sigma_rows == 1) {
+			input_set.charge_sigma = repmat(input_set.charge_sigma.t(), 1, 3);
+			if (input_set.trivariate) {	
+				log->debug("Equal values will be assumed for the charge_sigma in all directions!");
+			}
+			else {
+				log->debug("charge_sigma is properly defined!");
+			}
+		}
+	}
+	else if ((sigma_cols == 3) && (sigma_rows == 1)) {
+		if (input_set.trivariate) {
+			input_set.charge_sigma = repmat(input_set.charge_sigma, charge_number, 1);
+			log->debug("Equal charge_sigma will be assumed for all the Gaussian charges!");
+		}
+	}
+	
+	
+	//if all the sensible checks and remedies have been failed!
+	if(arma::size(input_set.charge_sigma) != arma::size(input_set.charge_position)){
 		log->warn("Number of the defined Gaussian charges and the charge_sigma sets does not match!");
+		input_set.charge_sigma = mat(arma::size(input_set.charge_position), fill::ones);
 		if (input_set.trivariate) {
 			log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma));
 		}
 		else {
 			log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma.col(0)));
 		}
-		
 	}
+
+	log->debug("charge_sigma after the checks: {}", to_string(input_set.charge_sigma));
+
+	//charge_fraction
 	if (input_set.charge_fraction.n_elem != input_set.charge_position.n_rows) {
 		log->debug("Number of charge position values: {}", input_set.charge_position.n_rows);
 		log->debug("Number of charge fraction values: {}", input_set.charge_fraction.n_elem);
@@ -547,7 +594,7 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 	auto log = spdlog::get("loggers");
 	INIReader reader(input_file);
 	if (reader.ParseError() < 0) {
-		log->critical("Cannot load '{}'", input_file);
+		log->critical("Cannot load the input file: {}", input_file);
 		exit(1);
 	}
 
@@ -572,8 +619,8 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 	input_set.optimize_charge_fraction = reader.GetBoolean("optimize_charge_fraction", true);
 	input_set.optimize_interface = reader.GetBoolean("optimize_interfaces", true);
 	input_set.model_2D = reader.GetBoolean("2d_model", false);
-	input_set.opt_algo = reader.GetStr("optimize_algorithm", "COBYLA");
-	input_set.opt_tol = reader.GetReal("optimize_tolerance", 1e-3);
+	input_set.opt_algo = reader.GetStr("optimize_algorithm", (input_set.charge_position.n_rows == 1) ? "BOBYQA" : "COBYLA");
+	input_set.opt_tol = reader.GetReal("optimize_tolerance", (input_set.opt_algo == "COBYLA") ? 5e-2 : 1e-2);
 	input_set.max_eval = reader.GetInteger("optimize_maxsteps", 0);
 	input_set.max_time = reader.GetInteger("optimize_maxtime", 0);
 	input_set.opt_grid_x = reader.GetReal("optimize_grid_x", 0.8);
@@ -647,7 +694,7 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 
 void verify_interface_optimization(const rowvec2& initial_interfaces, const rowvec2& optimized_interfaces) {
 	
-	const double max_total_safe_movement = 4;
+	const double max_total_safe_movement = 4; //Ang
 	const double normal_length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction) / ang_to_bohr;
 	auto log = spdlog::get("loggers");
 

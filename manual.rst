@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 08 April 2019
-:version: 0.6.1
+:Last updated: 14 April 2019
+:version: 0.6.2
 
 .. sectnum::
 
@@ -324,9 +324,16 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``normal_direction = b``                               |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_algorithm``       |Optimization algorithm                                 |    COBYLA     |
-|                              |(`BOBYQA <https://en.wikipedia.org/wiki/BOBYQA>`_ [#]_ |               |
-|                              |/`COBYLA <https://en.wikipedia.org/wiki/COBYLA>`_ [#]_)|               |
+| ``optimize_algorithm``       |Optimization algorithm in the NLOPT library            |BOBYQA: for    |
+|                              |                                                       |the models with|
+|                              |`BOBYQA <https://en.wikipedia.org/wiki/BOBYQA>`_ :     |a single       |
+|                              |Bound Optimization BY Quadratic Approximation [#]_     |Gaussian charge|
+|                              |                                                       |               |
+|                              |`COBYLA <https://en.wikipedia.org/wiki/COBYLA>`_:      |COBYLA: for    |
+|                              |Constrained Optimization BY Linear Approximation [#]_  |the models with|
+|                              |                                                       |multiple       |
+|                              |SBPLX: S.G. Johnson's implementation of the            |Gaussian       |
+|                              |Subplex (subspace-searching simplex) algorithm [#]_    |charges        |
 |                              |                                                       |               |
 |                              |``optimize_algorithm = BOBYQA``                        |               |
 +------------------------------+-------------------------------------------------------+---------------+
@@ -364,7 +371,7 @@ The input file is processed as follows:
 |                              |optimize_grid_x < 1 will use the smaller grid which    |               |
 |                              |increases the speed and decreases the memory usage but |               |
 |                              |the parameters obtained using very small values may    |               |
-|                              |not be very accurate!                                  |               |
+|                              |be inaccurate!                                         |               |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``optimize_interfaces``      |**true**: find the optimal values for the model charge |               |
 |                              |interfaces to construct the best model which mimics    |     true      |
@@ -381,8 +388,11 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``optimize_maxtime = 1440``                            |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_tolerance``       |Relative optimization tolerance (convergence criteria) |    1e-3       |
+| ``optimize_tolerance``       |Relative optimization tolerance (convergence criteria) |0.05 for COBYLA|
 |                              |for root mean square error of the model potential      |               |
+|                              |                                                       |0.01 for the   |
+|                              |                                                       |other          |
+|                              |                                                       |algorithms     |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Center of the slab.                                    |               |
 | ``slab_center``              |(This point must be inside of the slab)                |  0.5 0.5 0.5  |
@@ -391,30 +401,32 @@ The input file is processed as follows:
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Verbosity of the program [#]_                          |               |
 | ``verbosity``                |                                                       |       1       |
-|                              |0: No extra info. Only write the output file.          |               |
+|                              |**0**: No extra info. Only write the output file.      |               |
 |                              |Logging is disabled.                                   |               |
 |                              |                                                       |               |
-|                              |1: Display calculated energy correction terms.         |               |
+|                              |**1**: Display calculated energy correction terms.     |               |
 |                              |Write the planar averaged potential and charge for the |               |
 |                              |Gaussian model charge and the extra-charge of QM       |               |
 |                              |calculations in the direction normal to the slab       |               |
 |                              |surface.                                               |               |
 |                              |                                                       |               |
-|                              |2: Write extra-charge density, extra-charge potential  |               |
-|                              |and dielectric profiles. Display debug info including  |               |
-|                              |the compilation machine info and a few important       |
-|                              |enviroment variables.                                  |               |
+|                              |**2**: Write extra-charge density, extra-charge        |               |
+|                              |potential and dielectric profiles. Display debug info  |               |
+|                              |including the compilation machine info and a few       |               |
+|                              |important enviroment variables.                        |               |
 |                              |                                                       |               |
-|                              |3: Write the planar averaged files in all directions.  |               |
+|                              |**3**: Write the planar averaged files in all          |               |
+|                              |directions.                                            |               |
 |                              |                                                       |               |
-|                              |4: Display the time passed since the start of slabcc   |               |
-|                              |(in seconds) and a description of each calculation step|               |
-|                              |(trace mode)                                           |               |
+|                              |**4**: Display the time passed since the start of      |               |
+|                              |slabcc (in seconds) and a description of each          |               |
+|                              |calculation step (trace mode)                          |               |
 +------------------------------+-------------------------------------------------------+---------------+
 
 .. [#] extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.
 .. [#] M.J.D. Powell, `The BOBYQA algorithm for bound constrained optimization without derivatives <http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf>`_, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).
 .. [#] M.J.D. Powell, `Direct search algorithms for optimization calculations <https://doi.org/10.1017/S0962492900002841>`_, Acta Numerica, Vol. 7(1998) pp. 287-336
+.. [#] T.H. Rowan, `Functional Stability Analysis of Numerical Algorithms <https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.5708>`_, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.
 .. [#] each verbosity level includes all the outputs from the lower verbosity options. Check `the files table`_ for complete list of the output files.
 
 ===============================
@@ -619,7 +631,7 @@ Known issues and limitations
 ==================================
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- BOBYQA algorithm cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
+- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============

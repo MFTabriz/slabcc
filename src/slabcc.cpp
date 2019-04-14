@@ -155,9 +155,6 @@ int main(int argc, char *argv[])
 		log->debug("Total extra charge: {}", total_vasp_charge);
 		log->warn("Total extra charge seems to be very small. Please make sure the path to the input CHGCAR files are set properly!");
 	}
-	//charge of each Gaussian
-	rowvec charge_q = charge_fraction * total_vasp_charge / accu(charge_fraction);
-
 	mat dielectric_profiles = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
 
 	// model charge distribution (e/bohr^3), negative for presence of the electron 
@@ -173,7 +170,7 @@ int main(int argc, char *argv[])
 	double initial_potential_MSE = -1;
 
 	// variables to optimize
-	opt_vars opt_vars = { shifted_interfaces, charge_sigma, charge_q, charge_position };
+	opt_vars opt_vars = { shifted_interfaces, charge_sigma, charge_fraction, charge_position };
 
 	if (optimize_charge_position || optimize_charge_sigma || optimize_charge_fraction || optimize_interfaces) {
 		const rowvec2 shifted_interfaces0 = shifted_interfaces;
@@ -193,7 +190,7 @@ int main(int argc, char *argv[])
 		potential_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces);
 		UpdateCell(cell_vectors, input_grid_size);
 		//add back the last Gaussian charge (removed in the optimization)
-		charge_q(charge_q.n_elem - 1) = total_vasp_charge - accu(charge_q);
+		charge_fraction(charge_fraction.n_elem - 1) = 1 - accu(charge_fraction);
 
 		//write the unshifted optimized values to the file
 		output_fstream << "\n[Optimized_model_parameters]\n";
@@ -208,9 +205,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (optimize_charge_fraction) {
-			if (charge_q.n_elem > 1) {
-				output_fstream << "charge_fraction_optimized =" << abs(charge_q / accu(charge_q));
-			}
+			output_fstream << "charge_fraction_optimized =" << charge_fraction << "\n";
 		}
 		if (optimize_charge_sigma) {
 			if (charge_trivariate) {
@@ -248,6 +243,10 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
+
+	//charge of each Gaussian
+	rowvec charge_q = charge_fraction * total_vasp_charge;
+
 	opt_data optimized_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
 	auto local_param = optimizer_packer(opt_vars);
 	vector<double> gradients = {};
@@ -376,7 +375,7 @@ int main(int argc, char *argv[])
 			const auto madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
 			auto madelung_term = -pow(total_model_charge, 2) * madelung_const / 2;
 			nonlinear_fit_data fit_data = { Es ,sizes, madelung_term };
-			const auto cs = nonlinear_fit(1e-12, fit_data);
+			const auto cs = nonlinear_fit(1e-10, fit_data);
 
 			log->info("Madelung constant = " + ::to_string(madelung_const));
 			const string fit_params = "c0= " + ::to_string(cs.at(0)) +

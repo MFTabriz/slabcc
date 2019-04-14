@@ -4,7 +4,7 @@
 
 #include "isolated.hpp"
 
-tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const rowvec &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
+tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
@@ -15,7 +15,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 
-		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
+		const double extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 
 		UpdateCell(cell_vectors0 * extrapol_factor, extrapolation_grid);
 
@@ -63,7 +63,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 	return make_tuple(Es, sizes);
 }
 
-tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const rowvec &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
+tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;

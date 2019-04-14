@@ -4,7 +4,7 @@
 // Go to the project home page for more info:
 // https://github.com/benhoyt/inih
 
-// NOTE: the "sections" parameter is removed from the interface functions
+// NOTE: the "sections" parameter has been removed from the interface functions
 
 #include "../ini.h"
 #include "INIReader.h"
@@ -63,6 +63,8 @@ void INIReader::dump_compilation_info() const {
 	#if defined(BOOST_COMP_MSVC_AVAILABLE)
 		log->debug("Available compiler: {} version {}", BOOST_COMP_MSVC_NAME, _MSC_VER);
 	#endif
+
+		log->debug("Compilation date: {} {}", __DATE__ , __TIME__);
 
 }
 
