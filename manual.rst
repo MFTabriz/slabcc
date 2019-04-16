@@ -176,9 +176,9 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     CHGCAR_charged = CHARGED_CHGCAR
     CHGCAR_neutral = UNCHARGED_CHGCAR
     2D_model = yes
-	extrapolate = yes
-	extrapolate_steps_number = 20
-	extrapolate_grid_x = 4.5
+    extrapolate = yes
+    extrapolate_steps_number = 20
+    extrapolate_grid_x = 4.5
     charge_position = 0.5 0.4 0.56
     interfaces =  0.66 0.46
     normal_direction = z

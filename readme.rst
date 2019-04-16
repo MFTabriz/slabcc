@@ -94,7 +94,8 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 4.8
     diel_out = 4.8
 
-4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poisson equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
+
+4. **Correction for the monolayers i.e. 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, in-plane dielectric constants must be equal and the model must be surrounded by the vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -107,6 +108,20 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
+5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α < 0.2) is necessary. A large extrapolation grid size is also required to calculate the energies accurately::
+
+    LOCPOT_charged = CHARGED_LOCPOT
+    LOCPOT_neutral = UNCHARGED_LOCPOT
+    CHGCAR_charged = CHARGED_CHGCAR
+    CHGCAR_neutral = UNCHARGED_CHGCAR
+    2D_model = yes
+    extrapolate = yes
+    extrapolate_steps_number = 20
+    extrapolate_grid_x = 4.5
+    charge_position = 0.5 0.4 0.56
+    interfaces =  0.66 0.46
+    normal_direction = z
+    diel_in = 6.28 6.28 1.83
 
 Test set
 --------
