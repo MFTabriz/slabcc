@@ -1,5 +1,5 @@
-:Last updated: 14 April 2019
-:version: 0.6.2
+:Last updated: 16 April 2019
+:version: 0.6.3
 
 .. sectnum::
 
@@ -120,19 +120,19 @@ Installation
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. g++ 5.0 or later, or icpc 15.0 or later) 
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside slabcc but it is highly recommended to use OpenBLAS/MKL instead. If you don't have OpenBLAS/BLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
 
-**Note**: By default, the code will be compiled for the specific architecture of your machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
+**Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
 ==================================
 Known issues and limitations
 ==================================
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
+- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with more than 2 localized Gaussian charges. COBYLA algorithm must be used in these cases.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============

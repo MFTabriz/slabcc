@@ -220,7 +220,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	double pot_MSE_min = 0;
 	auto opt_algorithm = nlopt::LN_COBYLA;
 	
-	if (opt_vars.charge_fraction.n_elem == 1) {
+	if (opt_vars.charge_fraction.n_elem < 3) {
 		if (opt_algo == "BOBYQA") {
 			opt_algorithm = nlopt::LN_BOBYQA;
 		} 
@@ -250,7 +250,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	if (max_time > 0) {
 		opt.set_maxtime(60.0 * max_time);
 	}
-	if (opt_vars.charge_fraction.n_elem > 1) {
+	if (opt_vars.charge_fraction.n_elem > 2) {
 		//add constraint to keep the total charge constant
 		opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-6);
 	}
@@ -394,8 +394,8 @@ void check_inputs(input_data input_set) {
 	input_set.opt_grid_x = abs(input_set.opt_grid_x);
 	input_set.opt_tol = abs(input_set.opt_tol);
 
-	if (input_set.max_eval == 1) {
-		log->warn("optimizing for only 1 step will not be any useful!");
+	if ((input_set.max_eval != 0) && (input_set.max_eval < 3)) {
+		log->warn("Searching for the optimum model parameters only for {} steps most probably will not be any useful!", input_set.max_eval);
 	}
 
 	if (input_set.diel_in.n_elem == 1) {
@@ -433,8 +433,8 @@ void check_inputs(input_data input_set) {
 		if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA") && (input_set.opt_algo != "SBPLX")) {
 			log->debug("Optimization algorithm: {}", input_set.opt_algo);
 			log->warn("Unsupported optimization algorithm is selected!");
-			if (input_set.charge_position.n_rows == 1) {
-				input_set.opt_algo = "SBPLX";
+			if (input_set.charge_position.n_rows < 3) {
+				input_set.opt_algo = "BOBYQA";
 			}
 			else {
 				input_set.opt_algo = "COBYLA";

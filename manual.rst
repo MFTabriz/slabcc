@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 14 April 2019
-:version: 0.6.2
+:Last updated: 16 April 2019
+:version: 0.6.3
 
 .. sectnum::
 
@@ -36,7 +36,7 @@ And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
 Algorithm
 ----------
-* slabcc reads `VASP <https://www.vasp.at>`_ output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.
+* slabcc reads the `VASP <https://www.vasp.at>`_ output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.
 * The extra charge is modeled by sum of Gaussian charge distributions as:
 
 .. math::
@@ -78,7 +78,7 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 .. math::
 	E = \frac{1}{2} \int V(r) \rho(r) \, dr
 
-* E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
+* E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for the extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
 
 .. math::
 	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
@@ -156,7 +156,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     diel_in = 4.8
     diel_out = 4.8
 
-4. **Correction for the monolayer i.e. 2D models:** In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poisson equation). Use the extrapolation method (``extrapolate=yes``) for more general cases::
+4. **Correction for the monolayers i.e. 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, in-plane dielectric constants must be equal and the model must be surrounded by the vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -169,6 +169,20 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
+5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α < 0.2) is necessary. A large extrapolation grid size is also required to calculate the energies accurately::
+
+    LOCPOT_charged = CHARGED_LOCPOT
+    LOCPOT_neutral = UNCHARGED_LOCPOT
+    CHGCAR_charged = CHARGED_CHGCAR
+    CHGCAR_neutral = UNCHARGED_CHGCAR
+    2D_model = yes
+	extrapolate = yes
+	extrapolate_steps_number = 20
+	extrapolate_grid_x = 4.5
+    charge_position = 0.5 0.4 0.56
+    interfaces =  0.66 0.46
+    normal_direction = z
+    diel_in = 6.28 6.28 1.83
 
 Test set
 --------
@@ -182,12 +196,12 @@ Installation
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. g++ 5.0 or later, or icpc 15.0 or later) 
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside slabcc but it is highly recommended to use OpenBLAS/MKL instead. If you don't have OpenBLAS/BLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
 
-**Note**: By default, the code will be compiled for the specific architecture of your machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
+**Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
 =======================
 Command-line parameters
@@ -284,19 +298,21 @@ The input file is processed as follows:
 |                              |                                                       |parameter      |
 |                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Extrapolation grid size multiplier.                    |               |
+|                              |Extrapolation grid size multiplier. The number of the  |               |
+|                              |grid points in each direction will be multiplied by    |               |
+|                              |this value.                                            |               |
 |                              |                                                       |               |
-|                              |extrapolate_grid_x > 1 will use larger grid in the     |               |
-|``extrapolate_grid_x``        |extrapolations which will increase the accuracy but    |       1       |
-|                              |requires more memory and computational power.          |               |
+|                              |extrapolate_grid_x > 1 will use a larger grid in the   |               |
+|``extrapolate_grid_x``        |extrapolations which will increase its accuracy but    |       1       |
+|                              |will requires more memory and the computational power. |               |
 |                              |                                                       |               |
-|                              |extrapolate_grid_x = 1 will use the same grid as the   |               |
-|                              |VASP input files                                       |               |
+|                              |extrapolate_grid_x = 1 will use the same grid size as  |               |
+|                              |the VASP input files in the extrapolation.             |               |
 |                              |                                                       |               |
-|                              |extrapolate_grid_x < 1 will use the smaller grid which |               |
-|                              |increases the speed and decreases the memory usage but |               |
-|                              |the energies for the higher orders of extrapolation    |               |
-|                              |may not be accurate!                                   |               |
+|                              |extrapolate_grid_x < 1 will use a smaller grid for the |               |
+|                              |extrapolations which increases the speed and decreases |               |
+|                              |the memory usage but the energies for the higher orders|               |
+|                              |of the extrapolation may not be accurate!              |               |
 |                              |                                                       |               |
 |                              |``extrapolate_grid_x = 1.8``                           |               |
 +------------------------------+-------------------------------------------------------+---------------+
@@ -326,16 +342,16 @@ The input file is processed as follows:
 +------------------------------+-------------------------------------------------------+---------------+
 | ``optimize_algorithm``       |Optimization algorithm in the NLOPT library            |BOBYQA: for    |
 |                              |                                                       |the models with|
-|                              |`BOBYQA <https://en.wikipedia.org/wiki/BOBYQA>`_ :     |a single       |
-|                              |Bound Optimization BY Quadratic Approximation [#]_     |Gaussian charge|
+|                              |`BOBYQA <https://en.wikipedia.org/wiki/BOBYQA>`_ :     |1 or 2 Gaussian|
+|                              |Bound Optimization BY Quadratic Approximation [#]_     |charges        |
 |                              |                                                       |               |
 |                              |`COBYLA <https://en.wikipedia.org/wiki/COBYLA>`_:      |COBYLA: for    |
 |                              |Constrained Optimization BY Linear Approximation [#]_  |the models with|
-|                              |                                                       |multiple       |
+|                              |                                                       |3 or more      |
 |                              |SBPLX: S.G. Johnson's implementation of the            |Gaussian       |
 |                              |Subplex (subspace-searching simplex) algorithm [#]_    |charges        |
 |                              |                                                       |               |
-|                              |``optimize_algorithm = BOBYQA``                        |               |
+|                              |``optimize_algorithm = SBPLX``                         |               |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``optimize_charge_fraction`` |**true**: find the optimal values for the              |     true      |
 |                              |charge_fraction parameter to construct the best model  |               |
@@ -358,20 +374,22 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |**false**: do not change the charge_sigma parameter    |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Optimization grid size multiplier.                     |               |
+|                              |Optimization grid size multiplier. The number of the   |               |
+|                              |grid points in each direction will be multiplied by    |               |
+|                              |this value.                                            |               |
 |                              |                                                       |               |
-|                              |optimize_grid_x > 1 will use larger grid in the        |               |
-| ``optimize_grid_x``          |extrapolations which will increase the accuracy but    |       0.8     |
-|                              |requires more memory and computational power.          |               |
-|                              |[Normally this is not necessary]                       |               |
+|                              |optimize_grid_x > 1 will use a larger grid in the      |               |
+| ``optimize_grid_x``          |optimization which will increase its accuracy but will |       0.8     |
+|                              |requires more memory and the computational power.      |               |
+|                              |[usually this is not necessary]                        |               |
 |                              |                                                       |               |
 |                              |optimize_grid_x = 1 will use the same grid as the      |               |
-|                              |VASP input files                                       |               |
+|                              |VASP input files in the optimization                   |               |
 |                              |                                                       |               |
-|                              |optimize_grid_x < 1 will use the smaller grid which    |               |
-|                              |increases the speed and decreases the memory usage but |               |
-|                              |the parameters obtained using very small values may    |               |
-|                              |be inaccurate!                                         |               |
+|                              |optimize_grid_x < 1 will use a smaller grid for the    |               |
+|                              |optimization which increases the speed and decreases   |               |
+|                              |the memory usage but the parameters obtained using very|               |
+|                              |small grid sizes may be inaccurate!                    |               |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``optimize_interfaces``      |**true**: find the optimal values for the model charge |               |
 |                              |interfaces to construct the best model which mimics    |     true      |
@@ -394,8 +412,9 @@ The input file is processed as follows:
 |                              |                                                       |other          |
 |                              |                                                       |algorithms     |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Center of the slab.                                    |               |
-| ``slab_center``              |(This point must be inside of the slab)                |  0.5 0.5 0.5  |
+|                              |Center of the slab. During the calculations, everything|               |
+| ``slab_center``              |will be shifted to keep this point at the center. This |  0.5 0.5 0.5  |
+|                              |point must be inside of the slab.                      |               |
 |                              |                                                       |               |
 |                              |``slab_center = 0.2 0.7 0.5``                          |               |
 +------------------------------+-------------------------------------------------------+---------------+
@@ -423,11 +442,11 @@ The input file is processed as follows:
 |                              |calculation step (trace mode)                          |               |
 +------------------------------+-------------------------------------------------------+---------------+
 
-.. [#] extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.
+.. [#] Extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.
 .. [#] M.J.D. Powell, `The BOBYQA algorithm for bound constrained optimization without derivatives <http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf>`_, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).
 .. [#] M.J.D. Powell, `Direct search algorithms for optimization calculations <https://doi.org/10.1017/S0962492900002841>`_, Acta Numerica, Vol. 7(1998) pp. 287-336
 .. [#] T.H. Rowan, `Functional Stability Analysis of Numerical Algorithms <https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.5708>`_, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.
-.. [#] each verbosity level includes all the outputs from the lower verbosity options. Check `the files table`_ for complete list of the output files.
+.. [#] Each verbosity level includes all the outputs from the lower verbosity options. Check `the files table`_ for complete list of the output files.
 
 ===============================
 Results and the generated files
@@ -594,15 +613,15 @@ FAQ
     LVHAR = .TRUE.
     LCHARG = .TRUE.
 
- After obtaining the files for your charged system, do the calculation again *without relaxing the geometry* to get the necessary files for the neutralized system.
+ After obtaining the files for your charged system, do the calculation again *without relaxing (changing) the geometry* to get the necessary files for the neutralized system.
 
 2. **Do I need to perform spin polarized calculation in VASP?**  Although, the slabcc only reads the sum of both spins, but for proper description of the charge distribution in your system you may need to perform spin polarized calculation.
 
-3. **How can I speed-up the optimization process?** You can try using a different optimization algorithm or improve the initial guess for the model parameters to speed-up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (``optimize_grid_x < 1``), or increase the optimization convergence criteria (``optimize_tolerance``) to speed up the process but the accuracy of the obtained results in these cases must be always checked.
+3. **How can I speed-up the model parameters optimization process?** You can try using a different optimization algorithm or improve the initial guess for the model parameters to speed-up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (``optimize_grid_x < 1``), or increase the optimization convergence criteria (``optimize_tolerance``) to speed up the process but the accuracy of the obtained results in these cases must be always checked.
 
 4. **Why do I need to provide an initial guess for the parameters which will be optimized?** The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.
 
-5. **How should I decide on the initial guess for the parameters which will be optimized?** As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “–d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages.
+5. **How should I decide on the initial guess for the parameters which will be optimized?** As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “-d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages without shifting the input files to the `slab_center`. These files will guide you on how to provide the initial guess for the input parameters.
 
 6. **Can I turn off the optimization for the input parameters?** Yes. But optimization ensures the model charge mimics the original localized charge in large distances as close as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely `check your results`__.
 
@@ -610,9 +629,9 @@ __ check_
 
 7. **Can I run the slabcc on a computational cluster?** Yes. BUT… Although slabcc hugely benefits from the multicore architecture of the computation nodes using OpenMP, it has not yet been parallelized using MPI. Therefore, It won’t use more than one machine at a time.
 
-8. **Is slabcc free? Can I use its source code in my own software?** slabcc is released under the 2-Clause BSD license_ which permits this software to be modified, redistributed and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)
+8. **Is the slabcc free? Can I use its source code in my own software?** slabcc is released under the 2-Clause BSD license_ which permits this software to be modified, redistributed and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)
 
-9. **How accurate are the slabcc results?** The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few `known issues and limitations`_ to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the license_ explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.
+9. **How accurate are the slabcc results?** The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means that the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few `known issues and limitations`_ to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the license_ explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.
 
 .. _check:
 
@@ -622,7 +641,7 @@ __ check_
 
 .. _cite:
 
-11. **How should I cite slabcc?** Please cite the slabcc as: (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
+11. **How should I cite the slabcc?** Please cite the slabcc as: (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
 
  Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
   
@@ -631,7 +650,7 @@ Known issues and limitations
 ==================================
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.
+- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with more than 2 localized Gaussian charges. COBYLA algorithm must be used in these cases.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============

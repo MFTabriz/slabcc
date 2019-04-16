@@ -18,23 +18,25 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 		const double extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 
 		UpdateCell(cell_vectors0 * extrapol_factor, extrapolation_grid);
-
-		//extrapolated interfaces
 		rowvec2 interfaces_ext = interfaces;
-		const uvec interface_sorted_i = sort_index(interfaces);
-		interfaces_ext(interface_sorted_i(1)) += abs(interfaces(0) - interfaces(1)) * (extrapol_factor - 1);
-		interfaces_ext /= extrapol_factor;
-
-		//charges moved to the same distance from their original nearest interface
 		mat charge_position_shifted = charge_position / extrapol_factor;
 
-		for (auto charge = 0; charge < charge_position.n_rows; ++charge) {
-			const rowvec2 distance_to_interfaces = abs(charge_position(charge, normal_direction) - interfaces);
-			if (distance_to_interfaces(0) < distance_to_interfaces(1)) {
-				charge_position_shifted(charge, normal_direction) += interfaces_ext(0) - interfaces(0) / extrapol_factor;
-			}
-			else {
-				charge_position_shifted(charge, normal_direction) += interfaces_ext(1) - interfaces(1) / extrapol_factor;
+		// not a bulk model!
+		if (!approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
+			
+			const uvec interface_sorted_i = sort_index(interfaces);
+			interfaces_ext(interface_sorted_i(1)) += abs(interfaces(0) - interfaces(1)) * (extrapol_factor - 1);
+			interfaces_ext /= extrapol_factor;
+
+			//charges moved to the same distance from their original nearest interface
+			for (auto charge = 0; charge < charge_position.n_rows; ++charge) {
+				const rowvec2 distance_to_interfaces = abs(charge_position(charge, normal_direction) - interfaces);
+				if (distance_to_interfaces(0) < distance_to_interfaces(1)) {
+					charge_position_shifted(charge, normal_direction) += interfaces_ext(0) - interfaces(0) / extrapol_factor;
+				}
+				else {
+					charge_position_shifted(charge, normal_direction) += interfaces_ext(1) - interfaces(1) / extrapol_factor;
+				}
 			}
 		}
 

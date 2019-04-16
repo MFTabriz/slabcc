@@ -1075,10 +1075,10 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">14 April 2019</td>
+<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">16 April 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.6.2</td></tr>
+<td>0.6.3</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1136,7 +1136,7 @@ Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentia
 <div class="section" id="algorithm">
     <h2><a class="toc-backref" href="#id24">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
     <ul class="simple">
-        <li>slabcc reads <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
+        <li>slabcc reads the <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
         <li>
             The extra charge is modeled by sum of Gaussian charge distributions as:
             <div class="formula">
@@ -1237,7 +1237,7 @@ Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentia
     </div>
     <ul class="simple">
         <li>
-            E<sub>isolated</sub> is calculated the same way as E<sub>periodic</sub> but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for extrapolation [<a class="reference external" href="https://doi.org/10.1103/PhysRevX.8.039902">10.1103/PhysRevX.8.039902</a>]:
+            E<sub>isolated</sub> is calculated the same way as E<sub>periodic</sub> but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for the extrapolation [<a class="reference external" href="https://doi.org/10.1103/PhysRevX.8.039902">10.1103/PhysRevX.8.039902</a>]:
 
             <div class="formula">
                 <i>E</i> = <i>c</i><sub>0</sub> + <i>c</i><sub>1</sub><i>x</i> + <i>c</i><sub>2</sub><i>x</i><sup>2</sup> + <i>d</i><i>e</i><sup> − <i>c</i><sub>3</sub><i>x</i></sup>
@@ -1321,7 +1321,7 @@ diel_out = 4.8
 </li>
 </ol>
 <ol class="arabic" start="4">
-<li><p class="first"><strong>Correction for the monolayer i.e. 2D models:</strong> In-plane dielectric constants must be equal for the default isolated energy calculation algorithm of the 2D models (Bessel expansion of the Poisson equation). Use the extrapolation method (<tt class="docutils literal">extrapolate=yes</tt>) for more general cases:</p>
+<li><p class="first"><strong>Correction for the monolayers i.e. 2D models (without extrapolation):</strong> To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, in-plane dielectric constants must be equal and the model must be surrounded by the vacuum. Use the extrapolation method (<tt class="docutils literal">extrapolate=yes</tt>) for more general cases:</p>
 <pre class="literal-block">
 LOCPOT_charged = CHARGED_LOCPOT
 LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -1333,6 +1333,24 @@ interfaces =  0.66 0.46
 normal_direction = z
 diel_in = 6.28 6.28 1.83
 diel_out = 1
+</pre>
+</li>
+</ol>
+<ol class="arabic" start="5">
+<li><p class="first"><strong>Correction for the monolayers i.e. 2D models (with extrapolation):</strong> To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α &lt; 0.2) is necessary. A large extrapolation grid size is also required to calculate the energies accurately:</p>
+<pre class="literal-block">
+LOCPOT_charged = CHARGED_LOCPOT
+LOCPOT_neutral = UNCHARGED_LOCPOT
+CHGCAR_charged = CHARGED_CHGCAR
+CHGCAR_neutral = UNCHARGED_CHGCAR
+2D_model = yes
+extrapolate = yes
+extrapolate_steps_number = 20
+extrapolate_grid_x = 4.5
+charge_position = 0.5 0.4 0.56
+interfaces =  0.66 0.46
+normal_direction = z
+diel_in = 6.28 6.28 1.83
 </pre>
 </li>
 </ol>
@@ -1351,14 +1369,14 @@ diel_out = 1
 <ol class="arabic simple">
 <li><strong>Compiler:</strong> You need a C++ compiler with C++14 standard support (e.g. g++ 5.0 or later, or icpc 15.0 or later)</li>
 <li><strong>FFTW:</strong> If you don't have FFTW installed on your system follow the guide on the <a class="reference external" href="http://www.fftw.org/download.html">FFTW website</a></li>
-<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS for the matrix operations inside slabcc but it is highly recommended to use OpenBLAS/MKL instead. If you don't have OpenBLAS/BLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a></li>
+<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a></li>
 </ol>
 </blockquote>
 <ol class="arabic simple" start="2">
 <li><strong>Configuration:</strong> You must edit the <tt class="docutils literal">src/makefile</tt> to choose your compiler and add the paths to FFTW and OpenBLAS libraries.</li>
 <li><strong>Compilation:</strong> Run the command <tt class="docutils literal">make</tt> in the <tt class="docutils literal">src/</tt> to compile the slabcc.</li>
 </ol>
-<p><strong>Note</strong>: By default, the code will be compiled for the specific architecture of your machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the <tt class="docutils literal"><span class="pre">-march</span></tt> flag.</p>
+<p><strong>Note</strong>: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the <tt class="docutils literal"><span class="pre">-march</span></tt> flag.</p>
 </div>
 <div class="section" id="command-line-parameters">
 <h1><a class="toc-backref" href="#id29">4&nbsp;&nbsp;&nbsp;Command-line parameters</a></h1>
@@ -1495,16 +1513,16 @@ method</td>
 <td>opposite of the <tt class="docutils literal">2d_model</tt> parameter</td>
 </tr>
 <tr><td><tt class="docutils literal">extrapolate_grid_x</tt></td>
-<td><p class="first">Extrapolation grid size multiplier.</p>
-<p>extrapolate_grid_x &gt; 1 will use larger grid in the
-extrapolations which will increase the accuracy but
-requires more memory and computational power.</p>
-<p>extrapolate_grid_x = 1 will use the same grid as the
-VASP input files</p>
-<p>extrapolate_grid_x &lt; 1 will use the smaller grid which
-increases the speed and decreases the memory usage but
-the energies for the higher orders of extrapolation
-may not be accurate!</p>
+<td><p class="first">Extrapolation grid size multiplier. The number of the grid points in each direction will be multiplied by this value.</p>
+<p>extrapolate_grid_x &gt; 1 will use a larger grid in the
+extrapolations which will increase its accuracy but
+will requires more memory and the computational power.</p>
+<p>extrapolate_grid_x = 1 will use the same grid size as
+the VASP input files in the extrapolation.</p>
+<p>extrapolate_grid_x &lt; 1 will use a smaller grid for the
+extrapolations which increases the speed and decreases
+the memory usage but the energies for the higher orders
+of the extrapolation may not be accurate!</p>
 <p class="last"><tt class="docutils literal">extrapolate_grid_x = 1.8</tt></p>
 </td>
 <td>1</td>
@@ -1552,10 +1570,10 @@ Bound Optimization BY Quadratic Approximation <a class="footnote-reference" href
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/COBYLA"><b>COBYLA</b></a>:
 Constrained Optimization BY Linear Approximation <a class="footnote-reference" href="#id8" id="id4">[3]</a></p>
 <p><b>SBPLX</b>: S.G. Johnson's implementation of the Subplex (subspace-searching simplex) algorithm <a class="footnote-reference" href="#idm2" id="idm1">[4]</a></p>
-<p class="last"><tt class="docutils literal">optimize_algorithm = BOBYQA</tt></p>
+<p class="last"><tt class="docutils literal">optimize_algorithm = SBPLX</tt></p>
 </td>
-<td><p class="first">BOBYQA: for the models with a single Gaussian charge</p>
-<p class="last">COBYLA: for the models with multiple Gaussian charges</p></td>
+<td><p class="first">BOBYQA: for the models with 1 or 2 Gaussian charges</p>
+<p class="last">COBYLA: for the models with 3 or more Gaussian charges</p></td>
 </tr>
 <tr><td><tt class="docutils literal">optimize_charge_fraction</tt></td>
 <td><p class="first"><strong>true</strong>: find the optimal values for the charge_fraction parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
@@ -1578,16 +1596,17 @@ Constrained Optimization BY Linear Approximation <a class="footnote-reference" h
 <td>true</td>
 </tr>
 <tr><td><tt class="docutils literal">optimize_grid_x</tt></td>
-<td><p class="first">Optimization grid size multiplier.</p>
-<p>optimize_grid_x &gt; 1 will use larger grid in the
-extrapolations which will increase the accuracy but
-requires more memory and computational power.
-[Normally this is not necessary]</p>
+<td><p class="first">Optimization grid size multiplier. The number of the grid points in each direction will be multiplied by this value.</p>
+<p>optimize_grid_x &gt; 1 will use a larger grid in the
+optimization which will increase its accuracy but will
+requires more memory and the computational power.
+[usually this is not necessary]</p>
 <p>optimize_grid_x = 1 will use the same grid as the
-VASP input files</p>
-<p class="last">optimize_grid_x &lt; 1 will use the smaller grid which
-increases the speed and decreases the memory usage but
-the parameters obtained using very small values may be inaccurate!</p>
+VASP input files in the optimization</p>
+<p class="last">optimize_grid_x &lt; 1 will use a smaller grid for the
+optimization which increases the speed and decreases
+the memory usage but the parameters obtained using very
+small grid sizes may be inaccurate!</p>
 </td>
 <td>0.8</td>
 </tr>
@@ -1618,8 +1637,7 @@ for root mean square error of the model potential</td>
 <td><p>0.05 for COBYLA</p><p>0.01 for the other algorithms</p></td>
 </tr>
 <tr><td><tt class="docutils literal">slab_center</tt></td>
-<td><p class="first">Center of the slab.
-(This point must be inside of the slab)</p>
+<td><p class="first">Center of the slab. During the calculations, everything will be shifted to keep this point at the center. This point must be inside of the slab.</p>
 <p class="last"><tt class="docutils literal">slab_center = 0.2 0.7 0.5</tt></p>
 </td>
 <td>0.5 0.5 0.5</td>
@@ -1645,7 +1663,7 @@ and dielectric profiles. Display debug info including the compilation machine in
 <table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id7" rules="none">
@@ -1669,7 +1687,7 @@ and dielectric profiles. Display debug info including the compilation machine in
 <table class="docutils footnote" frame="void" id="id9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>each verbosity level includes all the outputs from the lower verbosity options. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Each verbosity level includes all the outputs from the lower verbosity options. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</td></tr>
 </tbody>
 </table>
 </div>
@@ -1880,32 +1898,20 @@ LVTOT = .TRUE.
 LVHAR = .TRUE.
 LCHARG = .TRUE.
 </pre>
-</li>
-</ol>
-<blockquote>
-After obtaining the files for your charged system, do the calculation again <em>without relaxing the geometry</em> to get the necessary files for the neutralized system.</blockquote>
-<ol class="arabic simple" start="2">
+<p>After obtaining the files for your charged system, do the calculation again <em>without relaxing (changing) the geometry</em> to get the necessary files for the neutralized system.</p></li>
 <li><strong>Do I need to perform spin polarized calculation in VASP?</strong>  Although, the slabcc only reads the sum of both spins, but for proper description of the charge distribution in your system you may need to perform spin polarized calculation.</li>
-<li><strong>How can I speed-up the optimization process?</strong> You can try using a different optimization algorithm or improve the initial guess for the model parameters to speed-up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (<tt class="docutils literal">optimize_grid_x &lt; 1</tt>), or increase the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) to speed up the process but the accuracy of the obtained results in these cases must be always checked.</li>
+<li><strong>How can I speed-up the model parameters optimization process?</strong> You can try using a different optimization algorithm or improve the initial guess for the model parameters to speed-up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (<tt class="docutils literal">optimize_grid_x &lt; 1</tt>), or increase the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) to speed up the process but the accuracy of the obtained results in these cases must be always checked.</li>
 <li><strong>Why do I need to provide an initial guess for the parameters which will be optimized?</strong> The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.</li>
-<li><strong>How should I decide on the initial guess for the parameters which will be optimized?</strong> As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “–d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages.</li>
+<li><strong>How should I decide on the initial guess for the parameters which will be optimized?</strong> As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “-d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages without shifting the input files to the <tt class="docutils literal">slab_center</tt>. These files will guide you on how to provide the initial guess for the input parameters.</li>
 <li><strong>Can I turn off the optimization for the input parameters?</strong> Yes. But optimization ensures the model charge mimics the original localized charge in large distances as close as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely <a class="reference internal" href="#check">check your results</a>.</li>
-</ol>
-<ol class="arabic simple" start="7">
 <li><strong>Can I run the slabcc on a computational cluster?</strong> Yes. BUT… Although slabcc hugely benefits from the multicore architecture of the computation nodes using OpenMP, it has not yet been parallelized using MPI. Therefore, It won’t use more than one machine at a time.</li>
-<li><strong>Is slabcc free? Can I use its source code in my own software?</strong> slabcc is released under the 2-Clause BSD <a class="reference internal" href="#license">license</a> which permits this software to be modified, redistributed and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)</li>
-<li><strong>How accurate are the slabcc results?</strong> The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few <a class="reference internal" href="#known-issues-and-limitations">known issues and limitations</a> to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the <a class="reference internal" href="#license">license</a> explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.</li>
+<li><strong>Is the slabcc free? Can I use its source code in my own software?</strong> slabcc is released under the 2-Clause BSD <a class="reference internal" href="#license">license</a> which permits this software to be modified, redistributed and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)</li>
+<li><strong>How accurate are the slabcc results?</strong> The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means that the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few <a class="reference internal" href="#known-issues-and-limitations">known issues and limitations</a> to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the <a class="reference internal" href="#license">license</a> explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.</li>
+<li id="check"><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <tt class="docutils literal">slabcc_MZCHG.dat</tt> and <tt class="docutils literal">slabcc_MZPOT.dat</tt>, with <tt class="docutils literal">slabcc_DZCHG.dat</tt> and <tt class="docutils literal">slabcc_DZPOT.dat</tt>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
+<p>Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</p>
+<li id="cite"><strong>How should I cite the slabcc?</strong> Please cite the slabcc as: (You can <a class="reference external" href="https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&amp;format=application%2Fx-research-info-systems&amp;withabstract=true">download the citation in the RIS format from here</a>!)</li>
+<p>Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SLABCC: Total energy correction code for charged periodic slab models</em>, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: <a class="reference external" href="https://doi.org/10.1016/j.cpc.2019.02.018">10.1016/j.cpc.2019.02.018</a></p>
 </ol>
-<ol class="arabic simple" id="check" start="10">
-<li><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <tt class="docutils literal">slabcc_MZCHG.dat</tt> and <tt class="docutils literal">slabcc_MZPOT.dat</tt>, with <tt class="docutils literal">slabcc_DZCHG.dat</tt> and <tt class="docutils literal">slabcc_DZPOT.dat</tt>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
-</ol>
-<blockquote>
-Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</blockquote>
-<ol class="arabic simple" id="cite" start="11">
-<li><strong>How should I cite slabcc?</strong> Please cite the slabcc as: (You can <a class="reference external" href="https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&amp;format=application%2Fx-research-info-systems&amp;withabstract=true">download the citation in the RIS format from here</a>!)</li>
-</ol>
-<blockquote>
-Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SLABCC: Total energy correction code for charged periodic slab models</em>, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: <a class="reference external" href="https://doi.org/10.1016/j.cpc.2019.02.018">10.1016/j.cpc.2019.02.018</a></blockquote>
  </div>
 <div class="section" id="known-issues-and-limitations">
 <h1><a class="toc-backref" href="#id34">8&nbsp;&nbsp;&nbsp;Known issues and limitations</a></h1>
@@ -1914,7 +1920,7 @@ Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SL
 </li>
 <li><p class="first">Maximum line length of the input file (slabcc.in) is 4000 bytes.</p>
 </li>
-<li><p class="first">SBPLX/BOBYQA algorithms cannot be used for optimization of the models with multiple localized Gaussian charges. COBYLA algorithm must be used in these cases.</p>
+<li><p class="first">SBPLX/BOBYQA algorithms cannot be used for optimization of the models with more than 2 localized Gaussian charges. COBYLA algorithm must be used in these cases.</p>
 </li>
 <li><p class="first">Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (<tt class="docutils literal">diel_out > 1</tt>). Extrapolation method must be used in these cases.</p>
 </li>

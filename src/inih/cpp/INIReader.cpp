@@ -142,7 +142,7 @@ void INIReader::dump_all(std::ofstream& out_file) const {
 		}
 		if (!has_parsed) {
 			if (find(deprecated_params.begin(), deprecated_params.end(), param_in_file) != deprecated_params.end()) {
-				log->warn("The parameter \"{}\" in deprecated! Please refer to this version of slabcc's manual for a complete list of the supported parameters.", param_in_file);
+				log->warn("The parameter \"{}\" in deprecated! Please refer to this version of the slabcc's manual for a complete list of the supported parameters.", param_in_file);
 			}
 			else {
 				log->warn("Unrecognized parameter in the input file: " + param_in_file);

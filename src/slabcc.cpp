@@ -118,11 +118,12 @@ int main(int argc, char *argv[])
 	const rowvec3 rounded_relative_shift = round(input_grid_size % relative_shift) / input_grid_size;
 
 	rowvec2 shifted_interfaces = fmod(interfaces + rounded_relative_shift(normal_direction), 1);
-	shift_structure(Neutral_supercell, rounded_relative_shift);
-	shift_structure(Charged_supercell, rounded_relative_shift);
-	charge_position += repmat(rounded_relative_shift, charge_position.n_rows, 1);
-	charge_position = fmod_p(charge_position, 1);
-
+	if (!diff_only) {
+		shift_structure(Neutral_supercell, rounded_relative_shift);
+		shift_structure(Charged_supercell, rounded_relative_shift);
+		charge_position += repmat(rounded_relative_shift, charge_position.n_rows, 1);
+		charge_position = fmod_p(charge_position, 1);
+	}
 	log->debug("Slab normal direction index (0-2): {}", normal_direction);
 	log->trace("Shift to center done!");
 
@@ -277,7 +278,7 @@ int main(int argc, char *argv[])
 		log->warn("The potential error is highly anisotropic.");
 		log->warn("If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge "
 			"or the chosen dielectric tensor is not a good representation of the actual tensor! "
-			"This can be fixed by using multiple Gaussian charges, trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model.");
+			"This can be fixed by properly optimizing the model parameters, using multiple Gaussian charges, using trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model.");
 	}
 
 	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
