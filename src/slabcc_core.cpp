@@ -192,9 +192,10 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	auto log = spdlog::get("loggers");
 
 	log->debug("-----------------------------------------");
-	const rowvec2 unshifted_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(slabcc_cell.normal_direction), 1);
-	log->debug("> interfaces=" + ::to_string(unshifted_interfaces));
-
+	if (!approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
+		const rowvec2 unshifted_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(slabcc_cell.normal_direction), 1);
+		log->debug("> interfaces=" + ::to_string(unshifted_interfaces));
+	}
 
 	const mat unshifted_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 
@@ -638,16 +639,17 @@ double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void
 {
 	auto log = spdlog::get("loggers");
 	rowvec2 interfaces;
-	rowvec charge_q;
+	rowvec charge_fraction;
 	mat charge_sigma;
 	mat defcenter;
-	opt_vars variables = { interfaces, charge_sigma, charge_q, defcenter };
+	opt_vars variables = { interfaces, charge_sigma, charge_fraction, defcenter };
 	optimizer_unpacker(x, variables);
 
 	const auto d = static_cast<const opt_data *>(data);
 	const auto total_vasp_charge = d->total_vasp_charge;
-	charge_q(charge_q.n_elem - 1) = total_vasp_charge - accu(charge_q);
-	const auto constraint = -charge_q(charge_q.n_elem - 1) * total_vasp_charge;
+	charge_fraction(charge_fraction.n_elem - 1) = 1 - accu(charge_fraction);
+	const auto constraint = -charge_fraction(charge_fraction.n_elem - 1);
+	const rowvec charge_q = charge_fraction * total_vasp_charge;
 	log->debug("Charge in each Gaussian:" + ::to_string(charge_q));
 	return constraint;
 }
