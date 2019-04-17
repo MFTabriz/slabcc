@@ -1,4 +1,4 @@
-:Last updated: 16 April 2019
+:Last updated: 17 April 2019
 :version: 0.6.3
 
 .. sectnum::
@@ -94,7 +94,6 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 4.8
     diel_out = 4.8
 
-
 4. **Correction for the monolayers i.e. 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, in-plane dielectric constants must be equal and the model must be surrounded by the vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
@@ -133,7 +132,7 @@ Installation
 ============
 1. **Prerequisites:**
 
- #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. g++ 5.0 or later, or icpc 15.0 or later) 
+ #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
 

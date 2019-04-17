@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
 
-:Last updated: 16 April 2019
+:Last updated: 17 April 2019
 :version: 0.6.3
 
 .. sectnum::
@@ -194,7 +194,7 @@ Installation
 ============
 1. **Prerequisites:**
 
- #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. g++ 5.0 or later, or icpc 15.0 or later) 
+ #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
 
@@ -498,9 +498,9 @@ The parsed input variables or their default values and the calculation results w
 
 	[Results]
 	dV = -0.00291385176718
-	E_periodic of model charge = 2.0404453156
-	E_isolated of model charge = 2.59716677886
-	Energy correction for model charge (Eiso-Eper-q*dV) = 0.559635314929
+	E_periodic of the model charge = 2.0404453156
+	E_isolated of the model charge = 2.59716677886
+	Energy correction for the model charge (E_iso-E_per-q*dV) = 0.559635314929
 
 Planar average files are written as a single column in plain text format and named as: "slabcc_{1}{2}{XXX}.dat" where:
 
