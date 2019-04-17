@@ -155,6 +155,7 @@ string INIReader::GetStr(const string& name, const string& default_value) const
 {
 	string valstr = Get(name, default_value);
 	valstr.erase(std::remove(valstr.begin(), valstr.end(), '"'), valstr.end());
+	replace(valstr, "\n", " ");
 	_parsed.push_back({ name, valstr });
 	return valstr;
 }

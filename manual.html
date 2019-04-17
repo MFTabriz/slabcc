@@ -1420,11 +1420,13 @@ The input file is processed as follows:</p>
 <li>Lines starting with # will be treated as comments. Inline comments are also allowed</li>
 <li>Double quotation marks will be removed from the strings</li>
 <li>A warning will be issued for any unidentified parameter</li>
+<li>A warning will be issued for the use of the deprecated parameters</li>
 <li>All the coordinates must be in fractional form [0-1]</li>
-<li>True/False parameters can be also declared as 0/1, on/off, yes/no, .true./.false.</li>
-<li>Parameter names can be written in small or CAPITAL letters</li>
+<li>Boolean (True/False) parameters can be also declared as 0/1, on/off, yes/no, .true./.false.</li>
+<li>Parameter names can be written in the small or the CAPITAL letters</li>
 <li>For vectors and matrices, columns are separated by a “ ”(space), while the rows are separated by a “;” (semicolon)</li>
-<li>Lines starting with a space “ ” will be treated as the continuation of the last parameter value</li>
+<li>Lines starting with a space “ ” will be treated as the continuation of the last parameter's value</li>
+<li>Subsequent definitions for any parameter will be concatenated to the existing definition</li>
 </ul>
 <table border="1" class="docutils">
 <colgroup>

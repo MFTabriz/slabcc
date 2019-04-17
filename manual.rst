@@ -1,4 +1,4 @@
-**Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for proper rendering!
+**Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
 :Last updated: 17 April 2019
 :version: 0.6.3
@@ -226,11 +226,13 @@ The input file is processed as follows:
 - Lines starting with # will be treated as comments. Inline comments are also allowed
 - Double quotation marks will be removed from the strings
 - A warning will be issued for any unidentified parameter
+- A warning will be issued for the use of the deprecated parameters
 - All the coordinates must be in fractional form [0-1]
-- True/False parameters can be also declared as 0/1, on/off, yes/no, .true./.false.
-- Parameter names can be written in small or CAPITAL letters
+- Boolean (True/False) parameters can be also declared as 0/1, on/off, yes/no, .true./.false.
+- Parameter names can be written in the small or the CAPITAL letters
 - For vectors and matrices, columns are separated by a “ ”(space), while the rows are separated by a “;” (semicolon)
-- Lines starting with a space “ ” will be treated as the continuation of the last parameter value
+- Lines starting with a space “ ” will be treated as the continuation of the last parameter's value
+- Subsequent definitions for any parameter will be concatenated to the existing definition
 
  
 +------------------------------+-------------------------------------------------------+---------------+
