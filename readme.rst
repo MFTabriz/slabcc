@@ -1,5 +1,5 @@
-:Last updated: 17 April 2019
-:version: 0.6.3
+:Last updated: 22 April 2019
+:version: 0.6.4
 
 .. sectnum::
 
@@ -146,7 +146,6 @@ Known issues and limitations
 ==================================
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with more than 2 localized Gaussian charges. COBYLA algorithm must be used in these cases.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============

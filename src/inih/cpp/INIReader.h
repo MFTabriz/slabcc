@@ -55,7 +55,7 @@ public:
 	bool GetBoolean(const std::string& name, const bool default_value) const;
 
 	//writes the parsed variables to the output file and also log
-	void dump_all(std::ofstream& out_file) const;
+	void dump_all() const;
 	void dump_compilation_info() const;
 	void dump_env_info() const;
 

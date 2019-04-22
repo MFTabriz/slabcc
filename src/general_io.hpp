@@ -59,8 +59,10 @@ string tolower(string in_str) noexcept;
 // reads the command line and sets the input_file and output_file
 void parse_cli(int argc, char *argv[], cli_params& cli_parameters);
 
-void initialize_logger(string log_file);
-void logger_update();
+void initialize_loggers(const string& log_file, const string& output_file);
+void update_loggers();
+void finalize_loggers();
+
 
 // bool to yes/no conversion
 string to_string(const bool& b);

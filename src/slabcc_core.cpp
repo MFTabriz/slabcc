@@ -147,9 +147,9 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 
 	rowvec2 shifted_interfaces;
 	mat charge_sigma;
-	rowvec charge_fraction;
+	rowvec input_charge_fraction, normalized_charge_fraction;
 	mat charge_position;
-	opt_vars variables = { shifted_interfaces, charge_sigma, charge_fraction, charge_position };
+	opt_vars variables = { shifted_interfaces, charge_sigma, input_charge_fraction, charge_position };
 	optimizer_unpacker(x, variables);
 
 	//input data
@@ -161,34 +161,45 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	const double &total_vasp_charge = d->total_vasp_charge;
 	const bool &trivariate = d->trivariate;
 	const rowvec3 &rounded_relative_shift = d->rounded_relative_shift;
-
+	
 	//rest of the charge goes to the last Gaussian
-	charge_fraction(charge_fraction.n_elem - 1) = 1 - accu(charge_fraction);
+	input_charge_fraction(input_charge_fraction.n_elem - 1) = 1.0 - accu(input_charge_fraction);
+	normalized_charge_fraction = input_charge_fraction;
+	
+	//total charge error
+	double bounds_factor = 0;
+
+	if(input_charge_fraction(input_charge_fraction.n_elem - 1) < 0){
+		bounds_factor = -input_charge_fraction(input_charge_fraction.n_elem - 1);
+		normalized_charge_fraction(normalized_charge_fraction.n_elem - 1) = 0;
+		normalized_charge_fraction /= (bounds_factor + 1);
+	}
 
 	//output data
 	mat& dielectric_profiles = d->dielectric_profiles;
 	cx_cube& rhoM = d->rhoM;
 	cx_cube& V = d->V;
 	cube& V_diff = d->V_diff;
-	auto& initial_potential_MSE = d->initial_potential_MSE;
+	auto& initial_potential_RMSE = d->initial_potential_RMSE;
 
 	dielectric_profiles = dielectric_profiles_gen(shifted_interfaces, diel_in, diel_out, diel_erf_beta);
 
 	rhoM.reset();
 	rhoM = zeros<cx_cube>(as_size(slabcc_cell.grid));
-	for (uword i = 0; i < charge_fraction.n_elem; ++i) {
-		rhoM += gaussian_charge(charge_fraction(i) * total_vasp_charge, charge_position.row(i).t(), charge_sigma.row(i), trivariate);
+	for (uword i = 0; i < normalized_charge_fraction.n_elem; ++i) {
+		rhoM += gaussian_charge(normalized_charge_fraction(i) * total_vasp_charge, charge_position.row(i).t(), charge_sigma.row(i), trivariate);
 	}
 
 	V = poisson_solver_3D(rhoM, dielectric_profiles);
 	V_diff = real(V) * Hartree_to_eV - defect_potential;
+	//bigger output for out-of-bounds input: quadratic penalty
+	const double bounds_correction = bounds_factor + 10 * bounds_factor * bounds_factor;
+	const double potential_RMSE = sqrt(accu(square(V_diff)) / V_diff.n_elem) + bounds_correction;
 
-	const auto potential_MSE = accu(square(V_diff)) / V_diff.n_elem;
-
-	if (initial_potential_MSE < 0) {
-		initial_potential_MSE = potential_MSE;
+	if (initial_potential_RMSE < 0) {
+		initial_potential_RMSE = potential_RMSE;
 	}
-
+	
 	auto log = spdlog::get("loggers");
 
 	log->debug("-----------------------------------------");
@@ -199,7 +210,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 
 	const mat unshifted_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 
-	for (uword i = 0; i < charge_fraction.n_elem; ++i) {
+	for (uword i = 0; i < normalized_charge_fraction.n_elem; ++i) {
 		log->debug("> charge_position=" + ::to_string(unshifted_charge_position.row(i)));
 		if (trivariate) {
 			log->debug("> charge_sigma=" + ::to_string(charge_sigma.row(i)));
@@ -207,35 +218,29 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 		else {
 			log->debug("> charge_sigma=" + ::to_string(charge_sigma(i,0)));
 		}
-		if (charge_fraction.n_elem > 1) {
-			log->debug("> charge_fraction={}", charge_fraction(i));
+		if (input_charge_fraction.n_elem > 1) {
+			log->debug("> charge_fraction={}", input_charge_fraction(i));
 		}		
 	}
-	log->debug("Potential Root Mean Square Error: {}", sqrt(potential_MSE));
+	if (bounds_correction > 0) {
+		log->debug("Out of the bounds correction to the RMSE: {}", bounds_correction);
+	}
+	log->debug("Potential Root Mean Square Error: {}", potential_RMSE);
 
-	return potential_MSE;
+	return potential_RMSE;
 }
 
 double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge_position, const bool &optimize_charge_sigma, const bool &optimize_charge_fraction, const bool &optimize_interfaces) {
 	auto log = spdlog::get("loggers");
 	double pot_MSE_min = 0;
 	auto opt_algorithm = nlopt::LN_COBYLA;
+	if (opt_algo == "BOBYQA") {
+		opt_algorithm = nlopt::LN_BOBYQA;
+	}
+	else if (opt_algo == "SBPLX") {
+		opt_algorithm = nlopt::LN_SBPLX;
+	}
 	
-	if (opt_vars.charge_fraction.n_elem < 3) {
-		if (opt_algo == "BOBYQA") {
-			opt_algorithm = nlopt::LN_BOBYQA;
-		} 
-		else if (opt_algo == "SBPLX") {
-			opt_algorithm = nlopt::LN_SBPLX;
-		}
-	}
-	else {
-		if (opt_algo != "COBYLA") {
-			//SBPLX/BOBYQA in NLOPT 2.4.2 does not support the inequality constraints which is needed to preserve the total charge of the model!
-			log->warn("SBPLX/BOBYQA optimization algorithms does not support the models with multiple charges! COBYLA will be used instead!");
-		}
-	}
-
 	vector<double> opt_param, low_b, upp_b, step_size;
 	tie(opt_param, low_b, upp_b, step_size) = optimizer_packer(opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces, opt_data.trivariate);
 	nlopt::opt opt(opt_algorithm, opt_param.size());
@@ -244,16 +249,18 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 	opt.set_initial_step(step_size);
 
 	opt.set_min_objective(potential_eval, &opt_data);
-	opt.set_xtol_rel(square(opt_tol));   //tolerance is defined for RMSE in the input, optimizer is checking MSE
+	opt.set_xtol_rel(opt_tol); 
 	if (max_eval > 0) {
 		opt.set_maxeval(max_eval);
 	}
 	if (max_time > 0) {
 		opt.set_maxtime(60.0 * max_time);
 	}
+	//this seems to improve the COBYLA's performance is some cases
 	if (opt_vars.charge_fraction.n_elem > 2) {
-		//add constraint to keep the total charge constant
-		opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-6);
+		if (opt_algo == "COBYLA") {
+			opt.add_inequality_constraint(opt_charge_constraint, &opt_data, 1e-6);
+		}
 	}
 
 	const int sigma_per_charge = opt_data.trivariate ? 3 : 1;
@@ -434,12 +441,7 @@ void check_inputs(input_data input_set) {
 		if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA") && (input_set.opt_algo != "SBPLX")) {
 			log->debug("Optimization algorithm: {}", input_set.opt_algo);
 			log->warn("Unsupported optimization algorithm is selected!");
-			if (input_set.charge_position.n_rows < 3) {
-				input_set.opt_algo = "BOBYQA";
-			}
-			else {
-				input_set.opt_algo = "COBYLA";
-			}
+			input_set.opt_algo = "BOBYQA";
 			log->warn("{} will be used instead!", input_set.opt_algo);
 		}
 
@@ -461,6 +463,7 @@ void check_inputs(input_data input_set) {
 		log->debug("Number of the parameters defined for the position of a charge: {}", input_set.charge_position.n_cols);
 		log->critical("Incorrect definition of charge positions!");
 		log->critical("Positions should be defined as: charge_position = 0.1 0.2 0.3; 0.1 0.2 0.4;");
+		finalize_loggers();
 		exit(1);
 	}
 
@@ -510,7 +513,7 @@ void check_inputs(input_data input_set) {
 	}
 	
 	
-	//if all the sensible checks and remedies have been failed!
+	//if all the sensible checks and remedies have failed!
 	if(arma::size(input_set.charge_sigma) != arma::size(input_set.charge_position)){
 		log->warn("Number of the defined Gaussian charges and the charge_sigma sets does not match!");
 		input_set.charge_sigma = mat(arma::size(input_set.charge_position), fill::ones);
@@ -542,6 +545,7 @@ void check_inputs(input_data input_set) {
 		log->debug("LOCPOT_neutral: '{}' found: {}", input_set.LOCPOT_neutral, to_string(file_exists(input_set.LOCPOT_neutral)));
 		log->debug("LOCPOT_charged: '{}' found: {}", input_set.LOCPOT_charged, to_string(file_exists(input_set.LOCPOT_charged)));
 		log->critical("One or more of the input files could not be found!");
+		finalize_loggers();
 		exit(1);
 	}
 	
@@ -591,11 +595,12 @@ void check_inputs(input_data input_set) {
 
 }
 
-void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set) {
+void parse_input_params(const string& input_file, const input_data& input_set) {
 	auto log = spdlog::get("loggers");
 	INIReader reader(input_file);
 	if (reader.ParseError() < 0) {
 		log->critical("Cannot load the input file: {}", input_file);
+		finalize_loggers();
 		exit(1);
 	}
 
@@ -620,8 +625,8 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 	input_set.optimize_charge_fraction = reader.GetBoolean("optimize_charge_fraction", true);
 	input_set.optimize_interface = reader.GetBoolean("optimize_interfaces", true);
 	input_set.model_2D = reader.GetBoolean("2d_model", false);
-	input_set.opt_algo = reader.GetStr("optimize_algorithm", (input_set.charge_position.n_rows == 1) ? "BOBYQA" : "COBYLA");
-	input_set.opt_tol = reader.GetReal("optimize_tolerance", (input_set.opt_algo == "COBYLA") ? 5e-2 : 1e-2);
+	input_set.opt_algo = reader.GetStr("optimize_algorithm", "BOBYQA");
+	input_set.opt_tol = reader.GetReal("optimize_tolerance", 0.01);
 	input_set.max_eval = reader.GetInteger("optimize_maxsteps", 0);
 	input_set.max_time = reader.GetInteger("optimize_maxtime", 0);
 	input_set.opt_grid_x = reader.GetReal("optimize_grid_x", 0.8);
@@ -630,7 +635,7 @@ void parse_input_params(const string& input_file, ofstream& output_fstream, cons
 	input_set.extrapol_steps_num = reader.GetInteger("extrapolate_steps_number", 4);
 	input_set.extrapol_steps_size = reader.GetReal("extrapolate_steps_size", 0.5);
 
-	reader.dump_all(output_fstream);
+	reader.dump_all();
 
 	slabcc_cell.normal_direction = input_set.normal_direction;
 }
@@ -664,6 +669,7 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 		log->debug("Neutral supercell vectors: " + to_string(Neutral_supercell.cell_vectors * Neutral_supercell.scaling));
 		log->debug("Charged supercell vectors: " + to_string(Charged_supercell.cell_vectors * Charged_supercell.scaling));
 		log->critical("Cell vectors of the input files does not match!");
+		finalize_loggers();
 		exit(1);
 	}
 
@@ -675,6 +681,7 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 		log->debug("Cell vectors basis: " + to_string(cell));
 		log->debug("Orthogonality criteria: " + to_string(cell.t() * cell));
 		log->critical("Supercell vectors are not orthogonal!");
+		finalize_loggers();
 		exit(1);
 	}
 
@@ -688,6 +695,7 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 		log->debug("Charged CHGCAR grid: " + to_string(arma::size(Charged_supercell.charge)));
 		log->debug("Charged LOCPOT grid: " + to_string(arma::size(Charged_supercell.potential)));
 		log->critical("Data grids of the CHGCAR or LOCPOT files does not match!");
+		finalize_loggers();
 		exit(1);
 	}
 

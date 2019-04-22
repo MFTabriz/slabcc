@@ -52,11 +52,18 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 		const auto V = poisson_solver_3D(rhoM, dielectric_profiles);
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
 		const rowvec2 interface_pos = interfaces_ext * slabcc_cell.vec_lengths(normal_direction);
-		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + to_string(interface_pos);
+		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + ::to_string(Q) + "\t" + to_string(interface_pos);
 		for (auto i = 0; i < charge_position_shifted.n_rows; ++i) {
 			extrapolation_info += "\t" + to_string(charge_position_shifted(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
+		if (abs(Q - accu(charge_q) > 0.01)) {
+			log->critical("Some of the extra charge is missing form the extrapolated model! "
+			"The charge_sigma values may be too small, or the number of the extrapolation steps or the step-size may be too large for the extrapolation grid size. "
+			"You need to use a larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
+			finalize_loggers();
+			exit(1);
+		}
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
 

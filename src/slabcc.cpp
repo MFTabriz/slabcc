@@ -19,15 +19,13 @@ int main(int argc, char *argv[])
 	string input_file = "slabcc.in";
 	string output_file = "slabcc.out";
 	string log_file = "slabcc.log";
-	bool diff_only = false;
-	cli_params parameter_list = { input_file, output_file, log_file, diff_only };
+	bool output_diffs_only = false;
+	cli_params parameter_list = { input_file, output_file, log_file, output_diffs_only };
 	parse_cli(argc, argv, parameter_list);
-	initialize_logger(log_file);
+	initialize_loggers(log_file, output_file);
 	auto log = spdlog::get("loggers");
+	auto output_log = spdlog::get("output");
 
-	ofstream output_fstream(output_file);
-	output_fstream << setprecision(12);
-	
 	// default values should be defined in the parser function
 
 	string CHGCAR_neutral = "";
@@ -67,7 +65,7 @@ int main(int argc, char *argv[])
 		opt_tol, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces, extrapolate, model_2D, charge_trivariate, opt_grid_x,
 		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
-	parse_input_params(input_file, output_fstream, input_file_variables);
+	parse_input_params(input_file, input_file_variables);
 	
 	log->debug("SLABCC: version {}.{}.{}", SLABCC_VERSION_MAJOR, SLABCC_VERSION_MINOR, SLABCC_VERSION_PATCH);
 	log->debug("Armadillo library: version {}.{}.{}", ARMA_VERSION_MAJOR, ARMA_VERSION_MINOR, ARMA_VERSION_PATCH);
@@ -79,7 +77,7 @@ int main(int argc, char *argv[])
 
 	vector<pair<string, string>> calculation_results;
 
-	if (!diff_only) {
+	if (!output_diffs_only) {
 		check_inputs(input_file_variables);
 	}
 
@@ -118,7 +116,7 @@ int main(int argc, char *argv[])
 	const rowvec3 rounded_relative_shift = round(input_grid_size % relative_shift) / input_grid_size;
 
 	rowvec2 shifted_interfaces = fmod(interfaces + rounded_relative_shift(normal_direction), 1);
-	if (!diff_only) {
+	if (!output_diffs_only) {
 		shift_structure(Neutral_supercell, rounded_relative_shift);
 		shift_structure(Charged_supercell, rounded_relative_shift);
 		charge_position += repmat(rounded_relative_shift, charge_position.n_rows, 1);
@@ -131,16 +129,16 @@ int main(int argc, char *argv[])
 	Defect_supercell.potential = Charged_supercell.potential - Neutral_supercell.potential;
 	Defect_supercell.charge = Charged_supercell.charge - Neutral_supercell.charge;
 
-	if (is_active(verbosity::write_defect_file) || diff_only) {
+	if (is_active(verbosity::write_defect_file) || output_diffs_only) {
 		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_D.LOCPOT", Defect_supercell));
 		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_D.CHGCAR", Defect_supercell));
 	}
 
-	if (diff_only) {
+	if (output_diffs_only) {
 		log->debug("Only the extra charge and the potential difference calculation have been requested!");
 		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D");
 		for (auto &promise : future_files) { promise.get(); }
-		output_fstream.close();
+		finalize_loggers();
 		exit(0);
 	}
 
@@ -166,9 +164,9 @@ int main(int argc, char *argv[])
 	//difference of the potential resulted from the model charge and the QM calculation (VASP) results (eV)
 	cube V_diff(arma::size(V));
 
-	double potential_MSE = 0;
+	double potential_RMSE = 0;
 
-	double initial_potential_MSE = -1;
+	double initial_potential_RMSE = -1;
 
 	// variables to optimize
 	opt_vars opt_vars = { shifted_interfaces, charge_sigma, charge_fraction, charge_position };
@@ -186,18 +184,18 @@ int main(int argc, char *argv[])
 		log->debug("Optimization grid size: " + to_string(SizeVec(interpolated_potential)));
 
 		//data needed for potential error calculation
-		opt_data optimize_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, interpolated_potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE};
+		opt_data optimize_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, interpolated_potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_RMSE};
 		UpdateCell(cell_vectors, SizeVec(interpolated_potential));
-		potential_MSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces);
+		potential_RMSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimize_data, opt_vars, optimize_charge_position, optimize_charge_sigma, optimize_charge_fraction, optimize_interfaces);
 		UpdateCell(cell_vectors, input_grid_size);
 		//add back the last Gaussian charge (removed in the optimization)
 		charge_fraction(charge_fraction.n_elem - 1) = 1 - accu(charge_fraction);
 
 		//write the unshifted optimized values to the file
-		output_fstream << "\n[Optimized_model_parameters]\n";
+		output_log->info("\n[Optimized_model_parameters]");
 		if (optimize_interfaces) {
 			const rowvec2 optimized_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(normal_direction), 1);
-			output_fstream << "interfaces_optimized = " << optimized_interfaces << '\n';
+			output_log->info("interfaces_optimized = {}", to_string(optimized_interfaces));
 			
 
 			// need a clever way to check the change in the interface positions
@@ -206,41 +204,40 @@ int main(int argc, char *argv[])
 		}
 
 		if (optimize_charge_fraction) {
-			output_fstream << "charge_fraction_optimized =" << charge_fraction << "\n";
+			output_log->info("charge_fraction_optimized = {}", to_string(charge_fraction));
 		}
 		if (optimize_charge_sigma) {
 			if (charge_trivariate) {
-				output_fstream << "charge_sigma_optimized = " << charge_sigma << '\n';
+				output_log->info("charge_sigma_optimized = {}", to_string(charge_sigma));
 			}
 			else {
-				output_fstream << "charge_sigma_optimized = " << charge_sigma.col(0) << '\n';
+				output_log->info("charge_sigma_optimized = {}", to_string(charge_sigma.col(0)));
 			}
 		}
 		if (optimize_charge_position) {
 			const mat optimized_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
-			output_fstream << "charge_position_optimized = " << optimized_charge_position << '\n';
+			output_log->info("charge_position_optimized = {}", to_string(optimized_charge_position));
 
 			// need a better algorithm to handle the swaps and PBCs
 			const mat charge_position_change = abs(charge_position0 - charge_position);
 			if (charge_position_change.max() > 0.1) {
 				log->warn("The optimized position for the extra charge is significantly different from the initial value.");
 				log->warn("Please make sure that the final position of the extra charge have been estimated correctly!");
-				log->trace("Charge position changes: ", to_string(charge_position_change));
+				log->debug("Charge position changes: ", to_string(charge_position_change));
 			}
 		}
-
-		output_fstream.flush();
 
 		if (optimize_interfaces) {
 			verify_interface_optimization(fmod_p(shifted_interfaces0 - rounded_relative_shift(normal_direction), 1), fmod_p(shifted_interfaces - rounded_relative_shift(normal_direction), 1));
 		}
 
-		if (initial_potential_MSE * (opt_tol + 1) < potential_MSE) {
+		if (initial_potential_RMSE * (opt_tol + 1) < potential_RMSE) {
 			// Don't panic! either NLOPT seems to be malfunctioning
 			// or we are not correctly logging/checking the result
 			log->critical("Optimization failed!");
 			log->critical("Potential error of the initial parameters seems to be smaller than the optimized parameters!");
 			log->critical("You may want to change the initial guess for charge_position, change the optimization algorithm, or turn off the optimization.");
+			finalize_loggers();
 			exit(1);
 		}
 	}
@@ -248,20 +245,20 @@ int main(int argc, char *argv[])
 	//charge of each Gaussian
 	rowvec charge_q = charge_fraction * total_vasp_charge;
 
-	opt_data optimized_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_MSE };
+	opt_data optimized_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, Defect_supercell.potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_RMSE };
 	auto local_param = optimizer_packer(opt_vars);
 	vector<double> gradients = {};
-	potential_MSE = potential_eval(get<0>(local_param), gradients, &optimized_data);
+	potential_RMSE = potential_eval(get<0>(local_param), gradients, &optimized_data);
 	const bool bulk_model = approx_equal(diel_in, diel_out, "absdiff", 0.02);
 	const bool isotropic_screening = (abs(diel_in(0) - diel_in(1)) < 0.02) && (abs(diel_in(0) - diel_in(2)) < 0.02);
 
-	if (potential_MSE > 0.01) {
+	if (potential_RMSE > 0.1) {
 		if (bulk_model && isotropic_screening) {
-			log->debug("MSE of the model charge potential is large but for the bulk models with an isotropic screening (dielectric tensor) "
+			log->debug("RMSE of the model charge potential is large but for the bulk models with an isotropic screening (dielectric tensor) "
 			"this shouldn't make much difference in the total correction energy!");
 		}
 		else {
-			log->warn("MSE of the model charge potential is large. The calculated correction energies may not be accurate!");
+			log->warn("RMSE of the model charge potential is large. The calculated correction energies may not be accurate!");
 		}
 	}
 
@@ -272,13 +269,12 @@ int main(int argc, char *argv[])
 	//potential error in each direction
 	rowvec3 V_error_planars = { accu(square(V_error_x)), accu(square(V_error_y)), accu(square(V_error_z)) };
 	V_error_planars = sqrt(V_error_planars/V_diff.n_elem);
-
 	log->debug("Directional RMSE: " + to_string(V_error_planars));
 	if (max(V_error_planars) / min(V_error_planars) > 10) {
 		log->warn("The potential error is highly anisotropic.");
 		log->warn("If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge "
 			"or the chosen dielectric tensor is not a good representation of the actual tensor! "
-			"This can be fixed by properly optimizing the model parameters, using multiple Gaussian charges, using trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model.");
+			"This can be fixed by properly optimizing the model parameters, using multiple Gaussian charges, using trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model/method.");
 	}
 
 	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
@@ -326,8 +322,7 @@ int main(int argc, char *argv[])
 			"this should not make much difference in the total energy correction value!");
 		}
 		else {
-			log->warn("The potential alignment term (dV) is relatively large." );
-			log->warn("The constructed model may not be accurate!");
+			log->warn("The potential alignment term (dV) is relatively large. The constructed model may not be accurate!");
 		}
 	}
 
@@ -339,11 +334,13 @@ int main(int argc, char *argv[])
 
 	log->debug("Difference of the charge in the input files: " + ::to_string(total_vasp_charge));
 	log->debug("Total charge of the model: " + ::to_string(total_model_charge));
-	if (abs(total_model_charge - total_vasp_charge) > 0.05) {
-		log->warn("Part of the extra charge is missing from the model. "
+	if (abs(total_model_charge - total_vasp_charge) > 0.01) {
+		log->critical("Part of the extra charge is missing from the model. "
 			"This usually happens when the size of the supercell is too small and cannot contain the whole "
 			"Gaussian charge. Otherwise, the width of the Gaussian charge may be too large. "
 			"The present charge correction method is not suitable for these cases!");
+		finalize_loggers();
+		exit(1);
 	}
 	double E_isolated = 0;
 	double E_correction = 0;
@@ -358,9 +355,9 @@ int main(int argc, char *argv[])
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
 		log->debug("Extrapolation grid size: " + to_string(extrapolation_grid));
 		log->debug("--------------------------------------------------------");
-		log->debug("Scaling\tE_periodic\t\tinterfaces\t\tcharge position");
+		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
 		const rowvec2 interface_pos = shifted_interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
-		string extrapolation_info = to_string(1.0) + "\t" + ::to_string(EperModel0) + "\t" + to_string(interface_pos);
+		string extrapolation_info = to_string(1.0) + "\t" + ::to_string(EperModel0) + "\t" + ::to_string(total_model_charge) + "\t" + to_string(interface_pos);
 		for (auto i = 0; i < charge_position.n_rows; ++i) {
 			extrapolation_info += "\t" + to_string(charge_position(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
 		}
@@ -406,11 +403,12 @@ int main(int argc, char *argv[])
 			log->debug("Linear fit error for the periodic model: " + ::to_string(extrapol_error_periodic));
 
 			if (extrapol_error_periodic > 0.05) {
-				log->error("The extrapolated energies are not scaling linearly as expected!");
-				log->error("The extrapolation steps/size may be too large for the grid size or the slab thickness is too small for this extrapolation algorithm");
-				log->error("You may need to use larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
-				log->error("For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file.");
-				log->error("Extrapolation energy slopes: " + to_string(slopes));
+				log->debug("Extrapolation energy slopes: " + to_string(slopes));
+				log->critical("The extrapolated energies are not scaling linearly as expected! "
+				"The slab thickness may be too small for this extrapolation algorithm. "
+				"For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file.");
+				finalize_loggers();
+				exit(1);
 			}
 
 			E_isolated = EperModel0 - pols(0);
@@ -429,6 +427,8 @@ int main(int argc, char *argv[])
 		else {
 			// input parameter checking function must prevent this from happening!
 			log->critical("There is no algorithm other than the extrapolation for E_isolated calculation of the slab models in this version of the slabcc!");
+			finalize_loggers();
+			exit(1);
 		}
 
 	}
@@ -437,22 +437,15 @@ int main(int argc, char *argv[])
 	log->info("Energy correction for the model charge (E_iso-E_per-q*dV=): " + ::to_string(E_correction) );
 	calculation_results.emplace_back("Energy correction for the model charge (E_iso-E_per-q*dV)", ::to_string(E_correction));
 	log->flush();
-	const string msgs_file = "MSG";
-	ifstream messages_list(msgs_file);
-	if (!file_is_empty(messages_list)) {
-		output_fstream << "\n[Messages]\n";
-		output_fstream << messages_list.rdbuf();
-	}
-	messages_list.close();
 	
-	output_fstream << "\n[Results]\n";
-	for (const auto &i : calculation_results) { output_fstream << i.first << " = " << i.second << '\n'; }
-	output_fstream.close();
+	finalize_loggers();
+	output_log->info("\n[Results]");
+	for (const auto &i : calculation_results) { output_log->info("{} = {}", i.first, i.second); }
+	output_log->flush();
 	
 	//making sure all the files are written
 	for (auto &promise : future_files) { promise.get(); }
 
 	log->trace("Calculations successfully ended!");
-	remove(msgs_file.c_str());
 	return 0;
 }

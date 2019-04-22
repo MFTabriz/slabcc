@@ -137,21 +137,45 @@ void parse_cli(int argc, char *argv[], cli_params& cli_parameters) {
 }
 
 
-void initialize_logger(string log_file) {
+void initialize_loggers(const string& log_file, const string& output_file) {
 
+	const string tmp_file = "slabcc.tmp";
 	vector<spdlog::sink_ptr> sinks;
 	sinks.push_back(make_shared<spdlog::sinks::stdout_color_sink_mt>());
 	sinks.push_back(make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, true));
-	sinks.push_back(make_shared<spdlog::sinks::basic_file_sink_mt>("MSG", true));
+	sinks.push_back(make_shared<spdlog::sinks::basic_file_sink_mt>(tmp_file, true));
 	auto combined_logger = make_shared<spdlog::logger>("loggers", begin(sinks), end(sinks));
 	sinks.at(2)->set_level(spdlog::level::warn);
 	sinks.at(2)->set_pattern("[%l] %v");
 	combined_logger->set_pattern("%v");
 	combined_logger->set_level(spdlog::level::info);
 	spdlog::register_logger(combined_logger);
-}
 
-void logger_update() {
+	auto output_logger = spdlog::basic_logger_mt("output", output_file);
+	output_logger->set_pattern("%v");
+	output_logger->set_level(spdlog::level::info);
+
+}
+void finalize_loggers() {
+	auto log = spdlog::get("loggers");
+	auto output_log = spdlog::get("output");
+	const string tmp_file = "slabcc.tmp";
+	log->flush();
+	output_log->flush();
+
+	ifstream messages_list(tmp_file);
+	string tmp_line = "";
+	if (!file_is_empty(messages_list)) {
+		output_log->info("\n[Messages]");
+		while (getline(messages_list, tmp_line)) {
+			output_log->info(tmp_line);
+		}
+	}
+	messages_list.close();
+	remove(tmp_file.c_str());
+	output_log->flush();
+}
+void update_loggers() {
 
 	auto log = spdlog::get("loggers");
 	string log_pattern = "%v";

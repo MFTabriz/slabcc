@@ -105,28 +105,27 @@ void INIReader::dump_env_info() const {
 	log->debug(time_string_buffer);
 }
 
-void INIReader::dump_all(std::ofstream& out_file) const {
+void INIReader::dump_all() const {
 
 	auto log = spdlog::get("loggers");
+	auto output_log = spdlog::get("output");
 	sort(_parsed.begin(), _parsed.end(), [](const auto& lhs, const auto& rhs) {
 		return tolower(rhs.at(0)) > tolower(lhs.at(0));
 	});
-	logger_update();
+	update_loggers();
 	dump_compilation_info();
 	dump_env_info();
 
 	log->info("-------------slabcc parameters-------------");
+	output_log->info("# Parameters read from the file or their default values:");
 	for (const auto &i : _parsed) {
 		log->info(i.at(0) + " = " + i.at(1));
+		output_log->info(i.at(0) + " = " + i.at(1));
 	}
 	log->info("-----------------------------------------");
+	log->flush();
 
-	out_file << "# Parameters read from the file or their default values:\n";
-	for (const auto &i : _parsed) {
-		out_file << i.at(0) << " = " << i.at(1) << "\n";
-	}
-
-	out_file.flush();
+	
 
 	const vector<string> deprecated_params{"optimize_charge"};
 

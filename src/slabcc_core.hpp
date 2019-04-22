@@ -58,7 +58,7 @@ struct opt_data {
 	cx_cube& rhoM;
 	cx_cube& V;
 	cube& V_diff;
-	double &initial_potential_MSE;
+	double &initial_potential_RMSE;
 };
 
 struct opt_vars {
@@ -117,7 +117,7 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 void verify_interface_optimization(const rowvec2& initial_interfaces, const rowvec2& optimized_interfaces);
 
 //parse the parameters from the input file
-void parse_input_params(const string& input_file, ofstream& output_fstream, const input_data& input_set);
+void parse_input_params(const string& input_file, const input_data& input_set);
 
 //optimization constraint to ensure all the Gaussian charges have the same sign
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data);

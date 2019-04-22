@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 17 April 2019
-:version: 0.6.3
+:Last updated: 22 April 2019
+:version: 0.6.4
 
 .. sectnum::
 
@@ -342,16 +342,16 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``normal_direction = b``                               |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_algorithm``       |Optimization algorithm in the NLOPT library            |BOBYQA: for    |
-|                              |                                                       |the models with|
-|                              |`BOBYQA <https://en.wikipedia.org/wiki/BOBYQA>`_ :     |1 or 2 Gaussian|
-|                              |Bound Optimization BY Quadratic Approximation [#]_     |charges        |
+| ``optimize_algorithm``       |Optimization algorithm in the NLOPT library            |    BOBYQA     |
 |                              |                                                       |               |
-|                              |`COBYLA <https://en.wikipedia.org/wiki/COBYLA>`_:      |COBYLA: for    |
-|                              |Constrained Optimization BY Linear Approximation [#]_  |the models with|
-|                              |                                                       |3 or more      |
-|                              |SBPLX: S.G. Johnson's implementation of the            |Gaussian       |
-|                              |Subplex (subspace-searching simplex) algorithm [#]_    |charges        |
+|                              |`BOBYQA <https://en.wikipedia.org/wiki/BOBYQA>`_ :     |               |
+|                              |Bound Optimization BY Quadratic Approximation [#]_     |               |
+|                              |                                                       |               |
+|                              |`COBYLA <https://en.wikipedia.org/wiki/COBYLA>`_:      |               |
+|                              |Constrained Optimization BY Linear Approximation [#]_  |               |
+|                              |                                                       |               |
+|                              |SBPLX: S.G. Johnson's implementation of the            |               |
+|                              |Subplex (subspace-searching simplex) algorithm [#]_    |               |
 |                              |                                                       |               |
 |                              |``optimize_algorithm = SBPLX``                         |               |
 +------------------------------+-------------------------------------------------------+---------------+
@@ -408,11 +408,8 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``optimize_maxtime = 1440``                            |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_tolerance``       |Relative optimization tolerance (convergence criteria) |0.05 for COBYLA|
+| ``optimize_tolerance``       |Relative optimization tolerance (convergence criteria) |    0.01       |
 |                              |for root mean square error of the model potential      |               |
-|                              |                                                       |0.01 for the   |
-|                              |                                                       |other          |
-|                              |                                                       |algorithms     |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Center of the slab. During the calculations, everything|               |
 | ``slab_center``              |will be shifted to keep this point at the center. This |  0.5 0.5 0.5  |
@@ -652,7 +649,6 @@ Known issues and limitations
 ==================================
 - Shape of the VASP files cell is limited to orthogonal cells.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- SBPLX/BOBYQA algorithms cannot be used for optimization of the models with more than 2 localized Gaussian charges. COBYLA algorithm must be used in these cases.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
 ===============
