@@ -229,7 +229,7 @@ int INIReader::ValueHandler(void* user, const char* section, const char* name,
 	return 1;
 }
 
-void INIReader::replace(std::string& str, const std::string from, const std::string to) const {
+void INIReader::replace(std::string& str, const std::string& from, const std::string& to) const {
 	
 	size_t start_pos = str.find(from);
 	while (start_pos != std::string::npos) {

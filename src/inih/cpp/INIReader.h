@@ -60,7 +60,7 @@ public:
 	void dump_env_info() const;
 
 	//replace all occurrences of the "from" string with "to" string inside "str" recursively
-	void replace(std::string& str, const std::string from, const std::string to) const;
+	void replace(std::string& str, const std::string& from, const std::string& to) const;
 
 protected:
 	mutable std::vector<std::vector<std::string>> _parsed;

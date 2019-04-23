@@ -419,7 +419,6 @@ int main(int argc, char *argv[])
 	}
 	else {
 		if (model_2D) {
-			const mat dielectric_profiles = dielectric_profiles_gen(shifted_interfaces, diel_in, diel_out, diel_erf_beta);
 			E_isolated = Eiso_bessel(charge_q(0), charge_position(0, normal_direction) * slabcc_cell.vec_lengths(normal_direction), charge_sigma(0), dielectric_profiles);
 			E_correction = E_isolated - EperModel0 - total_model_charge * dV;
 			log->info("E_isolated from the Bessel expansion of the Poisson equation: " + ::to_string(E_isolated));
