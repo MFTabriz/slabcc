@@ -4,7 +4,7 @@
 
 #include "isolated.hpp"
 
-tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
+tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
@@ -44,7 +44,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(charge_q(i), charge_position_shifted.row(i).t(), charge_sigma.row(i), trivariate);
+			rhoM += gaussian_charge(charge_q(i), charge_position_shifted.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
 		}
 		const double Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
@@ -58,7 +58,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 		}
 		log->debug(extrapolation_info);
 		if (abs(Q - accu(charge_q)) > 0.01) {
-			log->critical("Some of the extra charge is missing form the extrapolated model! "
+			log->critical("Part of the extra charge in the original model is missing form the extrapolated model! "
 			"The charge_sigma values may be too small, or the number of the extrapolation steps or the step-size may be too large for the extrapolation grid size. "
 			"You need to use a larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
 			finalize_loggers();
@@ -72,7 +72,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 	return make_tuple(Es, sizes);
 }
 
-tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const double &grid_multiplier, const bool &trivariate) {
+tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = slabcc_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
@@ -94,7 +94,7 @@ tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const doubl
 
 		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(charge_q(i), charge_position_ext.row(i).t(), charge_sigma.row(i), trivariate);
+			rhoM += gaussian_charge(charge_q(i), charge_position_ext.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
 		}
 		const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
 		// (only works for the orthogonal cells!)

@@ -1,6 +1,6 @@
  
-:Last updated: 22 April 2019
-:version: 0.6.4
+:Last updated: 11 May 2019
+:version: 0.6.5
 
 .. image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
    :alt: Codacy Badge
@@ -139,7 +139,7 @@ Installation
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.

@@ -35,13 +35,13 @@ struct input_data {
 	string &CHGCAR_neutral, &LOCPOT_charged, &LOCPOT_neutral, &CHGCAR_charged, &opt_algo;
 	mat &charge_position;
 	rowvec &charge_fraction;
-	mat &charge_sigma;
+	mat &charge_sigma, &charge_rotations;
 	rowvec3 &slabcenter;
 	rowvec &diel_in, &diel_out;
 	uword &normal_direction;
 	rowvec2 &interfaces;
 	double &diel_erf_beta, &opt_tol;
-	bool &optimize_charge_position, &optimize_charge_sigma, &optimize_charge_fraction, &optimize_interface, &extrapolate, &model_2D, &trivariate;
+	bool &optimize_charge_position, &optimize_charge_sigma, &optimize_charge_rotation, &optimize_charge_fraction, &optimize_interface, &extrapolate, &model_2D, &trivariate;
 	double &opt_grid_x, &extrapol_grid_x;
 	int &max_eval, &max_time, &extrapol_steps_num;
 	double &extrapol_steps_size;
@@ -61,9 +61,13 @@ struct opt_data {
 	double &initial_potential_RMSE;
 };
 
-struct opt_vars {
+struct opt_switch {
+	const bool &charge_position, &charge_sigma, &charge_rotation, &charge_fraction, &interfaces;
+};
+
+struct opt_variable {
 	rowvec2 &interfaces;
-	mat &charge_sigma;
+	mat &charge_sigma, &charge_rotations;
 	rowvec &charge_fraction;
 	mat &charge_position;
 };
@@ -79,7 +83,7 @@ void UpdateCell(const mat33& vectors, const urowvec3& grid);
 // Q is total charge, rel_pos is the relative position of the center of Gaussian charge,
 // sigma is the Gaussian width in x/y/z direction (for simple Gaussians only the 1st element is used)
 // the generated charge distribution data is in (e/bohr^3)
-cx_cube gaussian_charge(const double& Q, const vec3& rel_pos, const rowvec3& sigma, const bool& trivariate);
+cx_cube gaussian_charge(const double& Q, const rowvec3& rel_pos, const rowvec3& sigma, const rowvec3& rotation_angle, const bool& trivariate);
 
 
 
@@ -98,14 +102,14 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 // max number of evaluations: "max_eval"
 // reference to the data: "opt_data"
 // reference to the variables to be optimized: "opt_vars"
-double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_vars& opt_vars, const bool &optimize_charge_position, const bool &optimize_charge_sigma, const bool &optimize_charge_fraction, const bool &optimize_interfaces);
+double do_optimize(const string& opt_algo, const double& opt_tol, const int &max_eval, const int &max_time, opt_data& opt_data, opt_variable& opt_vars, opt_switch& optimize);
 
 //pack the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
 //returned vectors are "optimization parameters", "lower boundaries", "upper boundaries"
-tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_vars& opt_vars, const bool optimize_charge_position = false, const bool optimize_charge_sigma = false, const bool optimize_charge_fraction = false, const bool optimize_interface = false, const bool trivariate = false);
+tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_variable& opt_vars, opt_switch optimize = { false,false,false,false,false }, const bool trivariate = false);
 
 //unpack the optimization variable structure into opt_vars struct variables
-void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_vars &opt_vars);
+void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_variable &opt_vars);
 
 //sanity check on the input parameters
 void check_inputs(input_data input_set);
@@ -116,9 +120,11 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 //calculate the changes in the interface positions and warn the user if the changes are too big
 void verify_interface_optimization(const rowvec2& initial_interfaces, const rowvec2& optimized_interfaces);
 
+//check for large charge_sigma and report the delocalized charges
+void verify_charge_sigma_optimization(const rowvec& charge_q, const mat& charge_sigma);
+
 //parse the parameters from the input file
 void parse_input_params(const string& input_file, const input_data& input_set);
 
 //optimization constraint to ensure all the Gaussian charges have the same sign
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data);
-

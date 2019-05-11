@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 22 April 2019
-:version: 0.6.4
+:Last updated: 11 May 2019
+:version: 0.6.5
 
 .. sectnum::
 
@@ -196,7 +196,7 @@ Installation
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
@@ -254,6 +254,13 @@ The input file is processed as follows:
 |                              |``charge_position = 0.2 0.5 0.3``                      |               |
 |                              |                                                       |               |
 |                              |``charge_position = 0.2 0.2 0.2; 0.3 0.4 0.3``         |               |
++------------------------------+-------------------------------------------------------+---------------+
+|                              |Rotation angles around each axis for the trivariate    |               |
+|                              |Gaussian charges in arc degree (-90, 90)               |       0       |
+| ``charge_rotation``          |                                                       |               |
+|                              |``charge_rotation = 0 45 0``                           |               |
+|                              |                                                       |               |
+|                              |``charge_rotation = 45 0 0; 0 -10 0``                  |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Width of each localized Gaussian charge. It can be 1   |               |
 |                              |or in case of trivariate models, 3 parameters per      |               |
@@ -355,24 +362,32 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``optimize_algorithm = SBPLX``                         |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_charge_fraction`` |**true**: find the optimal values for the              |     true      |
+| ``optimize_charge_fraction`` |**true**: find the optimal values for the model's      |     true      |
 |                              |charge_fraction parameter to construct the best model  |               |
-|                              |which mimics the potential obtained from the VASP      |               |
-|                              |calculation                                            |               |
+|                              |charge which mimics the potential obtained from the    |               |
+|                              |VASP calculation                                       |               |
 |                              |                                                       |               |
 |                              |**false**: do not change the charge_fraction parameter |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_charge_position`` |**true**: find the optimal values for the model charge |     true      |
+| ``optimize_charge_position`` |**true**: find the optimal values for the model's      |     true      |
 |                              |charge_position parameter to construct the best model  |               |
-|                              |which mimics the potential obtained from the VASP      |               |
-|                              |calculation                                            |               |
+|                              |charge which mimics the potential obtained from the    |               |
+|                              |VASP calculation                                       |               |
 |                              |                                                       |               |
 |                              |**false**: do not change the charge_position parameter |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_charge_sigma``    |**true**: find the optimal values for the model charge |     true      |
+| ``optimize_charge_rotation`` |**true**: find the optimal values for the model's      |     false     |
+|                              |charge_rotation parameter to construct the best model  |               |
+|                              |charge which mimics the potential obtained from the    |               |
+|                              |VASP calculation. This can only be used for the        |               |
+|                              |trivariate Gaussian models.                            |               |
+|                              |                                                       |               |
+|                              |**false**: do not change the charge_rotation parameter |               |
++------------------------------+-------------------------------------------------------+---------------+
+| ``optimize_charge_sigma``    |**true**: find the optimal values for the model's      |     true      |
 |                              |charge_sigma parameter to construct the best model     |               |
-|                              |which mimics the potential obtained from the VASP      |               |
-|                              |calculation                                            |               |
+|                              |charge which mimics the potential obtained from the    |               |
+|                              |VASP calculation                                       |               |
 |                              |                                                       |               |
 |                              |**false**: do not change the charge_sigma parameter    |               |
 +------------------------------+-------------------------------------------------------+---------------+
@@ -393,7 +408,7 @@ The input file is processed as follows:
 |                              |the memory usage but the parameters obtained using very|               |
 |                              |small grid sizes may be inaccurate!                    |               |
 +------------------------------+-------------------------------------------------------+---------------+
-| ``optimize_interfaces``      |**true**: find the optimal values for the model charge |               |
+| ``optimize_interfaces``      |**true**: find the optimal values for the model's      |               |
 |                              |interfaces to construct the best model which mimics    |     true      |
 |                              |the potential obtained from the VASP calculation       |               |
 |                              |                                                       |               |
@@ -463,6 +478,7 @@ The parsed input variables or their default values and the calculation results w
 	2d_model = no
 	charge_fraction = 1
 	charge_position = 0.5 0.5 0.37; 
+	charge_rotation = 0 0 0;
 	charge_sigma = 1;
 	charge_trivariate = no
 	CHGCAR_charged = ../03-V_Cl_pos/CHGCAR
@@ -481,6 +497,7 @@ The parsed input variables or their default values and the calculation results w
 	optimize_algorithm = COBYLA
 	optimize_charge_fraction = yes
 	optimize_charge_position = yes
+	optimize_charge_rotation = no
 	optimize_charge_sigma = yes
 	optimize_grid_x = 0.8
 	optimize_interfaces = yes

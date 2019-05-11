@@ -1075,10 +1075,10 @@ span.boxed, span.framebox {
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">22 April 2019</td>
+<tr class="last-updated field"><th class="docinfo-name">Last updated:</th><td class="field-body">11 May 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.6.4</td></tr>
+<td>0.6.5</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1369,7 +1369,7 @@ diel_in = 6.28 6.28 1.83
 <ol class="arabic simple">
 <li><strong>Compiler:</strong> You need a C++ compiler with C++14 standard support (e.g. <a class="reference external" href="https://gcc.gnu.org/">g++</a> 5.0 or later, <a class="reference external" href="https://software.intel.com/en-us/c-compilers">icpc</a> 15.0 or later, etc.)</li>
 <li><strong>FFTW:</strong> If you don't have FFTW installed on your system follow the guide on the <a class="reference external" href="http://www.fftw.org/download.html">FFTW website</a></li>
-<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a></li>
+<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md">Armadillo documentations</a> for linking to the other BLAS replacements.</li>
 </ol>
 </blockquote>
 <ol class="arabic simple" start="2">
@@ -1463,21 +1463,28 @@ positions</em></td>
 </td>
 <td>&nbsp;</td>
 </tr>
+<tr><td><tt class="docutils literal">charge_rotation</tt></td>
+<td><p class="first">Rotation angles around each axis for the trivariate
+Gaussian charges in arc degree (-90, 90)
+</p>
+<p><tt class="docutils literal">charge_rotation = 0 45 0</tt></p>
+<p class="last"><tt class="docutils literal">charge_rotation = 45 0 0; 0 -10 0</tt></p>
+</td>
+<td>0</td>
+</tr>
 <tr><td><tt class="docutils literal">charge_sigma</tt></td>
-<td><p class="first">Width of each localized Gaussian charge. It can be 1 or in case of trivariate models, 3 parameters per localized Gaussian charge. For trivariate Gaussian models, defining a single parameter per charge, sets the sigma values to be equal in all directions.</p>
+<td><p class="first">width of each localized Gaussian charge. It can be 1 or in case of trivariate models, 3 parameters per localized Gaussian charge. For trivariate Gaussian models, defining a single parameter per charge, sets the sigma values to be equal in all directions.</p>
 <p>for a single Gaussian charge<p><tt class="docutils literal">charge_sigma = 1</tt></p>
 <p>for multiple Gaussian charges<p><tt class="docutils literal">charge_sigma = 1 1.5</tt></p>
 <p>for two trivariate Gaussian charges<p class="last"><tt class="docutils literal">charge_sigma = 1 2 3; 1.5 2.5 3.5;</tt></p>
 </td>
 <td>1 (for each charge in each direction)</td>
 </tr>
-
 <tr><td><tt class="docutils literal">charge_trivariate</tt></td>
 <td><p class="first">Use trivariate Gaussian model along the main axis</p>
 </td>
 <td>false</td>
 </tr>
-
 <tr><td><tt class="docutils literal">CHGCAR_charged</tt></td>
 <td><p class="first">Charge density file (CHGCAR) of the charged system</p>
 <p class="last"><tt class="docutils literal">CHGCAR_charged = CHGCAR1</tt></p>
@@ -1578,21 +1585,42 @@ Constrained Optimization BY Linear Approximation <a class="footnote-reference" h
 </td>
 </tr>
 <tr><td><tt class="docutils literal">optimize_charge_fraction</tt></td>
-<td><p class="first"><strong>true</strong>: find the optimal values for the charge_fraction parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_fraction parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation
+</p>
 <p class="last"><strong>false</strong>: do not change the charge_fraction parameter</p>
 </td>
 <td>true</td>
 </tr>
-</tr>
 <tr><td><tt class="docutils literal">optimize_charge_position</tt></td>
-<td><p class="first"><strong>true</strong>: find the optimal values for the charge_position parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_position parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation
+</p>
 <p class="last"><strong>false</strong>: do not change the charge_position parameter</p>
 </td>
 <td>true</td>
 </tr>
+<tr><td><tt class="docutils literal">optimize_charge_rotation</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_rotation parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation. This can only be used for the 
+trivariate Gaussian models.
+</p>
+<p class="last"><strong>false</strong>: do not change the charge_rotation parameter</p>
+</td>
+<td>false</td>
 </tr>
 <tr><td><tt class="docutils literal">optimize_charge_sigma</tt></td>
-<td><p class="first"><strong>true</strong>: find the optimal values for the charge_sigma parameter to construct the best model which mimics the potential obtained from the VASP calculation</p>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_sigma parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation
+</p>
 <p class="last"><strong>false</strong>: do not change the charge_sigma parameter</p>
 </td>
 <td>true</td>
@@ -1613,7 +1641,7 @@ small grid sizes may be inaccurate!</p>
 <td>0.8</td>
 </tr>
 <tr><td><tt class="docutils literal">optimize_interfaces</tt></td>
-<td><p class="first"><strong>true</strong>: find the optimal values for the model charge
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
 interfaces to construct the best model which mimics
 the potential obtained from the VASP calculation</p>
 <p class="last"><strong>false</strong>: do not change the position of interfaces in
@@ -1705,6 +1733,7 @@ and dielectric profiles. Display debug info including the compilation machine in
 2d_model = no
 charge_fraction = 1
 charge_position = 0.5 0.5 0.37; 
+charge_rotation = 0 0 0;
 charge_sigma = 1;
 charge_trivariate = no
 CHGCAR_charged = ../03-V_Cl_pos/CHGCAR
@@ -1723,6 +1752,7 @@ normal_direction = z
 optimize_algorithm = COBYLA
 optimize_charge_fraction = yes
 optimize_charge_position = yes
+optimize_charge_rotation = no
 optimize_charge_sigma = yes
 optimize_grid_x = 0.8
 optimize_interfaces = yes

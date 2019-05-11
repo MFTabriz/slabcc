@@ -151,6 +151,17 @@ void initialize_loggers(const string& log_file, const string& output_file) {
 	combined_logger->set_level(spdlog::level::info);
 	spdlog::register_logger(combined_logger);
 
+	if (file_exists(output_file)) {
+		int counter = 1;
+		string backup_name = output_file + ".old" + to_string(counter);
+
+		while (file_exists(backup_name)) {
+			counter++;
+			backup_name = output_file + ".old" + to_string(counter);
+		}
+		rename(output_file.c_str() , backup_name.c_str());
+	}
+
 	auto output_logger = spdlog::basic_logger_mt("output", output_file);
 	output_logger->set_pattern("%v");
 	output_logger->set_level(spdlog::level::info);
