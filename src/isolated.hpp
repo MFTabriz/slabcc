@@ -6,7 +6,7 @@
 
 using namespace arma;
 using namespace std;
-extern slabcc_cell_type slabcc_cell;
+extern slabcc_cell model_cell;
 
 struct nonlinear_fit_data {
 	rowvec &energies, &sizes;

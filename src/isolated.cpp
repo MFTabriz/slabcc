@@ -6,10 +6,10 @@
 
 tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
-	const uword normal_direction = slabcc_cell.normal_direction;
+	const uword normal_direction = model_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const mat33 cell_vectors0 = slabcc_cell.vectors;
-	const urowvec grid0 = slabcc_cell.grid;
+	const mat33 cell_vectors0 = model_cell.vectors;
+	const urowvec grid0 = model_cell.grid;
 	const rowvec3 extrapolation_grid_size = grid_multiplier * conv_to<rowvec>::from(grid0);
 	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0),(uword)extrapolation_grid_size(1),(uword)extrapolation_grid_size(2) };
 
@@ -17,7 +17,7 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 		const double extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
 
-		UpdateCell(cell_vectors0 * extrapol_factor, extrapolation_grid);
+		model_cell.update(cell_vectors0 * extrapol_factor, extrapolation_grid);
 		rowvec2 interfaces_ext = interfaces;
 		mat charge_position_shifted = charge_position / extrapol_factor;
 
@@ -42,19 +42,19 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 		const mat dielectric_profiles = dielectric_profiles_gen(interfaces_ext, diel_in, diel_out, diel_erf_beta);
 
-		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
+		cx_cube rhoM(as_size(model_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
 			rhoM += gaussian_charge(charge_q(i), charge_position_shifted.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
 		}
-		const double Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
+		const double Q = accu(real(rhoM)) * model_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
-		rhoM -= Q / prod(slabcc_cell.vec_lengths);
+		rhoM -= Q / prod(model_cell.vec_lengths);
 		const auto V = poisson_solver_3D(rhoM, dielectric_profiles);
-		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
-		const rowvec2 interface_pos = interfaces_ext * slabcc_cell.vec_lengths(normal_direction);
+		const auto EperModel = 0.5 * accu(real(V % rhoM)) * model_cell.voxel_vol * Hartree_to_eV;
+		const rowvec2 interface_pos = interfaces_ext * model_cell.vec_lengths(normal_direction);
 		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + ::to_string(Q) + "\t" + to_string(interface_pos);
 		for (auto i = 0; i < charge_position_shifted.n_rows; ++i) {
-			extrapolation_info += "\t" + to_string(charge_position_shifted(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
+			extrapolation_info += "\t" + to_string(charge_position_shifted(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
 		if (abs(Q - accu(charge_q)) > 0.01) {
@@ -74,38 +74,38 @@ tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const doubl
 
 tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate) {
 	auto log = spdlog::get("loggers");
-	const uword normal_direction = slabcc_cell.normal_direction;
+	const uword normal_direction = model_cell.normal_direction;
 	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const mat33 cell_vectors0 = slabcc_cell.vectors;
-	const urowvec grid0 = slabcc_cell.grid;
+	const mat33 cell_vectors0 = model_cell.vectors;
+	const urowvec grid0 = model_cell.grid;
 	const rowvec3 extrapolation_grid_size = grid_multiplier * conv_to<rowvec>::from(grid0);
 	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
-	UpdateCell(cell_vectors0, extrapolation_grid);
+	model_cell.update(cell_vectors0, extrapolation_grid);
 
 	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 
 		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
-		UpdateCell(cell_vectors0 * extrapol_factor, extrapolation_grid);
+		model_cell.update(cell_vectors0 * extrapol_factor, extrapolation_grid);
 		//extrapolated interfaces
 		const rowvec2 interfaces_ext = interfaces / extrapol_factor;
 
 		const mat charge_position_ext = charge_position / extrapol_factor;
 		const mat dielectric_profiles = dielectric_profiles_gen(interfaces_ext, diel_in, diel_out, diel_erf_beta);
 
-		cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
+		cx_cube rhoM(as_size(model_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
 			rhoM += gaussian_charge(charge_q(i), charge_position_ext.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
 		}
-		const auto Q = accu(real(rhoM)) * slabcc_cell.voxel_vol;
+		const auto Q = accu(real(rhoM)) * model_cell.voxel_vol;
 		// (only works for the orthogonal cells!)
-		rhoM -= Q / prod(slabcc_cell.vec_lengths);
+		rhoM -= Q / prod(model_cell.vec_lengths);
 		const auto V = poisson_solver_3D(rhoM, dielectric_profiles);
-		const auto EperModel = 0.5 * accu(real(V % rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
+		const auto EperModel = 0.5 * accu(real(V % rhoM)) * model_cell.voxel_vol * Hartree_to_eV;
 
-		const rowvec2 interface_pos = interfaces_ext * slabcc_cell.vec_lengths(normal_direction);
+		const rowvec2 interface_pos = interfaces_ext * model_cell.vec_lengths(normal_direction);
 		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + to_string(interface_pos);
 		for (auto i = 0; i < charge_position_ext.n_rows; ++i) {
-			extrapolation_info += "\t" + to_string(charge_position_ext(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
+			extrapolation_info += "\t" + to_string(charge_position_ext(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
 		Es(n) = EperModel;
@@ -175,9 +175,9 @@ double Eiso_bessel(double Q, double z0, double sigma, mat diel) {
 
 
 rowvec Uk(rowvec k, double z0, double sigma, mat diel) {
-	const rowvec3 length = slabcc_cell.vec_lengths;
-	const urowvec3 n_points = slabcc_cell.grid;
-	const uword normal = slabcc_cell.normal_direction;
+	const rowvec3 length = model_cell.vec_lengths;
+	const urowvec3 n_points = model_cell.grid;
+	const uword normal = model_cell.normal_direction;
 	const rowvec Gs = 2.0 * PI / length;
 
 	rowvec Gz0 = ceil(regspace<rowvec>(-0.5 * n_points(normal), 0.5 * n_points(normal) - 1)) * Gs(normal);

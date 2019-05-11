@@ -5,57 +5,20 @@
 #include "general_io.hpp"
 
 
-void write_vec2file(const vector<double>& input, const string& output_file) {
-	ofstream out_file;
-	auto log = spdlog::get("loggers");
-	log->trace("Started writing " + output_file);
-
-	out_file.open(output_file);
-	out_file << fixed << showpos << setprecision(15);
-	for (const auto& i : input) { out_file << i << '\n'; }
-	out_file.close();
-
-}
-
-unsigned int xyz2int(const string& s) {
-	const char dir_char = tolower(s.at(0));
-	const unordered_map<char, unsigned int> dir_map{
-		{ '0', 0 }, { 'x', 0 }, { 'a', 0 },
-		{ '1', 1 }, { 'y', 1 }, { 'b', 1 },
-		{ '2', 2 }, { 'z', 2 }, { 'c', 2 },
-	};
-	return dir_map.at(dir_char);
-}
-
-char int2xyz(const unsigned int& i) {
-	const unordered_map<unsigned int, char> dir_map{
-		{ 0 , 'X'}, { 1 , 'Y' }, { 2 , 'Z' },
-	};
-	return dir_map.at(i);
-}
-
-
-string tolower(string in_str) noexcept {
-	for (char& c : in_str) {
-		c = tolower(c);
-	}
-	return in_str;
-}
-
-void parse_cli(int argc, char *argv[], cli_params& cli_parameters) {
+void cli_params::parse(int argc, char *argv[]) {
 
 	bool showHelp = false, showManual = false, showVer = false, showAttr = false;
 	auto cli = clara::Help(showHelp) |
-		clara::Opt(cli_parameters.input_file, "input_file")
+		clara::Opt(input_file, "input_file")
 		["-i"]["--input"]
 		("slabcc input file name") |
-		clara::Opt(cli_parameters.output_file, "input_file")
+		clara::Opt(output_file, "input_file")
 		["-o"]["--output"]
 		("slabcc output file name") |
-		clara::Opt(cli_parameters.log_file, "log_file")
+		clara::Opt(log_file, "log_file")
 		["-l"]["--log"]
 		("slabcc log file name") |
-		clara::Opt(cli_parameters.diff_only)
+		clara::Opt(diff_only)
 		["-d"]["--diff"]
 		("calculate the charge and the potential differences only") |
 		clara::Opt(showManual)
@@ -126,7 +89,7 @@ void parse_cli(int argc, char *argv[], cli_params& cli_parameters) {
 			"-NLOPT: licensed under GNU Lesser General Public License (LGPL)\n"
 			"  (c) 2007-2010, Massachusetts Institute of Technology\n\n"
 			"-spdlog: licensed under the MIT License\n"
-		    "  (c) 2016, Gabi Melman\n\n"
+			"  (c) 2016, Gabi Melman\n\n"
 			"-Boost.Predef: licensed under the Boost Software License 1.0\n"
 			"  (c) 2005-2018 Rene Rivera\n"
 			"  (c) 2015 Charly Chevalier\n"
@@ -136,6 +99,42 @@ void parse_cli(int argc, char *argv[], cli_params& cli_parameters) {
 	}
 }
 
+void write_vec2file(const vector<double>& input, const string& output_file) {
+	ofstream out_file;
+	auto log = spdlog::get("loggers");
+	log->trace("Started writing " + output_file);
+
+	out_file.open(output_file);
+	out_file << fixed << showpos << setprecision(15);
+	for (const auto& i : input) { out_file << i << '\n'; }
+	out_file.close();
+
+}
+
+unsigned int xyz2int(const string& s) {
+	const char dir_char = tolower(s.at(0));
+	const unordered_map<char, unsigned int> dir_map{
+		{ '0', 0 }, { 'x', 0 }, { 'a', 0 },
+		{ '1', 1 }, { 'y', 1 }, { 'b', 1 },
+		{ '2', 2 }, { 'z', 2 }, { 'c', 2 },
+	};
+	return dir_map.at(dir_char);
+}
+
+char int2xyz(const unsigned int& i) {
+	const unordered_map<unsigned int, char> dir_map{
+		{ 0 , 'X'}, { 1 , 'Y' }, { 2 , 'Z' },
+	};
+	return dir_map.at(i);
+}
+
+
+string tolower(string in_str) noexcept {
+	for (char& c : in_str) {
+		c = tolower(c);
+	}
+	return in_str;
+}
 
 void initialize_loggers(const string& log_file, const string& output_file) {
 

@@ -17,6 +17,10 @@ extern int verbosity_level;
 struct cli_params {
 	string &input_file, output_file, log_file;
 	bool &diff_only;
+
+	// reads the command line and sets the input_file and output_file
+	void parse(int argc, char *argv[]);
+
 };
 
 //defines the minimum verbosity level for each type of action
@@ -55,9 +59,6 @@ inline bool file_is_empty(ifstream& file) {
 }
 
 string tolower(string in_str) noexcept;
-
-// reads the command line and sets the input_file and output_file
-void parse_cli(int argc, char *argv[], cli_params& cli_parameters);
 
 void initialize_loggers(const string& log_file, const string& output_file);
 void update_loggers();

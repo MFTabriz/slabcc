@@ -4,11 +4,11 @@
 
 #include "slabcc_core.hpp"
 
-extern slabcc_cell_type slabcc_cell;
+extern slabcc_cell model_cell;
 
 mat dielectric_profiles_gen(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta) {
-	const auto length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
-	const auto n_points = slabcc_cell.grid(slabcc_cell.normal_direction);
+	const auto length = model_cell.vec_lengths(model_cell.normal_direction);
+	const auto n_points = model_cell.grid(model_cell.normal_direction);
 	rowvec2 interfaces_cartesian = interfaces * length;
 	interfaces_cartesian = sort(interfaces_cartesian);
 	const auto positions = linspace<rowvec>(0, length, n_points + 1);
@@ -37,40 +37,31 @@ mat dielectric_profiles_gen(const rowvec2 &interfaces, const rowvec3 &diel_in, c
 	return dielectric_profiles;
 }
 
-void UpdateCell(const mat33& vectors, const urowvec3& grid) {
-	slabcc_cell.vectors = vectors;
-	for (uword i = 0; i < 3; ++i) {
-		slabcc_cell.vec_lengths(i) = norm(vectors.col(i));
-	}
-	slabcc_cell.grid = grid;
-	slabcc_cell.voxel_vol = prod(slabcc_cell.vec_lengths / grid);
-}
-
 cx_cube gaussian_charge(const double& Q, const rowvec3& rel_pos, const rowvec3& sigma, const rowvec3& rotation_angle, const bool& trivariate) {
 
-	rowvec x0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(0) - slabcc_cell.vec_lengths(0) / slabcc_cell.grid(0), slabcc_cell.grid(0));
-	rowvec y0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(1) - slabcc_cell.vec_lengths(1) / slabcc_cell.grid(1), slabcc_cell.grid(1));
-	rowvec z0 = linspace<rowvec>(0, slabcc_cell.vec_lengths(2) - slabcc_cell.vec_lengths(2) / slabcc_cell.grid(2), slabcc_cell.grid(2));
+	rowvec x0 = linspace<rowvec>(0, model_cell.vec_lengths(0) - model_cell.vec_lengths(0) / model_cell.grid(0), model_cell.grid(0));
+	rowvec y0 = linspace<rowvec>(0, model_cell.vec_lengths(1) - model_cell.vec_lengths(1) / model_cell.grid(1), model_cell.grid(1));
+	rowvec z0 = linspace<rowvec>(0, model_cell.vec_lengths(2) - model_cell.vec_lengths(2) / model_cell.grid(2), model_cell.grid(2));
 
 	// shift the axis reference to position of the Gaussian charge center
-	x0 -= accu(slabcc_cell.vectors.col(0) * rel_pos(0));
-	y0 -= accu(slabcc_cell.vectors.col(1) * rel_pos(1));
-	z0 -= accu(slabcc_cell.vectors.col(2) * rel_pos(2));
+	x0 -= accu(model_cell.vectors.col(0) * rel_pos(0));
+	y0 -= accu(model_cell.vectors.col(1) * rel_pos(1));
+	z0 -= accu(model_cell.vectors.col(2) * rel_pos(2));
 
 	//handle the minimum distance from the mirror charges
 	for (auto &pos : x0) {
-		if (abs(pos) > slabcc_cell.vec_lengths(0) / 2) {
-			pos = slabcc_cell.vec_lengths(0) - abs(pos);
+		if (abs(pos) > model_cell.vec_lengths(0) / 2) {
+			pos = model_cell.vec_lengths(0) - abs(pos);
 		}
 	}
 	for (auto &pos : y0) {
-		if (abs(pos) > slabcc_cell.vec_lengths(1) / 2) {
-			pos = slabcc_cell.vec_lengths(1) - abs(pos);
+		if (abs(pos) > model_cell.vec_lengths(1) / 2) {
+			pos = model_cell.vec_lengths(1) - abs(pos);
 		}
 	}
 	for (auto &pos : z0) {
-		if (abs(pos) > slabcc_cell.vec_lengths(2) / 2) {
-			pos = slabcc_cell.vec_lengths(2) - abs(pos);
+		if (abs(pos) > model_cell.vec_lengths(2) / 2) {
+			pos = model_cell.vec_lengths(2) - abs(pos);
 		}
 	}
 
@@ -117,22 +108,22 @@ cx_cube gaussian_charge(const double& Q, const rowvec3& rel_pos, const rowvec3& 
 	if (trivariate) {
 		charge_dist = cx_cube(Q / (pow(2 * PI, 1.5) * prod(sigma))
 			* exp(-square(x) / (2 * square(sigma(0))) - square(y) / (2 * square(sigma(1))) - square(z) / (2 * square(sigma(2))))
-			, zeros(as_size(slabcc_cell.grid)));
+			, zeros(as_size(model_cell.grid)));
 	}
 	else {
-		charge_dist = cx_cube(Q / pow((sigma(0) * sqrt(2 * PI)), 3) * exp(-r2 / (2 * square(sigma(0)))), zeros(as_size(slabcc_cell.grid)));
+		charge_dist = cx_cube(Q / pow((sigma(0) * sqrt(2 * PI)), 3) * exp(-r2 / (2 * square(sigma(0)))), zeros(as_size(model_cell.grid)));
 	}
 	return charge_dist;
 }
 
 cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
-	auto length = slabcc_cell.vec_lengths;
-	auto n_points = slabcc_cell.grid;
+	auto length = model_cell.vec_lengths;
+	auto n_points = model_cell.grid;
 
-	if (slabcc_cell.normal_direction != 2) {
-		n_points.swap_cols(slabcc_cell.normal_direction, 2);
-		length.swap_cols(slabcc_cell.normal_direction, 2);
-		diel.swap_cols(slabcc_cell.normal_direction, 2);
+	if (model_cell.normal_direction != 2) {
+		n_points.swap_cols(model_cell.normal_direction, 2);
+		length.swap_cols(model_cell.normal_direction, 2);
+		diel.swap_cols(model_cell.normal_direction, 2);
 	}
 
 	const rowvec Gs = 2.0 * PI / length;
@@ -160,7 +151,7 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel) {
 		const cx_mat eps11_Gx0k2 = eps11 * square(Gx0(k));
 		for (uword m = 0; m < Gy0.n_elem; ++m) {
 			vector<span> spans = { span(k), span(m), span() };
-			swap(spans[slabcc_cell.normal_direction], spans[2]);
+			swap(spans[model_cell.normal_direction], spans[2]);
 			cx_mat AG = Az + eps11_Gx0k2 + eps22 * square(Gy0(m));
 			if ((k == 0) && (m == 0)) { AG(0, 0) = 1; }
 			Vk(spans[0], spans[1], spans[2]) = solve(AG, vectorise(rhok(spans[0], spans[1], spans[2])));
@@ -214,7 +205,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	dielectric_profiles = dielectric_profiles_gen(shifted_interfaces, diel_in, diel_out, diel_erf_beta);
 
 	rhoM.reset();
-	rhoM = zeros<cx_cube>(as_size(slabcc_cell.grid));
+	rhoM = zeros<cx_cube>(as_size(model_cell.grid));
 	for (uword i = 0; i < normalized_charge_fraction.n_elem; ++i) {
 		rhoM += gaussian_charge(normalized_charge_fraction(i) * total_vasp_charge, charge_position.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
 	}
@@ -233,7 +224,7 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 
 	log->debug("-----------------------------------------");
 	if (!approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
-		const rowvec2 unshifted_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(slabcc_cell.normal_direction), 1);
+		const rowvec2 unshifted_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(model_cell.normal_direction), 1);
 		log->debug("> interfaces={}", ::to_string(unshifted_interfaces));
 	}
 
@@ -332,10 +323,10 @@ tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_
 	const double sigma_step = 0.5;
 	const double fraction_step = 0.2;
 	const double rotation_step = 0.2; //rad
-	const rowvec3 relative_move_step = move_step * ang_to_bohr / slabcc_cell.vec_lengths;
+	const rowvec3 relative_move_step = move_step * ang_to_bohr / model_cell.vec_lengths;
 	
 	//------interfaces----
-	vector<double> step_size = { relative_move_step(slabcc_cell.normal_direction) , relative_move_step(slabcc_cell.normal_direction) };
+	vector<double> step_size = { relative_move_step(model_cell.normal_direction) , relative_move_step(model_cell.normal_direction) };
 	vector<double> opt_param = { opt_vars.interfaces(0), opt_vars.interfaces(1) };
 	vector<double> low_b = { 0, 0 };		//lower bounds
 	vector<double> upp_b = { 1, 1 };		//upper bounds
@@ -462,279 +453,6 @@ void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_variable &
 }
 
 
-void check_inputs(input_data input_set) {
-	auto log = spdlog::get("loggers");
-	input_set.charge_sigma = abs(input_set.charge_sigma);
-	input_set.max_eval = abs(input_set.max_eval);
-	input_set.max_time = abs(input_set.max_time);
-	input_set.interfaces = fmod_p(input_set.interfaces, 1);
-	input_set.extrapol_grid_x = abs(input_set.extrapol_grid_x);
-	input_set.opt_grid_x = abs(input_set.opt_grid_x);
-	input_set.opt_tol = abs(input_set.opt_tol);
-	input_set.charge_rotations = fmod_p(input_set.charge_rotations + 90, 180) - 90;
-	input_set.charge_rotations *= PI / 180.0;
-
-	if ((input_set.max_eval != 0) && (input_set.max_eval < 3)) {
-		log->warn("Searching for the optimum model parameters only for {} steps most probably will not be any useful!", input_set.max_eval);
-	}
-
-	if (input_set.diel_in.n_elem == 1) {
-		log->trace("Isotropic dielectric constant inside of the slab.");
-		input_set.diel_in = repelem(input_set.diel_in, 1, 3);
-	}
-
-	if (input_set.diel_out.n_elem == 1) {
-		log->trace("Isotropic dielectric constant outside of the slab.");
-		input_set.diel_out = repelem(input_set.diel_out, 1, 3);
-	}
-
-	if ((min(input_set.diel_in) <= 0) || (min(input_set.diel_out) <= 0)) {
-		log->debug("Minimum of the dielectric tensor inside the slab: {}", min(input_set.diel_in));
-		log->debug("Minimum of the dielectric tensor outside the slab: {}", min(input_set.diel_out));
-		log->critical("The dielectric tensor is not defined properly! None of the tensor elements should be negative!");
-		exit(1);
-	}
-	if (approx_equal(input_set.diel_in, input_set.diel_out, "absdiff", 0.02)) {
-		log->debug("Model type: Bulk");
-		if (input_set.optimize_interface) {
-			log->trace("The position of the interfaces for the bulk models is irrelevant! \"interfaces\" will not be optimized!");
-			input_set.optimize_interface = false;
-		}
-	}
-	else {
-		if (input_set.model_2D) {
-			log->debug("Model type: 2D");
-		}
-		else {
-			log->debug("Model type: Slab");
-		}
-	}
-	if (input_set.optimize_charge_position || input_set.optimize_charge_sigma || input_set.optimize_charge_fraction || input_set.optimize_interface) {
-		if ((input_set.opt_algo != "BOBYQA") && (input_set.opt_algo != "COBYLA") && (input_set.opt_algo != "SBPLX")) {
-			log->debug("Optimization algorithm: {}", input_set.opt_algo);
-			log->warn("Unsupported optimization algorithm is selected!");
-			input_set.opt_algo = "BOBYQA";
-			log->warn("{} will be used instead!", input_set.opt_algo);
-		}
-
-		if ((input_set.optimize_charge_fraction) && (input_set.charge_fraction.n_elem == 1)) {
-			log->debug("There is only 1 Gaussian charge in your slabcc model. The charge_fraction will not be optimized!");
-			input_set.optimize_charge_fraction = false;
-		}
-
-		if (input_set.opt_tol > 1) {
-			log->debug("Requested optimization tolerance: {}", input_set.opt_tol);
-			log->warn("The relative optimization tolerance is unacceptable! It must be in choosen in (0-1) range.");
-			input_set.opt_tol = 0.01;
-			log->warn("optimize_tolerance = {} will be used!", input_set.opt_tol);
-		}
-	}
-
-
-	if (input_set.charge_position.n_cols != 3) {
-		log->debug("Number of the parameters defined for the position of a charge: {}", input_set.charge_position.n_cols);
-		log->critical("Incorrect definition of charge positions!");
-		log->critical("Positions should be defined as: charge_position = 0.1 0.2 0.3; 0.1 0.2 0.4;");
-		finalize_loggers();
-		exit(1);
-	}
-
-	const uword charge_number = input_set.charge_position.n_rows;
-	const uword sigma_rows = input_set.charge_sigma.n_rows;
-	const uword sigma_cols = input_set.charge_sigma.n_cols;
-
-	if (input_set.charge_sigma.n_elem == 1) {
-		input_set.charge_sigma = input_set.charge_sigma(0) * ones(charge_number, 3);
-		log->debug("Only one charge_sigma is defined!");
-
-	}else if (sigma_rows == charge_number) {
-		if (sigma_cols == 3) {
-			if (input_set.trivariate) {
-				log->debug("All the charge_sigma values are properly defined!");
-			}
-			else {
-				log->warn("charge_sigma is not defined properly! charge_sigma={} will be used.", to_string(input_set.charge_sigma.col(0)));
-			}
-		}
-		else if (sigma_cols == 1) {
-			input_set.charge_sigma = repmat(input_set.charge_sigma, 1, 3);
-			if (input_set.trivariate) {
-				log->debug("Equal values will be assumed for the charge_sigma in all directions!");
-			}
-			else {
-				log->debug("charge_sigma is properly defined!");
-			}
-		}
-	}
-	else if (sigma_cols == charge_number) {
-		if (sigma_rows == 1) {
-			input_set.charge_sigma = repmat(input_set.charge_sigma.t(), 1, 3);
-			if (input_set.trivariate) {	
-				log->debug("Equal values will be assumed for the charge_sigma in all directions!");
-			}
-			else {
-				log->debug("charge_sigma is properly defined!");
-			}
-		}
-	}
-	else if ((sigma_cols == 3) && (sigma_rows == 1)) {
-		if (input_set.trivariate) {
-			input_set.charge_sigma = repmat(input_set.charge_sigma, charge_number, 1);
-			log->debug("Equal charge_sigma will be assumed for all the Gaussian charges!");
-		}
-	}
-	
-	
-	//if all the sensible checks and remedies have failed!
-	if(arma::size(input_set.charge_sigma) != arma::size(input_set.charge_position)){
-		log->warn("Number of the defined Gaussian charges and the charge_sigma sets does not match!");
-		input_set.charge_sigma = mat(arma::size(input_set.charge_position), fill::ones);
-		if (input_set.trivariate) {
-			log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma));
-		}
-		else {
-			log->warn("charge_sigma = {} will be used!", to_string(input_set.charge_sigma.col(0)));
-		}
-	}
-
-	log->debug("charge_sigma after the checks: {}", to_string(input_set.charge_sigma));
-
-	if ((abs(input_set.charge_rotations)).max() > 0){
-		if (!input_set.trivariate) {
-			log->warn("charge_rotation will be ignored for the simple Gaussian charges!");
-			input_set.charge_rotations = zeros<mat>(arma::size(input_set.charge_position));
-		}
-		else {
-			log->debug("charge_rotation (rad): {}", to_string(input_set.charge_rotations));
-		}
-	}
-
-	if ((input_set.charge_rotations.n_rows == 1) && (charge_number > 1)) {
-		input_set.charge_rotations = repmat(input_set.charge_rotations, charge_number, 1);
-		log->debug("Equal charge_rotation will be assumed for all the Gaussian charges!");
-	}
-
-	if (arma::size(input_set.charge_rotations) != arma::size(input_set.charge_position)) {
-		log->warn("charge_rotation is not defined properly!");
-		input_set.charge_rotations = zeros<mat>(arma::size(input_set.charge_position));
-		log->warn("charge_rotation = {} will be used!", to_string(input_set.charge_rotations));
-	}
-	
-
-	//charge_fraction
-	if (input_set.charge_fraction.n_elem != input_set.charge_position.n_rows) {
-		log->debug("Number of charge position values: {}", input_set.charge_position.n_rows);
-		log->debug("Number of charge fraction values: {}", input_set.charge_fraction.n_elem);
-		input_set.charge_fraction = rowvec(input_set.charge_position.n_rows, fill::ones);
-		log->warn("Number of the charge_fraction and charge_position sets does not match!");
-		log->warn("Equal charge fractions will be assumed!");
-
-	}
-
-
-	if (!file_exists(input_set.CHGCAR_neutral) || !file_exists(input_set.CHGCAR_charged)
-		|| !file_exists(input_set.LOCPOT_neutral) || !file_exists(input_set.LOCPOT_charged)) {
-		log->debug("CHGCAR_neutral: '{}' found: {}", input_set.CHGCAR_neutral, to_string(file_exists(input_set.CHGCAR_neutral)));
-		log->debug("CHGCAR_charged: '{}' found: {}", input_set.CHGCAR_charged, to_string(file_exists(input_set.CHGCAR_charged)));
-		log->debug("LOCPOT_neutral: '{}' found: {}", input_set.LOCPOT_neutral, to_string(file_exists(input_set.LOCPOT_neutral)));
-		log->debug("LOCPOT_charged: '{}' found: {}", input_set.LOCPOT_charged, to_string(file_exists(input_set.LOCPOT_charged)));
-		log->critical("One or more of the input files could not be found!");
-		finalize_loggers();
-		exit(1);
-	}
-	
-	if (input_set.extrapolate) {
-		if (input_set.extrapol_steps_num < 3) {
-			log->debug("Requested extrapolation steps: {}", input_set.extrapol_steps_num);
-			log->warn("Minimum 3 steps are needed for the extrapolation algorithm to work reliably!");
-			input_set.extrapol_steps_num = 3;
-			log->warn("{} steps will be used instead!", input_set.extrapol_steps_num);
-		}
-	}
-	else {
-		if (input_set.model_2D) {
-			// Bessel expansion limitations
-			if (input_set.charge_fraction.n_elem > 1) {
-				log->error("The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support multiple Gaussian charges. The extrapolation method \"extrapolate=yes\" will be used for this calculation.");
-				input_set.extrapolate = true;
-			}
-			if (any(input_set.diel_out > 1)) {
-				log->error("The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support the models embedded in any dielectric medium other than the vacuum. The extrapolation method \"extrapolate=yes\" will be used for this calculation.");
-				input_set.extrapolate = true;
-			}
-			if (input_set.trivariate) {
-				log->error("The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support the trivariate Gaussian model charges. The extrapolation method \"extrapolate=yes\" will be used for this calculation.");
-				input_set.extrapolate = true;
-			}
-
-			vec2 inplane_diels;
-			for (uword i = 0; i < 3; ++i) {
-				if (i < input_set.normal_direction) {
-					inplane_diels(i) = input_set.diel_in(i);
-				}
-				if (i > input_set.normal_direction) {
-					inplane_diels(i - 1) = input_set.diel_in(i);
-				}
-			}
-
-			if (abs(inplane_diels(0) - inplane_diels(1)) > 0.01) {
-				log->debug("In-plane dielectric constants: {}", ::to_string(inplane_diels));
-				log->error("In-plane dielectric constants are not equal. The current implementation of the E_isolated calculation algorithm using the Bessel expansion of the Poisson eq. does not support this model. Will use the extrapolation method \"extrapolate=yes\" for this calculation.");
-				input_set.extrapolate = true;
-			}
-		}
-	}
-
-	log->trace("Input parameters verified!");
-
-}
-
-void parse_input_params(const string& input_file, const input_data& input_set) {
-	auto log = spdlog::get("loggers");
-	INIReader reader(input_file);
-	if (reader.ParseError() < 0) {
-		log->critical("Cannot load the input file: {}", input_file);
-		finalize_loggers();
-		exit(1);
-	}
-
-	verbosity_level = reader.GetInteger("verbosity", 1);
-
-	input_set.CHGCAR_neutral = reader.GetStr("CHGCAR_neutral", "CHGCAR.N");
-	input_set.LOCPOT_neutral = reader.GetStr("LOCPOT_neutral", "LOCPOT.N");
-	input_set.LOCPOT_charged = reader.GetStr("LOCPOT_charged", "LOCPOT.C");
-	input_set.CHGCAR_charged = reader.GetStr("CHGCAR_charged", "CHGCAR.C");
-	input_set.charge_position = reader.GetMat("charge_position", {});
-	input_set.charge_fraction = reader.GetVec("charge_fraction", rowvec(input_set.charge_position.n_rows, fill::ones) / input_set.charge_position.n_rows);
-	input_set.trivariate = reader.GetBoolean("charge_trivariate", false);
-	input_set.charge_rotations = reader.GetMat("charge_rotation", zeros<mat>(arma::size(input_set.charge_position)));
-	input_set.charge_sigma = reader.GetMat("charge_sigma", ones<mat>(arma::size(input_set.charge_position)));
-	input_set.slabcenter = reader.GetVec("slab_center", { 0.5, 0.5, 0.5 });
-	input_set.normal_direction = xyz2int(reader.GetStr("normal_direction", "z"));
-	input_set.interfaces = reader.GetVec("interfaces", { 0.25, 0.75 });
-	input_set.diel_in = reader.GetVec("diel_in", { 1 });
-	input_set.diel_out = reader.GetVec("diel_out", { 1 });
-	input_set.diel_erf_beta = reader.GetReal("diel_taper", 1);
-	input_set.optimize_charge_position = reader.GetBoolean("optimize_charge_position", true);
-	input_set.optimize_charge_sigma = reader.GetBoolean("optimize_charge_sigma", true);
-	input_set.optimize_charge_rotation = reader.GetBoolean("optimize_charge_rotation", false);
-	input_set.optimize_charge_fraction = reader.GetBoolean("optimize_charge_fraction", true);
-	input_set.optimize_interface = reader.GetBoolean("optimize_interfaces", true);
-	input_set.model_2D = reader.GetBoolean("2d_model", false);
-	input_set.opt_algo = reader.GetStr("optimize_algorithm", "BOBYQA");
-	input_set.opt_tol = reader.GetReal("optimize_tolerance", 0.01);
-	input_set.max_eval = reader.GetInteger("optimize_maxsteps", 0);
-	input_set.max_time = reader.GetInteger("optimize_maxtime", 0);
-	input_set.opt_grid_x = reader.GetReal("optimize_grid_x", 0.8);
-	input_set.extrapolate = reader.GetBoolean("extrapolate", input_set.model_2D ? false : true);
-	input_set.extrapol_grid_x = reader.GetReal("extrapolate_grid_x", 1);
-	input_set.extrapol_steps_num = reader.GetInteger("extrapolate_steps_number", 4);
-	input_set.extrapol_steps_size = reader.GetReal("extrapolate_steps_size", 0.5);
-
-	reader.dump_all();
-
-	slabcc_cell.normal_direction = input_set.normal_direction;
-}
 
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data)
 {
@@ -799,7 +517,7 @@ void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_s
 void verify_interface_optimization(const rowvec2& initial_interfaces, const rowvec2& optimized_interfaces) {
 	
 	const double max_total_safe_movement = 4; //Ang
-	const double normal_length = slabcc_cell.vec_lengths(slabcc_cell.normal_direction) / ang_to_bohr;
+	const double normal_length = model_cell.vec_lengths(model_cell.normal_direction) / ang_to_bohr;
 	auto log = spdlog::get("loggers");
 
 	const rowvec3 mirroring_template = { -1,0,1 };

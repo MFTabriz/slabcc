@@ -1,8 +1,9 @@
 #pragma once
+#include "slabcc_cell.hpp"
+#include "slabcc_input.hpp"
 #include "vasp.hpp"
 #include "general_io.hpp"
 #include "nlopt.hpp"
-#include "INIReader.h"
 
 extern const double Hartree_to_eV;
 
@@ -13,39 +14,7 @@ extern const double Hartree_to_eV;
 // estimating the average error of the model potential
 // optimizing the model parameters
 
-struct slabcc_cell_type {
 
-	// lengths of the basis vectors in Bohr
-	rowvec3 vec_lengths = { 0, 0, 0 };
-
-	// supercell vectors in Bohr
-	mat33 vectors = zeros(3, 3);
-
-	//calculation grid size
-	urowvec3 grid = { 1, 1, 1 };
-
-	uword normal_direction = 0;
-
-	// voxel volume of the grid in Bohr^3
-	double voxel_vol = 0;
-};
-
-//input data for checker
-struct input_data {
-	string &CHGCAR_neutral, &LOCPOT_charged, &LOCPOT_neutral, &CHGCAR_charged, &opt_algo;
-	mat &charge_position;
-	rowvec &charge_fraction;
-	mat &charge_sigma, &charge_rotations;
-	rowvec3 &slabcenter;
-	rowvec &diel_in, &diel_out;
-	uword &normal_direction;
-	rowvec2 &interfaces;
-	double &diel_erf_beta, &opt_tol;
-	bool &optimize_charge_position, &optimize_charge_sigma, &optimize_charge_rotation, &optimize_charge_fraction, &optimize_interface, &extrapolate, &model_2D, &trivariate;
-	double &opt_grid_x, &extrapol_grid_x;
-	int &max_eval, &max_time, &extrapol_steps_num;
-	double &extrapol_steps_size;
-};
 
 //input data for the optimizer function
 struct opt_data {
@@ -76,15 +45,12 @@ struct opt_variable {
 // dielectric tensor elements' variation in the normal direction.
 mat dielectric_profiles_gen(const rowvec2 &interfaces, const rowvec3 &diel_in, const rowvec3 &diel_out, const double &diel_erf_beta);
 
-//Sets the global struct slabcc_cell parameters from cell vectors "size" (in Bohr) and grid density "grid"
-void UpdateCell(const mat33& vectors, const urowvec3& grid);
 
 //Produces Gaussian charge distribution in real space
 // Q is total charge, rel_pos is the relative position of the center of Gaussian charge,
 // sigma is the Gaussian width in x/y/z direction (for simple Gaussians only the 1st element is used)
 // the generated charge distribution data is in (e/bohr^3)
 cx_cube gaussian_charge(const double& Q, const rowvec3& rel_pos, const rowvec3& sigma, const rowvec3& rotation_angle, const bool& trivariate);
-
 
 
 //Poisson solver in 3D with anisotropic dielectric profiles
@@ -111,9 +77,6 @@ tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_
 //unpack the optimization variable structure into opt_vars struct variables
 void optimizer_unpacker(const vector<double> &optimizer_vars_vec, opt_variable &opt_vars);
 
-//sanity check on the input parameters
-void check_inputs(input_data input_set);
-
 //check conditions and consistency of the supercell grid sizes and the shape
 void verify_cells(const supercell& Neutral_supercell, const supercell& Charged_supercell);
 
@@ -122,9 +85,6 @@ void verify_interface_optimization(const rowvec2& initial_interfaces, const rowv
 
 //check for large charge_sigma and report the delocalized charges
 void verify_charge_sigma_optimization(const rowvec& charge_q, const mat& charge_sigma);
-
-//parse the parameters from the input file
-void parse_input_params(const string& input_file, const input_data& input_set);
 
 //optimization constraint to ensure all the Gaussian charges have the same sign
 double opt_charge_constraint(const vector<double> &x, vector<double> &grad, void *data);

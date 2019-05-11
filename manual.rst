@@ -262,7 +262,7 @@ The input file is processed as follows:
 |                              |                                                       |               |
 |                              |``charge_rotation = 45 0 0; 0 -10 0``                  |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Width of each localized Gaussian charge. It can be 1   |               |
+|                              |width of each localized Gaussian charge. It can be 1   |               |
 |                              |or in case of trivariate models, 3 parameters per      |               |
 |                              |localized Gaussian charge. For trivariate Gaussian     |               |
 |                              |models, defining a single parameter per charge, sets   |               |

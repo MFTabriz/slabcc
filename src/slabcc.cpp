@@ -9,19 +9,18 @@
 using namespace std;
 
 int verbosity_level = 0;
-slabcc_cell_type slabcc_cell;
+slabcc_cell model_cell;
 const double ang_to_bohr = 1e-10 / datum::a_0;  //1.88972612546
 const double Hartree_to_eV = datum::R_inf * datum::h * datum::c_0 / datum::eV * 2; //27.2113860193
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 
 	string input_file = "slabcc.in";
 	string output_file = "slabcc.out";
 	string log_file = "slabcc.log";
 	bool output_diffs_only = false;
-	cli_params parameter_list = { input_file, output_file, log_file, output_diffs_only };
-	parse_cli(argc, argv, parameter_list);
+	cli_params parameters_list = { input_file, output_file, log_file, output_diffs_only };
+	parameters_list.parse(argc, argv);
 	initialize_loggers(log_file, output_file);
 	auto log = spdlog::get("loggers");
 	auto output_log = spdlog::get("output");
@@ -60,14 +59,14 @@ int main(int argc, char *argv[])
 	bool model_2D = false;		//the model is 2D
 	
 	// parameters read from the input file
-	const input_data input_file_variables = {
+	const input_data inputfile_variables = {
 		CHGCAR_neutral, LOCPOT_charged, LOCPOT_neutral, CHGCAR_charged,
 		opt_algo, charge_position, charge_fraction, charge_sigma, charge_rotations, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
 		opt_tol, optimize_charge_position, optimize_charge_sigma, optimize_charge_rotation, optimize_charge_fraction, optimize_interfaces, extrapolate, model_2D, charge_trivariate, opt_grid_x,
 		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
-	parse_input_params(input_file, input_file_variables);
+	inputfile_variables.parse(input_file);
 	
 	log->debug("SLABCC: version {}.{}.{}", SLABCC_VERSION_MAJOR, SLABCC_VERSION_MINOR, SLABCC_VERSION_PATCH);
 	log->debug("Armadillo library: version {}.{}.{}", ARMA_VERSION_MAJOR, ARMA_VERSION_MINOR, ARMA_VERSION_PATCH);
@@ -80,7 +79,7 @@ int main(int argc, char *argv[])
 	vector<pair<string, string>> calculation_results;
 
 	if (!output_diffs_only) {
-		check_inputs(input_file_variables);
+		inputfile_variables.verify();
 	}
 
 	//promises for async read of CHGCAR and POTCAR files
@@ -108,10 +107,10 @@ int main(int argc, char *argv[])
 	const mat33 cell_vectors = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
 
 	const urowvec3 input_grid_size = SizeVec(Neutral_supercell.charge);
-	UpdateCell(cell_vectors, input_grid_size);
+	model_cell.update(cell_vectors, input_grid_size);
 
 	//slabcc_cell volume in bohr^3 (only works in the orthogonal case!)
-	const auto volume = prod(slabcc_cell.vec_lengths);
+	const auto volume = prod(model_cell.vec_lengths);
 
 	const rowvec3 relative_shift = 0.5 - slabcenter;
 
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
 
 	if (output_diffs_only) {
 		log->debug("Only the extra charge and the potential difference calculation have been requested!");
-		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D");
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model_cell.voxel_vol, "D");
 		for (auto &promise : future_files) { promise.get(); }
 		finalize_loggers();
 		exit(0);
@@ -151,15 +150,15 @@ int main(int argc, char *argv[])
 	Defect_supercell.potential *= -1.0;
 
 	// total extra charge of the VASP calculation
-	const double total_vasp_charge = accu(Defect_supercell.charge) * slabcc_cell.voxel_vol;
+	const double total_vasp_charge = accu(Defect_supercell.charge) * model_cell.voxel_vol;
 	if (abs(total_vasp_charge) < 0.001) {
 		log->debug("Total extra charge: {}", total_vasp_charge);
 		log->warn("Total extra charge seems to be very small. Please make sure the path to the input CHGCAR files are set properly!");
 	}
-	mat dielectric_profiles = zeros<mat>(slabcc_cell.grid(normal_direction), 3);
+	mat dielectric_profiles = zeros<mat>(model_cell.grid(normal_direction), 3);
 
 	// model charge distribution (e/bohr^3), negative for presence of the electron 
-	cx_cube rhoM(as_size(slabcc_cell.grid), fill::zeros);
+	cx_cube rhoM(as_size(model_cell.grid), fill::zeros);
 
 	//potential resulted from the model charge (Hartree)
 	cx_cube V(arma::size(rhoM));
@@ -179,9 +178,9 @@ int main(int argc, char *argv[])
 		const rowvec2 shifted_interfaces0 = shifted_interfaces;
 		const mat charge_position0 = charge_position;
 
-		const rowvec optimization_grid_x = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(0));
-		const rowvec optimization_grid_y = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(1));
-		const rowvec optimization_grid_z = regspace<rowvec>(1.0, 1.0 / opt_grid_x, slabcc_cell.grid(2));
+		const rowvec optimization_grid_x = regspace<rowvec>(1.0, 1.0 / opt_grid_x, model_cell.grid(0));
+		const rowvec optimization_grid_y = regspace<rowvec>(1.0, 1.0 / opt_grid_x, model_cell.grid(1));
+		const rowvec optimization_grid_z = regspace<rowvec>(1.0, 1.0 / opt_grid_x, model_cell.grid(2));
 
 		cube interpolated_potential = interp3(Defect_supercell.potential, optimization_grid_x, optimization_grid_y, optimization_grid_z);
 		interpolated_potential -= accu(interpolated_potential) / interpolated_potential.n_elem;
@@ -189,9 +188,9 @@ int main(int argc, char *argv[])
 
 		//data needed for potential error calculation
 		opt_data optimization_data = { total_vasp_charge, diel_erf_beta, diel_in, diel_out, interpolated_potential, charge_trivariate, rounded_relative_shift, dielectric_profiles, rhoM, V, V_diff, initial_potential_RMSE};
-		UpdateCell(cell_vectors, SizeVec(interpolated_potential));
+		model_cell.update(cell_vectors, SizeVec(interpolated_potential));
 		potential_RMSE = do_optimize(opt_algo, opt_tol, max_eval, max_time, optimization_data, opt_vars, optimizer_activation_switches);
-		UpdateCell(cell_vectors, input_grid_size);
+		model_cell.update(cell_vectors, input_grid_size);
 
 		//write the unshifted optimized values to the file
 		output_log->info("\n[Optimized_model_parameters]");
@@ -275,7 +274,7 @@ int main(int argc, char *argv[])
 	}
 
 	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
-	log->debug("Cell dimensions (bohr): " + to_string(slabcc_cell.vec_lengths));
+	log->debug("Cell dimensions (bohr): " + to_string(model_cell.vec_lengths));
 	log->debug("Grid size: " + to_string(input_grid_size));
 	log->debug("Volume (bohr^3): {}", volume);
 
@@ -284,7 +283,7 @@ int main(int argc, char *argv[])
 		supercell Model_supercell = Neutral_supercell;
 		//charge is normalized to the VASP CHGCAR convention (rho * Vol)
 		//Also, positive value for the electron charge! (the probability of finding an electron)
-		Model_supercell.charge = -real(rhoM) * slabcc_cell.voxel_vol * rhoM.n_elem;
+		Model_supercell.charge = -real(rhoM) * model_cell.voxel_vol * rhoM.n_elem;
 		Model_supercell.potential = -real(V) * Hartree_to_eV;
 		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_M.CHGCAR", Model_supercell));
 		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_M.LOCPOT", Model_supercell));
@@ -294,17 +293,17 @@ int main(int argc, char *argv[])
 		write_mat2file(dielectric_profiles, "slabcc_DIEL.dat");
 	}
 	if (is_active(verbosity::write_planarAvg_file)) {
-		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * slabcc_cell.voxel_vol, "N");
-		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * slabcc_cell.voxel_vol, "C");
-		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D");
-		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M");
+		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * model_cell.voxel_vol, "N");
+		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * model_cell.voxel_vol, "C");
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model_cell.voxel_vol, "D");
+		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * model_cell.voxel_vol, "M");
 	}
 	else if (is_active(verbosity::write_normal_planarAvg)) {
-		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * slabcc_cell.voxel_vol, "D", slabcc_cell.normal_direction);
-		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * slabcc_cell.voxel_vol, "M", slabcc_cell.normal_direction);
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model_cell.voxel_vol, "D", model_cell.normal_direction);
+		write_planar_avg(real(V) * Hartree_to_eV, real(rhoM) * model_cell.voxel_vol, "M", model_cell.normal_direction);
 	}
 
-	const double total_model_charge = accu(real(rhoM)) * slabcc_cell.voxel_vol;
+	const double total_model_charge = accu(real(rhoM)) * model_cell.voxel_vol;
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= total_model_charge / volume;
 	const uword farthest_element_index = total_model_charge < 0 ? real(V).index_max() : real(V).index_min();
@@ -323,9 +322,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	log->debug("Calculation grid point for the potential alignment term: {}", to_string(ind2sub(as_size(slabcc_cell.grid), farthest_element_index)));
+	log->debug("Calculation grid point for the potential alignment term: {}", to_string(ind2sub(as_size(model_cell.grid), farthest_element_index)));
 
-	const double EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * slabcc_cell.voxel_vol * Hartree_to_eV;
+	const double EperModel0 = 0.5 * accu(real(V) % real(rhoM)) * model_cell.voxel_vol * Hartree_to_eV;
 	log->info("E_periodic of the model charge: {}", ::to_string(EperModel0));
 	calculation_results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
 
@@ -345,21 +344,21 @@ int main(int argc, char *argv[])
 	double E_isolated = 0;
 	double E_correction = 0;
 	if (extrapolate) {
-		const rowvec max_sizes = slabcc_cell.vec_lengths * (1.0 + extrapol_steps_size * (extrapol_steps_num - 1));
-		if (min(extrapol_grid_x / max_sizes % slabcc_cell.grid) < 1) {
-			log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(extrapol_grid_x / max_sizes % slabcc_cell.grid));
+		const rowvec max_sizes = model_cell.vec_lengths * (1.0 + extrapol_steps_size * (extrapol_steps_num - 1));
+		if (min(extrapol_grid_x / max_sizes % model_cell.grid) < 1) {
+			log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(extrapol_grid_x / max_sizes % model_cell.grid));
 			log->warn("The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate. "
 						"You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps.");
 		}
-		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(slabcc_cell.grid);
+		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(model_cell.grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
 		log->debug("Extrapolation grid size: {}", to_string(extrapolation_grid));
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
-		const rowvec2 interface_pos = shifted_interfaces * slabcc_cell.vec_lengths(slabcc_cell.normal_direction);
+		const rowvec2 interface_pos = shifted_interfaces * model_cell.vec_lengths(model_cell.normal_direction);
 		string extrapolation_info = to_string(1.0) + "\t" + ::to_string(EperModel0) + "\t" + ::to_string(total_model_charge) + "\t" + to_string(interface_pos);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			extrapolation_info += "\t" + to_string(charge_position(i, slabcc_cell.normal_direction) * slabcc_cell.vec_lengths(slabcc_cell.normal_direction));
+			extrapolation_info += "\t" + to_string(charge_position(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
 		rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
@@ -367,7 +366,7 @@ int main(int argc, char *argv[])
 		if (model_2D) {
 			tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
 				shifted_interfaces, diel_erf_beta, charge_position, charge_q, charge_sigma, charge_rotations, extrapol_grid_x, charge_trivariate);
-			const rowvec3 unit_cell = slabcc_cell.vec_lengths / max(slabcc_cell.vec_lengths);
+			const rowvec3 unit_cell = model_cell.vec_lengths / max(model_cell.vec_lengths);
 			const auto radius = 10.0;
 			const auto ewald_shells = generate_shells(unit_cell, radius);
 			const auto madelung_const = jellium_madelung_constant(ewald_shells, unit_cell, 1);
@@ -419,7 +418,7 @@ int main(int argc, char *argv[])
 	}
 	else {
 		if (model_2D) {
-			E_isolated = Eiso_bessel(charge_q(0), charge_position(0, normal_direction) * slabcc_cell.vec_lengths(normal_direction), charge_sigma(0), dielectric_profiles);
+			E_isolated = Eiso_bessel(charge_q(0), charge_position(0, normal_direction) * model_cell.vec_lengths(normal_direction), charge_sigma(0), dielectric_profiles);
 			E_correction = E_isolated - EperModel0 - total_model_charge * dV;
 			log->info("E_isolated from the Bessel expansion of the Poisson equation: {}", ::to_string(E_isolated));
 		}
