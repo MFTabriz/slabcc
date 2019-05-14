@@ -1,6 +1,6 @@
  
-:Last updated: 11 May 2019
-:version: 0.6.5
+:Last updated: 14 May 2019
+:version: 0.7.0
 
 .. image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
    :alt: Codacy Badge
@@ -156,9 +156,10 @@ Known issues and limitations
 ===============
 Release history
 ===============
+* 2019-05-13: version 0.7 - Added automatic recovery from the discretization error
 * 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
 * 2019-03-18: version 0.5 - Added 2D model support
-* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements
+* 2018-10-10: version 0.4 - Added spdlog and several user interface and performance improvements
 * 2018-07-29: version 0.3 - First public release
 
 ===========================

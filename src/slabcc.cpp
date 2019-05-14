@@ -304,6 +304,19 @@ int main(int argc, char *argv[]){
 	}
 
 	const double total_model_charge = accu(real(rhoM)) * model_cell.voxel_vol;
+
+	if (abs(total_model_charge - total_vasp_charge) > 0.00001) {
+		log->critical("The amount of the extra charge in model is not the same as the extra charge in the VASP input files.");
+		if (charge_sigma.max() > 6) {
+			log->critical("If the charge_sigma value is too large, the model supercell cannot contain the whole Gaussian charge and the present charge correction method is not suitable for this cases!");
+		}
+		if (charge_sigma.min() < 0.3) {
+			log->critical("If the charge_sigma value is too small, the discretization error is the reason and it can be fixed by using a bigger extrapolation_grid_x.");
+		}
+		finalize_loggers();
+		exit(1);
+	}
+
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	rhoM -= total_model_charge / volume;
 	const uword farthest_element_index = total_model_charge < 0 ? real(V).index_max() : real(V).index_min();
@@ -330,26 +343,51 @@ int main(int argc, char *argv[]){
 
 	log->debug("Difference of the charge in the input files: {}", ::to_string(total_vasp_charge));
 	log->debug("Total charge of the model: {}", ::to_string(total_model_charge));
-	if (abs(total_model_charge - total_vasp_charge) > 0.0001) {
-		log->critical("The amount of the extra charge in the extrapolated model is not the same as the extra charge in the VASP input files.");
-		if (charge_sigma.max() > 6) {
-			log->critical("If the charge_sigma value is too large, the model supercell cannot contain the whole Gaussian charge and the present charge correction method is not suitable for this cases!");
-		}
-		if (charge_sigma.min() < 0.3) {
-			log->critical("If the charge_sigma value is too small, the discretization error is the reason and it can be fixed by using a bigger extrapolation_grid_x.");
-		}
-		finalize_loggers();
-		exit(1);
-	}
+
 	double E_isolated = 0;
 	double E_correction = 0;
 	if (extrapolate) {
-		const rowvec max_sizes = model_cell.vec_lengths * (1.0 + extrapol_steps_size * (extrapol_steps_num - 1));
-		if (min(extrapol_grid_x / max_sizes % model_cell.grid) < 1) {
-			log->warn("The energy of the largest extrapolated model will be calculated with {} points/bohr grid", min(extrapol_grid_x / max_sizes % model_cell.grid));
-			log->warn("The extrapolation grid is very coarse! The extrapolation energies for the large model charges may not be accurate. "
-						"You should increase the extrapolation grid multiplier or decrease the number/size of extrapolation steps.");
-		}
+		//discretization error flag
+		bool q_error = false;
+		const mat33 cell_vectors0 = model_cell.vectors;
+		const urowvec3 grid0 = model_cell.grid;
+		//check for the discretization errors
+		do {
+			q_error = false;
+			const rowvec3 test_grid_size = extrapol_grid_x * conv_to<rowvec>::from(grid0);
+			const urowvec3 test_grid = { (uword)test_grid_size(0),(uword)test_grid_size(1),(uword)test_grid_size(2) };
+			for (auto n = extrapol_steps_num - 1; n > 0; --n) {
+				const double extrapol_factor = extrapol_steps_size * n + 1;
+				model_cell.update(cell_vectors0 * extrapol_factor, test_grid);
+				cx_cube rhoM_test(as_size(test_grid), fill::zeros);
+				for (uword i = 0; i < charge_position.n_rows; ++i) {
+					rhoM_test += gaussian_charge(charge_q(i), charge_position.row(i), charge_sigma.row(i), charge_rotations.row(i), charge_trivariate);
+				}
+				const double Q = accu(real(rhoM_test)) * model_cell.voxel_vol;
+				//Adjust the parameters
+				if (abs(Q - accu(charge_q)) > 0.00001) {
+					q_error = true;
+					log->debug("The total charge of the extrapolated model was different form the original value due to the discretization error!");
+					string adjusted_parameters = "";
+					if (!model_2D) {
+						if (extrapol_steps_num > 4) {
+							extrapol_steps_num = 4;
+							adjusted_parameters += " extrapolate_steps_number=" + to_string(extrapol_steps_num);
+						}
+						if (extrapol_steps_size > 0.25) {
+							extrapol_steps_size = 0.25;
+							adjusted_parameters += " extrapolate_steps_size=" + to_string(extrapol_steps_size);
+						}
+					}
+					extrapol_grid_x += 0.5;
+					adjusted_parameters += " extrapolate_grid_x=" + to_string(extrapol_grid_x);
+					log->debug("Adjusted parameters:{}", adjusted_parameters);
+					break;
+				}
+			}
+			model_cell.update(cell_vectors0, grid0);
+		} while (q_error);
+
 		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(model_cell.grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
 		log->debug("Extrapolation grid size: {}", to_string(extrapolation_grid));
@@ -361,11 +399,11 @@ int main(int argc, char *argv[]){
 			extrapolation_info += "\t" + to_string(charge_position(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
-		rowvec Es = zeros<rowvec>(extrapol_steps_num), sizes = Es;
+		rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
+		tie(Es, sizes) = extrapolate_model(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
+			shifted_interfaces, diel_erf_beta, charge_position, charge_q, charge_sigma, charge_rotations, extrapol_grid_x, charge_trivariate, model_2D);
 
 		if (model_2D) {
-			tie(Es, sizes) = extrapolate_2D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-				shifted_interfaces, diel_erf_beta, charge_position, charge_q, charge_sigma, charge_rotations, extrapol_grid_x, charge_trivariate);
 			const rowvec3 unit_cell = model_cell.vec_lengths / max(model_cell.vec_lengths);
 			const auto radius = 10.0;
 			const auto ewald_shells = generate_shells(unit_cell, radius);
@@ -387,9 +425,6 @@ int main(int argc, char *argv[]){
 			E_correction = E_isolated - EperModel0 - total_model_charge * dV;
 		}
 		else {
-			tie(Es, sizes) = extrapolate_3D(extrapol_steps_num, extrapol_steps_size, diel_in, diel_out,
-				shifted_interfaces, diel_erf_beta, charge_position, charge_q, charge_sigma, charge_rotations, extrapol_grid_x, charge_trivariate);
-
 			const colvec pols = polyfit(sizes, Es, 1);
 			const colvec evals = polyval(pols, sizes.t());
 			const auto linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;

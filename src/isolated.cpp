@@ -4,118 +4,66 @@
 
 #include "isolated.hpp"
 
-tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate) {
+tuple <rowvec, rowvec> extrapolate_model(int extrapol_steps_num, double extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, double grid_multiplier, const bool &trivariate, const bool &model_2d) {
+	const bool model_bulk = approx_equal(diel_in, diel_out, "absdiff", 0.02);
+	const bool model_slab = !model_2d && !model_bulk ? true : false;
+	//discretization error flag
+	bool q_error = false;
+
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = model_cell.normal_direction;
-	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
 	const mat33 cell_vectors0 = model_cell.vectors;
-	const urowvec grid0 = model_cell.grid;
+	const urowvec3 grid0 = model_cell.grid;
+	const double slab_thickness = abs(interfaces(0) - interfaces(1));
+	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
 	const rowvec3 extrapolation_grid_size = grid_multiplier * conv_to<rowvec>::from(grid0);
 	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0),(uword)extrapolation_grid_size(1),(uword)extrapolation_grid_size(2) };
-
 	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
-
 		const double extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
-
 		model_cell.update(cell_vectors0 * extrapol_factor, extrapolation_grid);
-		rowvec2 interfaces_ext = interfaces;
-		mat charge_position_shifted = charge_position / extrapol_factor;
+		rowvec2 interfaces_extrapolated = interfaces / extrapol_factor;
+		mat charge_position_extrapolated = charge_position / extrapol_factor;
 
-		// not a bulk model!
-		if (!approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
-			
+		if (model_slab) {
+			//increase the slab thickness
 			const uvec interface_sorted_i = sort_index(interfaces);
-			interfaces_ext(interface_sorted_i(1)) += abs(interfaces(0) - interfaces(1)) * (extrapol_factor - 1);
-			interfaces_ext /= extrapol_factor;
-
-			//charges moved to the same distance from their original nearest interface
+			interfaces_extrapolated(interface_sorted_i(1)) += slab_thickness * (extrapol_factor - 1) / extrapol_factor;
+			//move the charges to the same distance from their original nearest interface
 			for (auto charge = 0; charge < charge_position.n_rows; ++charge) {
 				const rowvec2 distance_to_interfaces = abs(charge_position(charge, normal_direction) - interfaces);
 				if (distance_to_interfaces(0) < distance_to_interfaces(1)) {
-					charge_position_shifted(charge, normal_direction) += interfaces_ext(0) - interfaces(0) / extrapol_factor;
+					charge_position_extrapolated(charge, normal_direction) += interfaces_extrapolated(0) - interfaces(0) / extrapol_factor;
 				}
 				else {
-					charge_position_shifted(charge, normal_direction) += interfaces_ext(1) - interfaces(1) / extrapol_factor;
+					charge_position_extrapolated(charge, normal_direction) += interfaces_extrapolated(1) - interfaces(1) / extrapol_factor;
 				}
 			}
 		}
 
-		const mat dielectric_profiles = dielectric_profiles_gen(interfaces_ext, diel_in, diel_out, diel_erf_beta);
-
+		const mat dielectric_profiles = dielectric_profiles_gen(interfaces_extrapolated, diel_in, diel_out, diel_erf_beta);
 		cx_cube rhoM(as_size(model_cell.grid), fill::zeros);
 		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(charge_q(i), charge_position_shifted.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
+			rhoM += gaussian_charge(charge_q(i), charge_position_extrapolated.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
 		}
 		const double Q = accu(real(rhoM)) * model_cell.voxel_vol;
+
 		// (only works for the orthogonal cells!)
 		rhoM -= Q / prod(model_cell.vec_lengths);
 		const auto V = poisson_solver_3D(rhoM, dielectric_profiles);
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * model_cell.voxel_vol * Hartree_to_eV;
-		const rowvec2 interface_pos = interfaces_ext * model_cell.vec_lengths(normal_direction);
+		const rowvec2 interface_pos = interfaces_extrapolated * model_cell.vec_lengths(normal_direction);
 		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + ::to_string(Q) + "\t" + to_string(interface_pos);
-		for (auto i = 0; i < charge_position_shifted.n_rows; ++i) {
-			extrapolation_info += "\t" + to_string(charge_position_shifted(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
-		}
-		log->debug(extrapolation_info);
-		if (abs(Q - accu(charge_q)) > 0.01) {
-			log->critical("Part of the extra charge in the original model is missing form the extrapolated model! "
-			"The charge_sigma values may be too small, or the number of the extrapolation steps or the step-size may be too large for the extrapolation grid size. "
-			"You need to use a larger \"extrapolate_grid_x\" or smaller \"extrapolate_steps_size\"/\"extrapolate_steps_number\"");
-			finalize_loggers();
-			exit(1);
-		}
-		Es(n) = EperModel;
-		sizes(n) = 1.0 / extrapol_factor;
-
-	}
-
-	return make_tuple(Es, sizes);
-}
-
-tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate) {
-	auto log = spdlog::get("loggers");
-	const uword normal_direction = model_cell.normal_direction;
-	rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	const mat33 cell_vectors0 = model_cell.vectors;
-	const urowvec grid0 = model_cell.grid;
-	const rowvec3 extrapolation_grid_size = grid_multiplier * conv_to<rowvec>::from(grid0);
-	const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
-	model_cell.update(cell_vectors0, extrapolation_grid);
-
-	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
-
-		const auto extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
-		model_cell.update(cell_vectors0 * extrapol_factor, extrapolation_grid);
-		//extrapolated interfaces
-		const rowvec2 interfaces_ext = interfaces / extrapol_factor;
-
-		const mat charge_position_ext = charge_position / extrapol_factor;
-		const mat dielectric_profiles = dielectric_profiles_gen(interfaces_ext, diel_in, diel_out, diel_erf_beta);
-
-		cx_cube rhoM(as_size(model_cell.grid), fill::zeros);
-		for (uword i = 0; i < charge_position.n_rows; ++i) {
-			rhoM += gaussian_charge(charge_q(i), charge_position_ext.row(i), charge_sigma.row(i), charge_rotations.row(i), trivariate);
-		}
-		const auto Q = accu(real(rhoM)) * model_cell.voxel_vol;
-		// (only works for the orthogonal cells!)
-		rhoM -= Q / prod(model_cell.vec_lengths);
-		const auto V = poisson_solver_3D(rhoM, dielectric_profiles);
-		const auto EperModel = 0.5 * accu(real(V % rhoM)) * model_cell.voxel_vol * Hartree_to_eV;
-
-		const rowvec2 interface_pos = interfaces_ext * model_cell.vec_lengths(normal_direction);
-		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + to_string(interface_pos);
-		for (auto i = 0; i < charge_position_ext.n_rows; ++i) {
-			extrapolation_info += "\t" + to_string(charge_position_ext(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
+		for (auto i = 0; i < charge_position_extrapolated.n_rows; ++i) {
+			extrapolation_info += "\t" + to_string(charge_position_extrapolated(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
 		Es(n) = EperModel;
 		sizes(n) = 1.0 / extrapol_factor;
-
 	}
-
+	
 	return make_tuple(Es, sizes);
 }
- 
+
 vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data) {
 	auto log = spdlog::get("loggers");
 	double fit_MSE = 0;

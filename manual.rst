@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 11 May 2019
-:version: 0.6.5
+:Last updated: 14 May 2019
+:version: 0.7.0
 
 .. sectnum::
 
@@ -671,9 +671,10 @@ Known issues and limitations
 ===============
 Release history
 ===============
+* 2019-05-13: version 0.7 - Added automatic recovery from the discretization error
 * 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
 * 2019-03-18: version 0.5 - Added 2D model support
-* 2018-10-10: version 0.4 - Added spdlog. General interface and performance improvements
+* 2018-10-10: version 0.4 - Added spdlog and several user interface and performance improvements
 * 2018-07-29: version 0.3 - First public release
 
 ===========================

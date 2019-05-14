@@ -14,8 +14,7 @@ struct nonlinear_fit_data {
 };
 
 // returns the extrapolated sizes and the energies
-tuple <rowvec, rowvec> extrapolate_3D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate);
-tuple <rowvec, rowvec> extrapolate_2D(const int &extrapol_steps_num, const double &extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, const double &grid_multiplier, const bool &trivariate);
+tuple <rowvec, rowvec> extrapolate_model(int extrapol_steps_num, double extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, double grid_multiplier, const bool &trivariate, const bool &model_2d);
 
 // evaluates the MSE for fitting to the 2nd-order + exponential function as described in the Erratum of the paper
 double fit_eval(const vector<double> &x, vector<double> &grad, void *data);
