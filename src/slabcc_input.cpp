@@ -129,6 +129,9 @@ void input_data::verify() const {
 		}
 	}
 
+	if (charge_sigma.min() < 0.001) {
+		log->warn("charge_sigma is too small. For accurate energy calculations with this parameter a very large grid is required!");
+	}
 
 	//if all the sensible checks and remedies have failed!
 	if (arma::size(charge_sigma) != arma::size(charge_position)) {
@@ -276,7 +279,7 @@ void input_data::parse(const string& input_file) const {
 	extrapol_steps_num = reader.GetInteger("extrapolate_steps_number", 4);
 	extrapol_steps_size = reader.GetReal("extrapolate_steps_size", 0.5);
 
-	reader.dump_all();
+	reader.dump_parsed();
 
 	model_cell.normal_direction = normal_direction;
 }

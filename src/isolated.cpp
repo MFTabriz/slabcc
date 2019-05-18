@@ -7,8 +7,6 @@
 tuple <rowvec, rowvec> extrapolate_model(int extrapol_steps_num, double extrapol_steps_size, const rowvec3 &diel_in, const rowvec3 &diel_out, const rowvec2 &interfaces, const double &diel_erf_beta, const mat &charge_position, const rowvec &charge_q, const mat &charge_sigma, const mat &charge_rotations, double grid_multiplier, const bool &trivariate, const bool &model_2d) {
 	const bool model_bulk = approx_equal(diel_in, diel_out, "absdiff", 0.02);
 	const bool model_slab = !model_2d && !model_bulk ? true : false;
-	//discretization error flag
-	bool q_error = false;
 
 	auto log = spdlog::get("loggers");
 	const uword normal_direction = model_cell.normal_direction;
@@ -151,7 +149,7 @@ rowvec Uk(rowvec k, double z0, double sigma, mat diel) {
 	const cx_mat Ag12 = Ag1 % Ag2;
 	const auto cosGL_2 = cos(Gz0 * length(normal) / 2.0);
 	for (int i = 0; i < k.n_elem; ++i) {
-		const cx_mat Ag = Ag12 + Ag1p * pow(k(i), 2);
+		const cx_mat Ag = Ag12 + Ag1p * k(i) * k(i);
 		const double keff = k(i);
 		const mat Kinvg = diagmat(dielbulk * length(normal) * (pow(keff, 2) + Gz02) / (1 - exp(-keff * length(normal) / 2.0) * cosGL_2));
 		const cx_mat Dg = Kinvg + length(normal) * Ag;

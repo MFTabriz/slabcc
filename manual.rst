@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 14 May 2019
+:Last updated: 19 May 2019
 :version: 0.7.0
 
 .. sectnum::
@@ -668,10 +668,10 @@ Known issues and limitations
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
 
-===============
-Release history
-===============
-* 2019-05-13: version 0.7 - Added automatic recovery from the discretization error
+==========================
+Release history highlights
+==========================
+* 2019-05-14: version 0.7 - Added discretization error mitigation
 * 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
 * 2019-03-18: version 0.5 - Added 2D model support
 * 2018-10-10: version 0.4 - Added spdlog and several user interface and performance improvements

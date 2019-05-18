@@ -105,7 +105,7 @@ void INIReader::dump_env_info() const {
 	log->debug(time_string_buffer);
 }
 
-void INIReader::dump_all() const {
+void INIReader::dump_parsed() const {
 
 	auto log = spdlog::get("loggers");
 	auto output_log = spdlog::get("output");
@@ -125,8 +125,11 @@ void INIReader::dump_all() const {
 	log->info("-----------------------------------------");
 	log->flush();
 
+	for (const auto &i : _error_msgs) {
+		log->error(i);
+	}
 	
-
+	// add the deprectated parameters here!
 	const vector<string> deprecated_params{"optimize_charge"};
 
 	for (const auto &val : _values) {
@@ -161,10 +164,21 @@ string INIReader::GetStr(const string& name, const string& default_value) const
 
 arma::rowvec INIReader::GetVec(const string& name, const arma::rowvec default_value) const
 {
+	arma::rowvec result;
+	string error = "";
 	string valstr = Get(name);
 	replace(valstr, "\n", " ");
 	replace(valstr, ";", " ");
-	const arma::rowvec result(valstr);
+	try {
+		result = arma::rowvec(valstr);
+	}
+	catch (const exception &e) {
+		error = string(e.what());
+	}
+	if (error != "") {
+		_error_msgs.push_back("Error in parsing \"" + name + "\": " + error);
+	}
+
 	const arma::rowvec out = result.is_empty() ? default_value : result;
 	_parsed.push_back({ name, to_string(out) });
 	return out;
@@ -172,10 +186,21 @@ arma::rowvec INIReader::GetVec(const string& name, const arma::rowvec default_va
 
 arma::mat INIReader::GetMat(const string& name, const arma::mat default_value) const
 {
+	auto log = spdlog::get("loggers");
+	string error = "";
 	string valstr = Get(name);
 	replace(valstr, "\n", ";");
 	replace(valstr, ";;", ";");
-	const arma::mat result(valstr);
+	arma::mat result;
+	try {
+		 result = arma::mat(valstr);
+	}
+	catch (const exception &e) {
+		error = string(e.what());
+	}
+	if (error != "") {
+		_error_msgs.push_back("Error in parsing \"" + name + "\": " + error);
+	}
 	const arma::mat out = result.is_empty() ? default_value : result;
 	_parsed.push_back({ name, to_string(out) });
 	return out;
@@ -213,6 +238,8 @@ bool INIReader::GetBoolean(const string& name, const bool default_value) const {
 		result = true;
 	else if (valstr == ".false." || valstr == "false" || valstr == "no" || valstr == "off" || valstr == "0")
 		result = false;
+	else if (valstr != "")
+		_error_msgs.push_back("Error in parsing \"" + name + "\"");
 
 	_parsed.push_back({ name, to_string(result) });
 	return result;

@@ -55,7 +55,7 @@ public:
 	bool GetBoolean(const std::string& name, const bool default_value) const;
 
 	//writes the parsed variables to the output file and also log
-	void dump_all() const;
+	void dump_parsed() const;
 	void dump_compilation_info() const;
 	void dump_env_info() const;
 
@@ -64,6 +64,7 @@ public:
 
 protected:
 	mutable std::vector<std::vector<std::string>> _parsed;
+	mutable std::vector<std::string> _error_msgs;
 private:
 	int _error;
 	std::map<std::string, std::string> _values;

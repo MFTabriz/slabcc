@@ -225,25 +225,25 @@ double potential_eval(const vector<double> &x, vector<double> &grad, void *slabc
 	log->debug("-----------------------------------------");
 	if (!approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
 		const rowvec2 unshifted_interfaces = fmod_p(shifted_interfaces - rounded_relative_shift(model_cell.normal_direction), 1);
-		log->debug("> interfaces={}", ::to_string(unshifted_interfaces));
+		log->debug(" > interfaces={}", ::to_string(unshifted_interfaces));
 	}
 
 	const mat unshifted_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 
 	for (uword i = 0; i < normalized_charge_fraction.n_elem; ++i) {
-		log->debug("> charge_position={}", ::to_string(unshifted_charge_position.row(i)));
+		log->debug("{}> charge_position={}", i + 1, ::to_string(unshifted_charge_position.row(i)));
 		if (trivariate) {
-			log->debug("> charge_sigma={}", ::to_string(charge_sigma.row(i)));
+			log->debug("{}> charge_sigma={}", i + 1, ::to_string(charge_sigma.row(i)));
 			if (abs(charge_rotations).max() > 0) {
 				const rowvec3 rotation = charge_rotations.row(i) * 180.0 / PI;
-				log->debug("> charge_rotation={}", ::to_string(rotation));
+				log->debug("{}> charge_rotation={}", i + 1, ::to_string(rotation));
 			}
 		}
 		else {
-			log->debug("> charge_sigma={}", ::to_string(charge_sigma(i,0)));
+			log->debug("{}> charge_sigma={}", i + 1, ::to_string(charge_sigma(i,0)));
 		}
 		if (input_charge_fraction.n_elem > 1) {
-			log->debug("> charge_fraction={}", input_charge_fraction(i));
+			log->debug("{}> charge_fraction={}", i + 1, input_charge_fraction(i));
 		}		
 	}
 	if (bounds_correction > 0) {
@@ -302,12 +302,12 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 			log->warn("Optimization ended after {} steps before reaching the requested accuracy!", max_eval);
 		}
 		else if (nlopt_final_result == nlopt::MAXTIME_REACHED) {
-			log->warn("Optimization ended after {} minutes of search before reaching the requested accuracy!", max_time);
+			log->warn("Optimization ended after {} minutes before reaching the requested accuracy!", max_time);
 		}
 	}
 	catch (const exception &e) {
 		log->error("Optimization of the slabcc parameters failed: " + string(e.what()));
-		log->error("Please start with better initial guess for the input parameters or change the optimization algorithm.");
+		log->error("Please start with better initial guess for the input parameters or use a different optimization algorithm.");
 	}
 
 	optimizer_unpacker(opt_param, opt_vars);
