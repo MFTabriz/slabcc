@@ -52,7 +52,6 @@ endif
 ifeq ($(CXX),g++)
   OMP = -fopenmp
   CC  = gcc
-  OPTFLAGS += -flto
   EXTRA_LIBS = -lgfortran -lquadmath $(OMP)
 endif
 
