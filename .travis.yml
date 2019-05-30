@@ -23,10 +23,8 @@ matrix:
 before_install:
     - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-8 /usr/bin/gcc
     - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-8 /usr/bin/g++
-    - which gcc
-    - which g++
-    - gcc --version
-    - g++ --version
+    - which gcc && gcc --version
+    - which g++ && g++ --version
     - lscpu
 
 install: true
@@ -36,6 +34,7 @@ script:
     
 after_script:
     - ./slabcc -v
+    - ldd -v slabcc
     
 notifications:
     email: false

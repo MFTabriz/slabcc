@@ -7,8 +7,9 @@
 CXX =g++
 
 # Please edit/choose the path to one of the available
-# libraries on your system. The code have been tested
-# using g++/icpc and OpenBLAS/MKL
+# libraries on your system. 
+# Please read the “Validation” section in the readme.rst for more information 
+# about the compiler/libraries in our test environment.
 ##===========EXTERNAL LIBRARIES============##
 
 #FFTW_INC_PATH = -I${FFTW3_HOME}/include/
@@ -31,47 +32,44 @@ FFTW_LIB = -lfftw3
 #BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
 
 BLAS_LIB = -lblas -llapack #OpenBLAS
-#BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl #MKL_INTEL
-#BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lm -ldl #MKL_GNU
+#BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
+#BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
 
 ##============COMPILER FLAGS=============##
-# You can play wisely here and change the optimzation
-# flags/keywords but avoid aggressive optimization
-# -O3/-fast/-ffast-math, as it can cause numerical issues
-# due to changes of the float-point operations
-
 OPT      = -O2
 MARCH    = -march=native #change this if the architecture of the machine compiling and running the program is not the same
-EXTRAOPT = #add yours own (wise) optimization flags here!
+EXTRAOPT = #add yours own compiler optimization flags here!
 OPTFLAGS = $(OPT) $(MARCH) $(EXTRAOPT)
 
 
 ifeq ($(CXX),icpc)
-  OMP = -qopenmp # don't remove -qopenmp, it is helping to avoid numerical issues
+  OMP = -qopenmp
   CC = icc
   OPTFLAGS += -fp-model precise # don't remove this, it is helping to avoid numerical issues
   EXTRA_LIBS = -lifcore $(OMP)
 endif
 
 ifeq ($(CXX),g++)
-  OMP = -fopenmp # don't remove -fopenmp, it is helping to avoid numerical issues
+  OMP = -fopenmp
   CC  = gcc
+  OPTFLAGS += -flto
   EXTRA_LIBS = -lgfortran -lquadmath $(OMP)
 endif
 
 ALLFLAGS = $(OMP) $(OPTFLAGS) # this flags and compiler also used by the optimizer configure/makefile
 
-CFLAGS   = $(ALLFLAGS)
-CXXFLAGS = $(ALLFLAGS) -std=c++14
+CFLAGS   = $(ALLFLAGS) 
+CXXFLAGS = $(ALLFLAGS) -std=c++14 -Wall
 
 ##included libraries
 NLOPT_PATH = ../src/nlopt
-NLOPT_INC_PATH = -I../src/nlopt/include/
-NLOPT_LIB_PATH = -L../src/nlopt/lib/
-NLOPT_LIB_FILE = ../src/nlopt/lib/libnlopt.a
+NLOPT_INC_PATH = -I$(NLOPT_PATH)/include/
+NLOPT_LIB_PATH = -L$(NLOPT_PATH)/lib/
+NLOPT_LIB_FILE = $(NLOPT_PATH)/libnlopt.a
 NLOPT_LIB = -lnlopt
 
-CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER
+Add the -DMKL if you are linking against it!
+CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER # -DMKL 
 
 LDLIBS = $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
 LIB_PATHS = $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)
