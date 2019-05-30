@@ -2,10 +2,15 @@
 :Last updated: 19 May 2019
 :version: 0.7.0
 
-.. image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
+.. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
+   :alt: Build Status
+   :target: https://www.codacy.com/app/MFTabriz/slabcc
+.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
    :alt: Codacy Badge
    :target: https://www.codacy.com/app/MFTabriz/slabcc
-   
+
+|Travis| |Codacy|
+
 .. sectnum::
 
 .. contents::
