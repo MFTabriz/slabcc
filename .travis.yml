@@ -1,4 +1,5 @@
 language: cpp
+sudo: required
 env: 
   global:
     - OPENBLAS_NUM_THREADS=1
@@ -8,7 +9,6 @@ matrix:
       dist: xenial
       compiler: gcc
       env: 
-         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
       addons:
         apt:
           sources:
@@ -20,12 +20,16 @@ matrix:
             - fftw3-dev
 
 before_install:
-    - eval "${MATRIX_EVAL}"
-    - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
-    - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
+    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-8 /usr/bin/gcc
+    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-8 /usr/bin/g++
+    - which gcc
     - gcc --version
-install:
+
+install: true
+
+script:
     - cd ./bin/
     - make
+    
 notifications:
     email: false
