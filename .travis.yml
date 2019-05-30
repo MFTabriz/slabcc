@@ -24,6 +24,7 @@ before_install:
     - eval "${MATRIX_EVAL}"
 
 install:
+    - gcc --version
     - cd ./bin/
     - make
 notifications:

@@ -30,7 +30,7 @@ FFTW_LIB = -lfftw3
 #BLAS_INC_PATH = -I${MKLROOT}/include
 #BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
 
-BLAS_LIB = -lopenblas_omp #OpenBLAS
+BLAS_LIB = -lblas #OpenBLAS
 #BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl #MKL_INTEL
 #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lm -ldl #MKL_GNU
 
@@ -75,7 +75,7 @@ CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER
 
 LDLIBS = $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
 LIB_PATHS = $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)
-#LD_EXTRA_FLAGS = -Wl,--verbose
+LD_EXTRA_FLAGS = -Wl,--verbose
 
 SOURCE_INC_PATHS = -I../src/ -I../src/armadillo/include/ -I../src/inih/cpp/ -I../src/clara/single_include/ -I../src/spline/ -I../src/spdlog/
 CPPFLAGS = $(CPP_DEFS) $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)
