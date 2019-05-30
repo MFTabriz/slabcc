@@ -68,7 +68,7 @@ NLOPT_LIB_PATH = -L$(NLOPT_PATH)/lib/
 NLOPT_LIB_FILE = $(NLOPT_PATH)/libnlopt.a
 NLOPT_LIB = -lnlopt
 
-Add the -DMKL if you are linking against it!
+#Add the -DMKL if you are linking against it!
 CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER # -DMKL 
 
 LDLIBS = $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
