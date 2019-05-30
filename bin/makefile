@@ -11,8 +11,8 @@ CXX =g++
 # using g++/icpc and OpenBLAS/MKL
 ##===========EXTERNAL LIBRARIES============##
 
-FFTW_INC_PATH = -I$FFTW3_HOME/include/
-FFTW_LIB_PATH = -L$FFTW3_HOME/lib/
+FFTW_INC_PATH = -I${FFTW3_HOME}/include/
+FFTW_LIB_PATH = -L${FFTW3_HOME}/lib/
 
 #FFTW_INC_PATH = -I/cluster/fftw/3.3.6p2/intel2016/include/
 #FFTW_LIB_PATH = -L/cluster/fftw/3.3.6p2/intel2016/lib/
