@@ -17,7 +17,6 @@ matrix:
             - gcc-8
             - g++-8
             - gfortran-8
-            - liblapack-dev
             - libopenblas-dev
             - fftw3-dev
 
@@ -28,11 +27,15 @@ before_install:
     - which g++
     - gcc --version
     - g++ --version
+    - lscpu
 
 install: true
 
 script:
     - cd ./bin/ && make
+    
+after_script:
+    - ./slabcc -v
     
 notifications:
     email: false
