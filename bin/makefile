@@ -11,8 +11,8 @@ CXX =g++
 # using g++/icpc and OpenBLAS/MKL
 ##===========EXTERNAL LIBRARIES============##
 
-FFTW_INC_PATH = -I${FFTW3_HOME}/include/
-FFTW_LIB_PATH = -L${FFTW3_HOME}/lib/
+#FFTW_INC_PATH = -I${FFTW3_HOME}/include/
+#FFTW_LIB_PATH = -L${FFTW3_HOME}/lib/
 
 #FFTW_INC_PATH = -I/cluster/fftw/3.3.6p2/intel2016/include/
 #FFTW_LIB_PATH = -L/cluster/fftw/3.3.6p2/intel2016/lib/
@@ -30,7 +30,7 @@ FFTW_LIB = -lfftw3
 #BLAS_INC_PATH = -I${MKLROOT}/include
 #BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
 
-BLAS_LIB = -lblas #OpenBLAS
+BLAS_LIB = -lblas -llapack #OpenBLAS
 #BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl #MKL_INTEL
 #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lm -ldl #MKL_GNU
 

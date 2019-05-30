@@ -1,5 +1,4 @@
 language: cpp
-sudo: false
 env: 
   global:
     - OPENBLAS_NUM_THREADS=1
@@ -22,9 +21,10 @@ matrix:
 
 before_install:
     - eval "${MATRIX_EVAL}"
-
-install:
+    - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
+    - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
     - gcc --version
+install:
     - cd ./bin/
     - make
 notifications:
