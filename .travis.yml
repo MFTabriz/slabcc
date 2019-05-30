@@ -1,0 +1,31 @@
+language: cpp
+sudo: false
+env: 
+  global:
+    - OPENBLAS_NUM_THREADS=1
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+      addons:
+        apt:
+          sources:
+          packages:
+            - g++-8
+            - liblapack-dev
+            - libopenblas-dev
+            - fftw3-dev
+
+before_script:
+    - ls $HOME/OpenBlas/lib || (cd /tmp/ && git clone https://github.com/xianyi/OpenBLAS.git -b master && cd OpenBLAS && (make NO_AFFINITY=1 -j$(getconf _NPROCESSORS_ONLN) 2>/dev/null >/dev/null) && make PREFIX=$HOME/OpenBlas install)
+    - export BLAS_LIB_PATH=$HOME/OpenBlas/lib
+    - export BLAS_INC_PATH=$HOME/OpenBlas/include
+
+install:
+    g++ -v
+    cd ./bin/
+    make
+notifications:
+    email: false
