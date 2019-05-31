@@ -200,14 +200,14 @@ Installation
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
-4. **Cleanup:** Run `make clean` to remove the slabcc executable, compiled objects, and library files. Run `make distclean` to additionally remove all the compiled external library files.
+4. **Cleanup:** You can run `make clean` to remove the compiled objects, and library files. `make distclean` additionally removes all the compiled external library files.
 
 **Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
 ==========
 Validation
 ==========
-We are trying to keep slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
 The current version of the slabcc has been validated on:
 
 - CentOS Linux release 7.6.1810

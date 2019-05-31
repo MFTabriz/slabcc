@@ -30,7 +30,8 @@ before_install:
 install: true
 
 script:
-    - cd ./bin/ && make
+    - cd ./bin/ && mv -f makefile.dbg makefile
+    - make
     
 after_script:
     - ./slabcc -v
