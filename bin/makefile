@@ -8,7 +8,7 @@ CXX =g++
 
 # Please edit/choose the path to one of the available
 # libraries on your system. 
-# Please read the “Validation” section in the readme.rst for more information 
+# Please read the “Validation” section in the manual/readme file for more information 
 # about the compiler/libraries in our test environment.
 ##===========EXTERNAL LIBRARIES============##
 
@@ -45,7 +45,6 @@ OPTFLAGS = $(OPT) $(MARCH) $(EXTRAOPT)
 ifeq ($(CXX),icpc)
   OMP = -qopenmp
   CC = icc
-  OPTFLAGS += -fp-model precise # don't remove this, it is helping to avoid numerical issues
   EXTRA_LIBS = -lifcore $(OMP)
 endif
 
@@ -55,7 +54,7 @@ ifeq ($(CXX),g++)
   EXTRA_LIBS = -lgfortran -lquadmath $(OMP)
 endif
 
-ALLFLAGS = $(OMP) $(OPTFLAGS) # this flags and compiler also used by the optimizer configure/makefile
+ALLFLAGS = $(OMP) $(OPTFLAGS) # these flags and the compiler are also used by the NLOPT configure/makefile
 
 CFLAGS   = $(ALLFLAGS) 
 CXXFLAGS = $(ALLFLAGS) -std=c++14 -Wall

@@ -1,9 +1,9 @@
-:Last updated: 30 May 2019
+:Last updated: 31 May 2019
 :version: 0.7.0
 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
-   :target: https://www.codacy.com/app/MFTabriz/slabcc
+   :target: https://travis-ci.org/MFTabriz/slabcc
 .. |Codacy| image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
    :alt: Codacy Badge
    :target: https://www.codacy.com/app/MFTabriz/slabcc
@@ -147,6 +147,7 @@ Installation
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
+4. **Cleanup:** Run `make clean` to remove the slabcc executable, compiled objects, and library files. Run `make distclean` to additionally remove all the compiled external library files.
 
 **Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
@@ -158,7 +159,7 @@ The current version of the slabcc has been validated on:
 
 - CentOS Linux release 7.6.1810
  - with Intel C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
-- Ubuntu Linux release 16.04.6
+- Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
  - with GNU C++ compiler 8.1.0, OpenBLAS 0.2.18, FFTW 3.3.4
 - Microsoft Windows version 10.0.17134
  - with Intel C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
