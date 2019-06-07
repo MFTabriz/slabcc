@@ -97,6 +97,14 @@ void INIReader::dump_env_info() const {
 		}
 	}
 
+#ifdef MKL
+		MKLVersion Version;
+		MKL_Get_Version(&Version);
+		log->debug("MKL version: {}.{}.{}", Version.MajorVersion, Version.MinorVersion, Version.UpdateVersion);
+		log->debug("Platform: {}", Version.Platform);
+		log->debug("Processor optimization: {}", Version.Processor);
+#endif
+
 	auto start_date_time = chrono::system_clock::now();
 	auto tt = chrono::system_clock::to_time_t(start_date_time);
 	auto timeinfo = localtime(&tt);

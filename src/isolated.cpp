@@ -27,7 +27,7 @@ tuple <rowvec, rowvec> extrapolate_model(int extrapol_steps_num, double extrapol
 			const uvec interface_sorted_i = sort_index(interfaces);
 			interfaces_extrapolated(interface_sorted_i(1)) += slab_thickness * (extrapol_factor - 1) / extrapol_factor;
 			//move the charges to the same distance from their original nearest interface
-			for (auto charge = 0; charge < charge_position.n_rows; ++charge) {
+			for (uword charge = 0; charge < charge_position.n_rows; ++charge) {
 				const rowvec2 distance_to_interfaces = abs(charge_position(charge, normal_direction) - interfaces);
 				if (distance_to_interfaces(0) < distance_to_interfaces(1)) {
 					charge_position_extrapolated(charge, normal_direction) += interfaces_extrapolated(0) - interfaces(0) / extrapol_factor;
@@ -51,7 +51,7 @@ tuple <rowvec, rowvec> extrapolate_model(int extrapol_steps_num, double extrapol
 		const auto EperModel = 0.5 * accu(real(V % rhoM)) * model_cell.voxel_vol * Hartree_to_eV;
 		const rowvec2 interface_pos = interfaces_extrapolated * model_cell.vec_lengths(normal_direction);
 		string extrapolation_info = to_string(extrapol_factor) + "\t" + ::to_string(EperModel) + "\t" + ::to_string(Q) + "\t" + to_string(interface_pos);
-		for (auto i = 0; i < charge_position_extrapolated.n_rows; ++i) {
+		for (uword i = 0; i < charge_position_extrapolated.n_rows; ++i) {
 			extrapolation_info += "\t" + to_string(charge_position_extrapolated(i, model_cell.normal_direction) * model_cell.vec_lengths(model_cell.normal_direction));
 		}
 		log->debug(extrapolation_info);
@@ -74,7 +74,7 @@ vector<double> nonlinear_fit(const double& opt_tol, nonlinear_fit_data& fit_data
 	opt.set_xtol_rel(opt_tol);   //tolerance for error value
 
 	try {
-		const nlopt::result nlopt_final_result = opt.optimize(fit_parameters, fit_MSE);
+		opt.optimize(fit_parameters, fit_MSE);
 	}
 	catch (const exception &e) {
 		log->error("Nonlinear fitting failed: " + string(e.what()));
@@ -148,7 +148,7 @@ rowvec Uk(rowvec k, double z0, double sigma, mat diel) {
 
 	const cx_mat Ag12 = Ag1 % Ag2;
 	const auto cosGL_2 = cos(Gz0 * length(normal) / 2.0);
-	for (int i = 0; i < k.n_elem; ++i) {
+	for (uword i = 0; i < k.n_elem; ++i) {
 		const cx_mat Ag = Ag12 + Ag1p * k(i) * k(i);
 		const double keff = k(i);
 		const mat Kinvg = diagmat(dielbulk * length(normal) * (pow(keff, 2) + Gz02) / (1 - exp(-keff * length(normal) / 2.0) * cosGL_2));

@@ -26,3 +26,7 @@ constexpr auto SLABCC_VERSION_PATCH = 0;
 #include <algorithm> 
 
 
+#ifdef MKL
+#include "mkl_service.h"
+#include "mkl_types.h"
+#endif

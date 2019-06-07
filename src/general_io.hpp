@@ -7,6 +7,7 @@
 #include "clara.hpp"
 #include "spdlog.h"
 #include "arma_io.hpp"
+#include "nlopt.hpp"
 #include "sinks/basic_file_sink.h"
 #include "sinks/stdout_color_sinks.h"
 
@@ -15,7 +16,7 @@ using namespace std;
 extern int verbosity_level;
 
 struct cli_params {
-	string &input_file, output_file, log_file;
+	string &input_file, &output_file, &log_file;
 	bool &diff_only;
 
 	// reads the command line and sets the input_file and output_file

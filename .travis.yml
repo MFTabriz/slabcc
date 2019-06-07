@@ -1,0 +1,41 @@
+language: cpp
+sudo: required
+env: 
+  global:
+    - OPENBLAS_NUM_THREADS=1
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
+            - gfortran-8
+            - libopenblas-dev
+            - fftw3-dev
+
+before_install:
+    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-8 /usr/bin/gcc
+    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-8 /usr/bin/g++
+    - which gcc && gcc --version
+    - which g++ && g++ --version
+    - lscpu
+
+install: true
+
+script:
+    - cd ./bin/ && mv -f makefile.dbg makefile
+    - make
+    
+after_script:
+    - ./slabcc -v
+    - ldd -v slabcc
+    
+notifications:
+    email: false

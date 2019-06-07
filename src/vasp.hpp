@@ -52,7 +52,7 @@ struct supercell {
 	atom atoms;
 
 	//total number of atoms
-	int atoms_number = 0;
+	uword atoms_number = 0;
 
 	cube charge;			//total charge distribution, negative for presence of electron (spin 1+2 dataset of CHGCAR, * -1 / volume (in Bohr^3))
 	cube potential;			//total potential (LOCPOT * -1)

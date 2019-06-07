@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 19 May 2019
+:Last updated: 31 May 2019
 :version: 0.7.0
 
 .. sectnum::
@@ -195,14 +195,28 @@ Installation
 1. **Prerequisites:**
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
- #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS for the matrix operations inside the slabcc but it is highly recommended to use the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
+ #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
-2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and OpenBLAS libraries. 
+2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
+4. **Cleanup:** You can run `make clean` to remove the compiled objects, and static library files. `make distclean` additionally removes all the compiled objects in the external libraries.
 
 **Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
+==========
+Validation
+==========
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
+The current version of the slabcc has been validated on:
+
+- CentOS Linux release 7.6.1810
+ - with Intel C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
+- Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
+ - with GNU C++ compiler 8.1.0, OpenBLAS 0.2.18, FFTW 3.3.4
+- Microsoft Windows version 10.0.17134
+ - with Intel C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
+ 
 =======================
 Command-line parameters
 =======================
@@ -685,10 +699,10 @@ Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
 The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
 
 | This code uses several open source components each of which are located under a separate sub-directory in the `src/`. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.
-| The attributions are also present in the binary file and can be accessed using the `command-line parameters`_.
+| The attributions are also present in the binary file and can be accessed using the command-line parameters.
 
-Included libraries
-------------------
+Included third-party components
+-------------------------------
 
 - `Armadillo C++ Linear Algebra Library <http://arma.sourceforge.net>`_ licensed under the Apache License 2.0
  
@@ -727,12 +741,6 @@ Included libraries
  - © 2005-2018 Rene Rivera
  - © 2015 Charly Chevalier
  - © 2015 Joel Falcou, `et al. <https://github.com/boostorg/predef/contributors>`__
- 
-Linked libraries
----------------------
-
-- `FFTW <http://www.fftw.org>`_ licensed under GNU General Public License
-- `OpenBLAS <http://www.openblas.net>`_ licensed under the 3-clause BSD license 
 
 License
 -------
