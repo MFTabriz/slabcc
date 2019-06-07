@@ -3,8 +3,8 @@
 # See the accompanying LICENSE.txt file for terms.
 
 
-#CXX =icpc
-CXX =g++
+CXX =icpc
+#CXX =g++
 
 # Please edit/choose the path to one of the available
 # libraries on your system. 
@@ -18,7 +18,7 @@ CXX =g++
 #FFTW_INC_PATH = -I/cluster/fftw/3.3.6p2/intel2016/include/
 #FFTW_LIB_PATH = -L/cluster/fftw/3.3.6p2/intel2016/lib/
 
-FFTW_LIB = -lfftw3
+#FFTW_LIB = -lfftw3
 
 #BLAS_INC_PATH = -I/cluster/OpenBLAS/0.2.19/gcc62/include/
 #BLAS_LIB_PATH = -L/cluster/OpenBLAS/0.2.19/gcc62/lib/
@@ -27,11 +27,11 @@ FFTW_LIB = -lfftw3
 #BLAS_LIB_PATH = -L/cluster/OpenBLAS/1f217/intel2016/lib/
 
 #MKLROOT=/cluster/intel/compilers_and_libraries_2016.4.258/linux/mkl
-#FFTW_INC_PATH = -I${MKLROOT}/include/fftw
-#BLAS_INC_PATH = -I${MKLROOT}/include
-#BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
+FFTW_INC_PATH = -I${MKLROOT}/include/fftw
+BLAS_INC_PATH = -I${MKLROOT}/include
+BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
 
-BLAS_LIB = -lblas -llapack #OpenBLAS
+#BLAS_LIB = -lblas -llapack #OpenBLAS
 #BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
 #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
 

@@ -59,7 +59,7 @@ cx_cube poisson_solver_3D(const cx_cube &rho, mat diel);
 
 
 //calculates local: V, V_diff, rhoM (without jellium), diels, Q
-//returns: mean squared error (MSE) of the model charge potential 
+//returns: root mean squared error (RMSE) of the model charge potential 
 double potential_eval(const vector<double> &x, vector<double> &grad, void *slabcc_data);
 
 // runs the NLOPT with:
@@ -72,6 +72,7 @@ double do_optimize(const string& opt_algo, const double& opt_tol, const int &max
 
 //pack the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
 //returned vectors are "optimization parameters", "lower boundaries", "upper boundaries"
+//TODO: to keep the compatibility with MSVC, the default values must be replaced with std::optional in the C++17 standard version of slabcc
 tuple<vector<double>, vector<double>, vector<double>, vector<double>> optimizer_packer(const opt_variable& opt_vars, opt_switch optimize = { false,false,false,false,false }, const bool trivariate = false);
 
 //unpack the optimization variable structure into opt_vars struct variables

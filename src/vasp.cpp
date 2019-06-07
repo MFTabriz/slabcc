@@ -22,7 +22,7 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 
 	int counter = 0;
 	int counted = 0;
-	for (auto k = 0; k < defs.size(); ++k) {
+	for (size_t k = 0; k < defs.size(); ++k) {
 		while (structure.atoms.definition_order.at(counter) == defs.at(k)) {
 			++counter;
 			if (counter == structure.atoms_number) break;
@@ -82,7 +82,6 @@ supercell read_POSCAR(const string& file_name) {
 		log->critical("Could not open the "+ file_name);
 		return structure;
 	}
-
 	getline(infile, structure.label);
 	getline(infile, temp_line);
 	structure.scaling = stod(temp_line);
@@ -106,7 +105,7 @@ supercell read_POSCAR(const string& file_name) {
 	}
 
 	int atom_counter = 0;
-	for (auto i = 0; i < temp_types.size(); ++i) {
+	for (size_t i = 0; i < temp_types.size(); ++i) {
 		for (auto a = 0; a < temp_numbers.at(i); ++a) {
 			structure.atoms.type.push_back(temp_types.at(i));
 			structure.atoms.definition_order.push_back(i);
