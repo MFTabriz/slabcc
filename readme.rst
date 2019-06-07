@@ -7,8 +7,11 @@
 .. |Codacy| image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
    :alt: Codacy Badge
    :target: https://www.codacy.com/app/MFTabriz/slabcc
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1419758.svg
+   :alt: Test Set
+   :target: https://doi.org/10.5281/zenodo.1419758
 
-|Travis| |Codacy|
+|Zenodo| |Travis| |Codacy|
 
 .. sectnum::
 
@@ -147,7 +150,7 @@ Installation
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
-4. **Cleanup:** You can run `make clean` to remove the compiled objects, and library files. `make distclean` additionally removes all the compiled external library files.
+4. **Cleanup:** You can run `make clean` to remove the compiled objects, and static library files. `make distclean` additionally removes all the compiled objects in the external libraries.
 
 **Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 

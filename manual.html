@@ -1376,7 +1376,7 @@ diel_in = 6.28 6.28 1.83
 <ol class="arabic simple" start="2">
 <li><strong>Configuration:</strong> You must edit the <tt class="docutils literal">src/makefile</tt> to choose your compiler and add the paths to FFTW and BLAS libraries.</li>
 <li><strong>Compilation:</strong> Run the command <tt class="docutils literal">make</tt> in the <tt class="docutils literal">src/</tt> to compile the slabcc.</li>
-<li><strong>Cleanup:</strong> You can run <tt class="docutils literal">make clean</tt> to remove the compiled objects, and library files. <tt class="docutils literal">make distclean</tt> additionally removes all the compiled external library files.</li>
+<li><strong>Cleanup:</strong> You can run <tt class="docutils literal">make clean</tt> to remove the compiled objects, and static library files. <tt class="docutils literal">make distclean</tt> additionally removes all the compiled objects in the external libraries.</li>
 </ol>
 <p><strong>Note</strong>: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the <tt class="docutils literal"><span class="pre">-march</span></tt> flag.</p>
 </div>
