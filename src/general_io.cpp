@@ -47,8 +47,8 @@ void cli_params::parse(int argc, char *argv[]) {
 	if (showVer) {
 		cout << "SLAB Charge Correction (slabcc)" << '\n';
 		cout << "Version: " << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "." << SLABCC_VERSION_PATCH << '\n';
-		cout << "Armadillo library: version" << ARMA_VERSION_MAJOR << "." << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << '\n';
-		cout << "NLOPT library: version" << nlopt::version_major() << "." << nlopt::version_minor() << "." << nlopt::version_bugfix() << '\n';
+		cout << "Armadillo library: version " << ARMA_VERSION_MAJOR << "." << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << '\n';
+		cout << "NLOPT library: version " << nlopt::version_major() << "." << nlopt::version_minor() << "." << nlopt::version_bugfix() << '\n';
 		cout << "SPDLOG library: version " << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << '\n';
 		cout << "Compilation: " << __DATE__ << " " << __TIME__ << '\n';
 		exit(0);

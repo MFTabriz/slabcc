@@ -20,8 +20,8 @@ void write_POSCAR(const supercell& structure, const string& file_name) {
 	}
 	out_file << '\n' << noshowpos;
 
-	int counter = 0;
-	int counted = 0;
+	uword counter = 0;
+	uword counted = 0;
 	for (size_t k = 0; k < defs.size(); ++k) {
 		while (structure.atoms.definition_order.at(counter) == defs.at(k)) {
 			++counter;
@@ -164,7 +164,7 @@ cube read_CHGPOT(const string& file_name) {
 		return {};
 	}
 	const supercell structure = read_POSCAR(file_name);
-	for (auto currLineNumber = 0; currLineNumber < 8 + structure.atoms_number; ++currLineNumber) {
+	for (uword currLineNumber = 0; currLineNumber < 8 + structure.atoms_number; ++currLineNumber) {
 		if (infile.ignore(numeric_limits<streamsize>::max(), infile.widen('\n'))) {
 			//just skipping the line. POSCAR must be read and checked seperately
 		}
