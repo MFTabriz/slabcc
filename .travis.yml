@@ -9,6 +9,25 @@ matrix:
       dist: xenial
       compiler: gcc
       env: 
+        - CXX="g++-5"
+        - CC="gcc-5"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - g++-5
+            - gfortran-5
+            - libopenblas-dev
+            - fftw3-dev
+ 
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+        - CXX="g++-8"
+        - CC="gcc-8"
       addons:
         apt:
           sources:
@@ -19,10 +38,27 @@ matrix:
             - gfortran-8
             - libopenblas-dev
             - fftw3-dev
+            
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+        - CXX="g++-9"
+        - CC="gcc-9"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-9
+            - g++-9
+            - gfortran-9
+            - libopenblas-dev
+            - fftw3-dev
 
 before_install:
-    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-8 /usr/bin/gcc
-    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-8 /usr/bin/g++
+    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/${CC} /usr/bin/gcc
+    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/${CXX} /usr/bin/g++
     - which gcc && gcc --version
     - which g++ && g++ --version
     - lscpu
