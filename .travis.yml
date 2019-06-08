@@ -9,8 +9,7 @@ matrix:
       dist: xenial
       compiler: gcc
       env: 
-        - CXX="g++-5"
-        - CC="gcc-5"
+        - SET_COMPILERS="sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc && sudo ln -s /usr/bin/g++-5 /usr/bin/g++"
       addons:
         apt:
           sources:
@@ -21,13 +20,27 @@ matrix:
             - gfortran-5
             - libopenblas-dev
             - fftw3-dev
+     - os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+        - SET_COMPILERS="sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc && sudo ln -s /usr/bin/g++-6 /usr/bin/g++"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - gfortran-6
+            - libopenblas-dev
+            - fftw3-dev
  
     - os: linux
       dist: xenial
       compiler: gcc
       env: 
-        - CXX="g++-8"
-        - CC="gcc-8"
+        - SET_COMPILERS="sudo ln -s /usr/bin/gcc-8 /usr/bin/gcc && sudo ln -s /usr/bin/g++-8 /usr/bin/g++"
       addons:
         apt:
           sources:
@@ -43,8 +56,7 @@ matrix:
       dist: xenial
       compiler: gcc
       env: 
-        - CXX="g++-9"
-        - CC="gcc-9"
+        - SET_COMPILERS="sudo ln -s /usr/bin/gcc-9 /usr/bin/gcc && sudo ln -s /usr/bin/g++-9 /usr/bin/g++"
       addons:
         apt:
           sources:
@@ -57,8 +69,8 @@ matrix:
             - fftw3-dev
 
 before_install:
-    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/${CC} /usr/bin/gcc
-    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/${CXX} /usr/bin/g++
+    - sudo unlink /usr/bin/gcc && sudo unlink /usr/bin/g++
+    - eval ${SET_COMPILERS}
     - which gcc && gcc --version
     - which g++ && g++ --version
     - lscpu
