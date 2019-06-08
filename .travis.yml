@@ -20,7 +20,7 @@ matrix:
             - gfortran-5
             - libopenblas-dev
             - fftw3-dev
-     - os: linux
+    - os: linux
       dist: xenial
       compiler: gcc
       env: 
