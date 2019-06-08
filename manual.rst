@@ -213,7 +213,7 @@ The current version of the slabcc has been validated on:
 - CentOS Linux release 7.6.1810
  - with Intel C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
 - Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
- - with GNU C++ compiler 8.1.0, OpenBLAS 0.2.18, FFTW 3.3.4
+ - with GNU C++ compilers (5.5.0/6.5.0/8.1.0/9.1.0), OpenBLAS 0.2.18, FFTW 3.3.4
 - Microsoft Windows version 10.0.17134
  - with Intel C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
  
