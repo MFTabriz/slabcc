@@ -22,7 +22,7 @@ void slabcc_model::init_supercell(const mat33& new_vectors, const urowvec3& new_
 	voxel_vol = prod(cell_vectors_lengths / cell_grid);
 }
 
-void slabcc_model::set_input_variables(const input_data inputfile_variables) {
+void slabcc_model::set_input_variables(const input_data& inputfile_variables) {
 	normal_direction = inputfile_variables.normal_direction;
 	model_2d = inputfile_variables.model_2D;
 	interfaces = inputfile_variables.interfaces;
@@ -75,7 +75,7 @@ void slabcc_model::gaussian_charges_gen() {
 
 		CHG = arma::zeros<cx_cube>(as_size(cell_grid));
 
-		for (int i = 0; i < charge_fraction.n_elem; ++i) {
+		for (uword i = 0; i < charge_fraction.n_elem; ++i) {
 			// shift the axis reference to position of the Gaussian charge center
 			rowvec x = x0 - accu(cell_vectors.col(0) * charge_position(i, 0));
 			rowvec y = y0 - accu(cell_vectors.col(1) * charge_position(i, 1));
@@ -150,6 +150,7 @@ void slabcc_model::gaussian_charges_gen() {
 
 		total_charge = accu(real(CHG)) * voxel_vol;
 	}while(had_discretization_error());
+	update_Vref();
 }
 
 tuple<vector<double>, vector<double>, vector<double>, vector<double>> slabcc_model::data_packer(opt_switches optimize) const {
@@ -345,6 +346,21 @@ bool slabcc_model::had_discretization_error() {
 	return false;
 }
 
+void slabcc_model::update_Vref() {
+	auto log = spdlog::get("loggers");
+	if (as_size(cell_grid) != arma::size(V_ref)) {
+		V_ref.set_size(as_size(cell_grid));
+		V_ref.zeros();
+		const rowvec new_grid_x = linspace<rowvec>(1.0, V_ref0.n_rows, cell_grid(0));
+		const rowvec new_grid_y = linspace<rowvec>(1.0, V_ref0.n_cols, cell_grid(1));
+		const rowvec new_grid_z = linspace<rowvec>(1.0, V_ref0.n_slices, cell_grid(2));
+
+		V_ref = interp3(V_ref0, new_grid_x, new_grid_y, new_grid_z);
+		V_ref -= accu(V_ref) / V_ref.n_elem;
+		log->debug("New grid size: " + to_string(SizeVec(V_ref)));
+	}
+}
+
 void slabcc_model::adjust_extrapolation_params(int &extrapol_steps_num, double &extrapol_steps_size, double &extrapol_grid_x) {
 	auto log = spdlog::get("loggers");
 
@@ -438,8 +454,7 @@ tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double 
 }
 
 double slabcc_model::Eiso_bessel() const {
-	const double z0 = charge_position(0, normal_direction) * cell_vectors_lengths(normal_direction);
-	const double Q = charge_fraction(0) * total_charge;
+	
 	auto logger = spdlog::get("loggers");
 	const double K_min = 0.00001;
 	const double K_max = 100;
@@ -456,6 +471,7 @@ double slabcc_model::Eiso_bessel() const {
 	// eq. 7 in the SI (Supplementary Information for `First-principles electrostatic potentials for reliable alignment at interfaces and defects`)
 	const rowvec integrand = K % exp(-square(K) * pow(charge_sigma(0, 0), 2)) % Uk(K);
 	const mat integral = trapz(K, integrand, 1);
+	const double Q = charge_fraction(0) * total_charge;
 	const double U_total = pow(Q, 2) * integral(0) * Hartree_to_eV;
 
 	return U_total;
@@ -509,7 +525,6 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* slab
 
 	//input data
 	const auto d = static_cast<opt_data*>(slabcc_data);
-	const cube& defect_potential = d->defect_potential;
 	slabcc_model& model = d->model;
 	model.data_unpacker(x);
 	rowvec normalized_charge_fraction = model.charge_fraction;
@@ -527,7 +542,7 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* slab
 	model.dielectric_profiles_gen();
 
 	model.V = poisson_solver_3D(model.CHG, model.dielectric_profiles, model.cell_vectors_lengths, model.normal_direction);
-	model.V_diff = real(model.V) * Hartree_to_eV - defect_potential;
+	model.V_diff = real(model.V) * Hartree_to_eV - model.V_ref;
 	//bigger output for out-of-bounds input: quadratic penalty
 	const double bounds_correction = bounds_factor + 10 * bounds_factor * bounds_factor;
 	const double potential_RMSE = sqrt(accu(square(model.V_diff)) / model.V_diff.n_elem) + bounds_correction;
@@ -569,7 +584,7 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* slab
 	return potential_RMSE;
 }
 
-void optimize(const string & opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, opt_data & opt_data, const opt_switches& optimize) {
+void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, opt_data& opt_data, const opt_switches& optimize) {
 
 	auto log = spdlog::get("loggers");
 	slabcc_model& model = opt_data.model;

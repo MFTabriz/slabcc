@@ -150,6 +150,8 @@ int main(int argc, char *argv[]){
 	Defect_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.potential *= -1.0;
 
+	model.V_ref0 = Defect_supercell.potential;
+
 	// total extra charge of the VASP calculation
 	model.defect_charge = accu(Defect_supercell.charge) * model.voxel_vol;
 
@@ -163,19 +165,11 @@ int main(int argc, char *argv[]){
 	if (optimize_any) {
 		const rowvec2 shifted_interfaces0 = model.interfaces;
 		const mat charge_position0 = model.charge_position;
-
-
-		// TODO: this should be a separate function
-		const rowvec optimization_grid_x = regspace<rowvec>(1.0, 1.0 / opt_grid_x, model.cell_grid(0));
-		const rowvec optimization_grid_y = regspace<rowvec>(1.0, 1.0 / opt_grid_x, model.cell_grid(1));
-		const rowvec optimization_grid_z = regspace<rowvec>(1.0, 1.0 / opt_grid_x, model.cell_grid(2));
-
-		cube interpolated_potential = interp3(Defect_supercell.potential, optimization_grid_x, optimization_grid_y, optimization_grid_z);
-		interpolated_potential -= accu(interpolated_potential) / interpolated_potential.n_elem;
-		log->debug("Optimization grid size: " + to_string(SizeVec(interpolated_potential)));
-
-		opt_data optimizer_data = { interpolated_potential, model };
-		model.update_supercell(cell_vectors, SizeVec(interpolated_potential));
+		const rowvec3 optimization_grid_size = opt_grid_x * conv_to<rowvec>::from(model.cell_grid);
+		const urowvec3 optimization_grid = { (uword)optimization_grid_size(0), (uword)optimization_grid_size(1), (uword)optimization_grid_size(2) };
+		model.cell_grid = optimization_grid;
+		model.update_Vref();
+		opt_data optimizer_data = { model };
 		optimize(opt_algo, opt_tol, max_eval, max_time, optimizer_data, optimizer_activation_switches);
 		model.update_supercell(cell_vectors, input_grid_size);
 
@@ -227,7 +221,7 @@ int main(int argc, char *argv[]){
 			exit(1);
 		}
 	}
-	opt_data optimizer_data = { Defect_supercell.potential, model };
+	opt_data optimizer_data = { model };
 	auto local_param = model.data_packer();
 	vector<double> gradients = {};
 	model.potential_RMSE = potential_error(get<0>(local_param), gradients, &optimizer_data);
@@ -261,7 +255,6 @@ int main(int argc, char *argv[]){
 
 	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
 	log->debug("Cell dimensions (bohr): " + to_string(model.cell_vectors_lengths));
-	log->debug("Grid size: " + to_string(input_grid_size));
 	log->debug("Volume (bohr^3): {}", model.cell_volume);
 
 
@@ -281,11 +274,11 @@ int main(int argc, char *argv[]){
 	if (is_active(verbosity::write_planarAvg_file)) {
 		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * model.voxel_vol, "N");
 		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * model.voxel_vol, "C");
-		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model.voxel_vol, "D");
+		write_planar_avg(model.V_ref0, Defect_supercell.charge * model.voxel_vol, "D");
 		write_planar_avg(real(model.V) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M");
 	}
 	else if (is_active(verbosity::write_normal_planarAvg)) {
-		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model.voxel_vol, "D", model.normal_direction);
+		write_planar_avg(model.V_ref0, Defect_supercell.charge * model.voxel_vol, "D", model.normal_direction);
 		write_planar_avg(real(model.V) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M", model.normal_direction);
 	}
 
@@ -324,7 +317,9 @@ int main(int argc, char *argv[]){
 		
 		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
-		log->debug("Extrapolation grid size: {}", to_string(extrapolation_grid));
+		model.cell_grid = extrapolation_grid;
+		model.update_Vref();
+
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
 		const rowvec2 interface_pos = model.interfaces * model.cell_vectors_lengths(model.normal_direction);

@@ -53,18 +53,25 @@ struct slabcc_model {
 
 	//difference of the potential resulted from the model charge and the QM calculation (VASP) results (eV)
 	cube V_diff;
+
+	//reference potential of the extra charge in the input files (eV) from the input files
+	cube V_ref0;
+	//reference potential of the extra charge with the adjusted grid size (eV)
+	cube V_ref;
 	
 	mat dielectric_profiles;
 
 	//Sets the global struct slabcc_cell parameters from the new cell vectors (in Bohr) and the grid density
 	void init_supercell(const mat33& new_vectors, const urowvec3& new_grid);
 
+	//updates the V_ref from the V_ref0 to the model grid size
+	void update_Vref();
 
 	//Sets the global struct slabcc_cell parameters from the new cell vectors (in Bohr) and the grid density
 	void update_supercell(const mat33& new_vectors, const urowvec3& new_grid);
 
 	// must be checked before!
-	void set_input_variables(const input_data inputfile_variables);
+	void set_input_variables(const input_data& inputfile_variables);
 
 	// returns the extrapolated sizes and the energies
 	tuple <rowvec, rowvec> extrapolate(int extrapol_steps_num, double extrapol_steps_size);
@@ -84,7 +91,7 @@ struct slabcc_model {
 	tuple<vector<double>, vector<double>, vector<double>, vector<double>> data_packer(opt_switches optimize = { false,false,false,false,false }) const;
 
 
-	//writes the parameters from the optimization variable structure into model
+	//writes the parameters from the optimization variable structure into the model
 	void data_unpacker(const vector<double>& optimizer_vars_vec);
 
 	//calculate the changes in the interface positions and warn the user if the changes are too big
@@ -113,7 +120,6 @@ private:
 
 //input data for the optimizer function
 struct opt_data {
-	const cube& defect_potential;
 	slabcc_model& model;
 };
 
