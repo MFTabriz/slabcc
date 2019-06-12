@@ -1,6 +1,6 @@
 #pragma once
 #include "slabcc_math.hpp"
-#include "slabcc_cell.hpp"
+//#include "slabcc_model.hpp"
 #include "INIReader.h"
 
 //references to the input data variables

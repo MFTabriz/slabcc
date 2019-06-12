@@ -251,3 +251,48 @@ void write_planar_avg(const cube& potential_data, const cube& charge_data, const
 		write_vec2file(avg_chg, "slabcc_" + id + int2xyz(dir) + "CHG.dat");
 	}
 }
+
+
+
+void check_slabcc_compatiblity(const supercell& Neutral_supercell, const supercell& Charged_supercell) {
+
+	auto log = spdlog::get("loggers");
+
+	// equal size
+	if (!approx_equal(Neutral_supercell.cell_vectors * Neutral_supercell.scaling,
+		Charged_supercell.cell_vectors * Charged_supercell.scaling, "reldiff", 0.001)) {
+		log->debug("Neutral supercell vectors: " + to_string(Neutral_supercell.cell_vectors * Neutral_supercell.scaling));
+		log->debug("Charged supercell vectors: " + to_string(Charged_supercell.cell_vectors * Charged_supercell.scaling));
+		log->critical("Cell vectors of the input files does not match!");
+		finalize_loggers();
+		exit(1);
+	}
+
+	//orthogonal
+	auto cell = Neutral_supercell.cell_vectors;
+	cell.each_col([](vec & vec) { vec /= norm(vec); });
+	if (!approx_equal(cell.t() * cell, eye(3, 3), "reldiff", 0.001)) {
+		log->debug("Cell vectors: " + to_string(Neutral_supercell.cell_vectors));
+		log->debug("Cell vectors basis: " + to_string(cell));
+		log->debug("Orthogonality criteria: " + to_string(cell.t() * cell));
+		log->critical("Supercell vectors are not orthogonal!");
+		finalize_loggers();
+		exit(1);
+	}
+
+	// equal grid
+	const SizeCube input_grid = arma::size(Neutral_supercell.potential);
+	if ((input_grid != arma::size(Charged_supercell.potential)) ||
+		(input_grid != arma::size(Charged_supercell.charge)) ||
+		(input_grid != arma::size(Neutral_supercell.charge))) {
+		log->debug("Neutral CHGCAR grid: " + to_string(arma::size(Neutral_supercell.charge)));
+		log->debug("Neutral LOCPOT grid: " + to_string(arma::size(Neutral_supercell.potential)));
+		log->debug("Charged CHGCAR grid: " + to_string(arma::size(Charged_supercell.charge)));
+		log->debug("Charged LOCPOT grid: " + to_string(arma::size(Charged_supercell.potential)));
+		log->critical("Data grids of the CHGCAR or LOCPOT files does not match!");
+		finalize_loggers();
+		exit(1);
+	}
+
+	log->trace("All files are loaded and cross-checked!");
+}

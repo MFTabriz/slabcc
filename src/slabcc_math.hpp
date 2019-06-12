@@ -4,6 +4,7 @@
 
 #pragma once
 #include <armadillo>
+#include "arma_io.hpp"
 #include <fftw3.h>
 #include "general_io.hpp"
 #include "spline.hpp"
@@ -87,7 +88,12 @@ inline double square(const double& input) noexcept {
 	return input * input;
 }
 
-void write_mat2file(const mat& input, const string& output_file);
+
+//Poisson solver in 3D with anisotropic dielectric profiles
+//diel is the N*3 matrix of variations in dielectric tensor elements in direction normal to the surface
+cx_cube poisson_solver_3D(const cx_cube& rho, mat diel, rowvec3 lengths, uword normal_direction);
+
+
 
 //generate a copy of the cube with the elements shifted by N positions along:
 //dim=0: each row

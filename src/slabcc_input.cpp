@@ -4,8 +4,6 @@
 
 #include "slabcc_input.hpp"
 
-extern slabcc_cell model_cell;
-
 void input_data::verify() const {
 	auto log = spdlog::get("loggers");
 	charge_sigma = abs(charge_sigma);
@@ -260,8 +258,8 @@ void input_data::parse(const string& input_file) const {
 	slabcenter = reader.GetVec("slab_center", { 0.5, 0.5, 0.5 });
 	normal_direction = xyz2int(reader.GetStr("normal_direction", "z"));
 	interfaces = reader.GetVec("interfaces", { 0.25, 0.75 });
-	diel_in = reader.GetVec("diel_in", { 1 });
-	diel_out = reader.GetVec("diel_out", { 1 });
+	diel_in = reader.GetVec("diel_in", { 1,1,1 });
+	diel_out = reader.GetVec("diel_out", { 1,1,1 });
 	diel_erf_beta = reader.GetReal("diel_taper", 1);
 	optimize_charge_position = reader.GetBoolean("optimize_charge_position", true);
 	optimize_charge_sigma = reader.GetBoolean("optimize_charge_sigma", true);
@@ -281,5 +279,4 @@ void input_data::parse(const string& input_file) const {
 
 	reader.dump_parsed();
 
-	model_cell.normal_direction = normal_direction;
 }
