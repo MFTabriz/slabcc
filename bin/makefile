@@ -26,13 +26,12 @@ CXX =icpc
 #BLAS_INC_PATH = -I/cluster/OpenBLAS/1f217/intel2016/include/
 #BLAS_LIB_PATH = -L/cluster/OpenBLAS/1f217/intel2016/lib/
 
-#MKLROOT=/cluster/intel/compilers_and_libraries_2016.4.258/linux/mkl
 FFTW_INC_PATH = -I${MKLROOT}/include/fftw
 BLAS_INC_PATH = -I${MKLROOT}/include
 BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
 
 #BLAS_LIB = -lblas -llapack #OpenBLAS
-#BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
+BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
 #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
 
 ##============COMPILER FLAGS=============##
@@ -67,7 +66,7 @@ NLOPT_LIB_FILE = $(NLOPT_PATH)/libnlopt.a
 NLOPT_LIB = -lnlopt
 
 #Add the -DMKL if you are linking against it!
-CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER # -DMKL 
+CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER #-DMKL 
 
 LDLIBS = $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
 LIB_PATHS = $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)
@@ -76,7 +75,7 @@ LIB_PATHS = $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)
 SOURCE_INC_PATHS = -I../src/ -I../src/armadillo/include/ -I../src/inih/cpp/ -I../src/clara/single_include/ -I../src/spline/ -I../src/spdlog/
 CPPFLAGS = $(CPP_DEFS) $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)
 
-SOURCES = general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_core.cpp slabcc_input.cpp slabcc_cell.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
+SOURCES = general_io.cpp arma_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
 OBJECTS = $(patsubst %.c,%.o,$(SOURCES:.cpp=.o))
 EXECUTABLE = slabcc
 

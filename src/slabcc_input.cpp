@@ -4,8 +4,6 @@
 
 #include "slabcc_input.hpp"
 
-extern slabcc_cell model_cell;
-
 void input_data::verify() const {
 	auto log = spdlog::get("loggers");
 	charge_sigma = abs(charge_sigma);
@@ -35,28 +33,21 @@ void input_data::verify() const {
 	if ((min(diel_in) <= 0) || (min(diel_out) <= 0)) {
 		log->debug("Minimum of the dielectric tensor inside the slab: {}", min(diel_in));
 		log->debug("Minimum of the dielectric tensor outside the slab: {}", min(diel_out));
-		log->critical("The dielectric tensor is not defined properly! None of the tensor elements should be negative!");
+		log->critical("The dielectric tensor has not been defined properly! None of the tensor elements should be negative!");
 		exit(1);
 	}
-	if (approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
-		log->debug("Model type: Bulk");
+	if (approx_equal(diel_in, diel_out, "absdiff", 0.02)) { //bulk
 		if (optimize_interface) {
 			log->trace("The position of the interfaces for the bulk models is irrelevant! \"interfaces\" will not be optimized!");
 			optimize_interface = false;
 		}
 	}
-	else {
-		if (model_2D) {
-			log->debug("Model type: 2D");
-		}
-		else {
-			log->debug("Model type: Slab");
-		}
-	}
+	
+
 	if (optimize_charge_position || optimize_charge_sigma || optimize_charge_fraction || optimize_interface) {
 		if ((opt_algo != "BOBYQA") && (opt_algo != "COBYLA") && (opt_algo != "SBPLX")) {
 			log->debug("Optimization algorithm: {}", opt_algo);
-			log->warn("Unsupported optimization algorithm is selected!");
+			log->warn("Unsupported optimization algorithm has been selected!");
 			opt_algo = "BOBYQA";
 			log->warn("{} will be used instead!", opt_algo);
 		}
@@ -97,8 +88,13 @@ void input_data::verify() const {
 			if (trivariate) {
 				log->debug("All the charge_sigma values are properly defined!");
 			}
-			else {
-				log->warn("charge_sigma is not defined properly! charge_sigma={} will be used.", to_string(charge_sigma.col(0)));
+			else {	
+				const mat isotropic_sig = repmat(charge_sigma.col(0), 1, 3);
+				const mat sig_diff = abs(isotropic_sig - charge_sigma);
+				if (any(vectorise(sig_diff) > 0.01)) {
+					charge_sigma = isotropic_sig;
+					log->warn("charge_sigma is not defined properly! charge_sigma={} will be used.", to_string(charge_sigma.col(0)));
+				}		
 			}
 		}
 		else if (sigma_cols == 1) {
@@ -260,8 +256,8 @@ void input_data::parse(const string& input_file) const {
 	slabcenter = reader.GetVec("slab_center", { 0.5, 0.5, 0.5 });
 	normal_direction = xyz2int(reader.GetStr("normal_direction", "z"));
 	interfaces = reader.GetVec("interfaces", { 0.25, 0.75 });
-	diel_in = reader.GetVec("diel_in", { 1 });
-	diel_out = reader.GetVec("diel_out", { 1 });
+	diel_in = reader.GetVec("diel_in", { 1,1,1 });
+	diel_out = reader.GetVec("diel_out", { 1,1,1 });
 	diel_erf_beta = reader.GetReal("diel_taper", 1);
 	optimize_charge_position = reader.GetBoolean("optimize_charge_position", true);
 	optimize_charge_sigma = reader.GetBoolean("optimize_charge_sigma", true);
@@ -281,5 +277,4 @@ void input_data::parse(const string& input_file) const {
 
 	reader.dump_parsed();
 
-	model_cell.normal_direction = normal_direction;
 }

@@ -83,3 +83,8 @@ void write_POSCAR(const supercell& structure, const string& file_name);
 
 //Write planar average of potential and charge to files
 void write_planar_avg(const cube& potential_data, const cube& charge_data, const string& id, const int direction = -1);
+
+
+
+//check conditions and consistency of the supercell grid sizes and the shape
+void check_slabcc_compatiblity(const supercell& Neutral_supercell, const supercell& Charged_supercell);

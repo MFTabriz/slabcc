@@ -205,14 +205,51 @@ double fmod_p(double num, const double& denom) noexcept {
 	return num;
 }
 
-void write_mat2file(const mat& input, const string& output_file) {
-	ofstream out_file;
-	out_file.open(output_file);
-	out_file << fixed << showpos << setprecision(15);
-	input.each_row([&out_file](const rowvec &row) { 
-		row.for_each([&out_file](const double& val) { out_file << val << " "; });
-		out_file << '\n'; 
-	});
-	out_file.close();
-}
 
+
+cx_cube poisson_solver_3D(const cx_cube& rho, mat diel, rowvec3 lengths, uword normal_direction) {
+	auto n_points = SizeVec(rho);
+
+	if (normal_direction != 2) {
+		n_points.swap_cols(normal_direction, 2);
+		lengths.swap_cols(normal_direction, 2);
+		diel.swap_cols(normal_direction, 2);
+	}
+
+	const rowvec Gs = 2.0 * PI / lengths;
+
+	rowvec Gx0 = ceil(regspace<rowvec>(-0.5 * n_points(0), 0.5 * n_points(0) - 1)) * Gs(0);
+	rowvec Gy0 = ceil(regspace<rowvec>(-0.5 * n_points(1), 0.5 * n_points(1) - 1)) * Gs(1);
+	rowvec Gz0 = ceil(regspace<rowvec>(-0.5 * n_points(2), 0.5 * n_points(2) - 1)) * Gs(2);
+
+	Gx0 = ifftshift(Gx0);
+	Gy0 = ifftshift(Gy0);
+	Gz0 = ifftshift(Gz0);
+
+	// 4PI is for the atomic units
+	const auto rhok = fft(cx_cube(4.0 * PI * rho));
+	const cx_mat dielsG = fft(diel);
+	const cx_mat eps11 = circ_toeplitz(dielsG.col(0)) / Gz0.n_elem;
+	const cx_mat eps22 = circ_toeplitz(dielsG.col(1)) / Gz0.n_elem;
+	const cx_mat eps33 = circ_toeplitz(dielsG.col(2)) / Gz0.n_elem;
+	const mat GzGzp = Gz0.t() * Gz0;
+	const cx_mat Az = eps33 % GzGzp;
+	cx_cube Vk(arma::size(rhok));
+
+#pragma omp parallel for firstprivate(Az,eps11,eps22,rhok)
+	for (uword k = 0; k < Gx0.n_elem; ++k) {
+		const cx_mat eps11_Gx0k2 = eps11 * square(Gx0(k));
+		for (uword m = 0; m < Gy0.n_elem; ++m) {
+			vector<span> spans = { span(k), span(m), span() };
+			swap(spans[normal_direction], spans[2]);
+			cx_mat AG = Az + eps11_Gx0k2 + eps22 * square(Gy0(m));
+			if ((k == 0) && (m == 0)) { AG(0, 0) = 1; }
+			Vk(spans[0], spans[1], spans[2]) = solve(AG, vectorise(rhok(spans[0], spans[1], spans[2])));
+		}
+	}
+	// 0,0,0 in k-space corresponds to a constant in the real space: average potential over the supercell.
+	Vk(0, 0, 0) = 0;
+	const cx_cube V = ifft(Vk);
+
+	return V;
+}

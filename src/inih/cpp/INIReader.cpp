@@ -75,7 +75,7 @@ void INIReader::dump_env_info() const {
 	const vector<string> slurm_vars = { "SLURM_JOB_ID", "SLURM_SUBMIT_DIR", "SLURM_NTASKS", "SLURM_JOB_NODELIST" };
 	const vector<string> pbs_vars = { "PBS_JOBID", "PBS_O_WORKDIR", "PBS_NP", "PBS_NODEFILE" };
 
-	if (const char* env_p = getenv(slurm_vars.at(0).c_str())) {
+	if (getenv(slurm_vars.at(0).c_str())) {
 		for (const auto &var : slurm_vars) {
 			if (const char* env_p = getenv(var.c_str())) {
 				log->debug(">> {}={}", var, env_p);
@@ -83,7 +83,7 @@ void INIReader::dump_env_info() const {
 		}
 	}
 
-	if (const char* env_p = getenv(pbs_vars.at(0).c_str())) {
+	if (getenv(pbs_vars.at(0).c_str())) {
 		for (const auto &var : pbs_vars) {
 			if (const char* env_p = getenv(var.c_str())) {
 				log->debug(">> {}={}", var, env_p);

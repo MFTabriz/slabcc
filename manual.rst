@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 31 May 2019
-:version: 0.7.0
+:Last updated: 13 June 2019
+:version: 0.8.0
 
 .. sectnum::
 
@@ -187,7 +187,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_!
+You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_! Bitwise reproducibility of the results is not guaranteed across the different versions.
 
 ============
 Installation
@@ -685,6 +685,7 @@ Known issues and limitations
 ==========================
 Release history highlights
 ==========================
+* 2019-06-13: version 0.8 - OO redesign
 * 2019-05-14: version 0.7 - Added discretization error mitigation
 * 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
 * 2019-03-18: version 0.5 - Added 2D model support

@@ -1,5 +1,5 @@
-:Last updated: 31 May 2019
-:version: 0.7.0
+:Last updated: 13 June 2019
+:version: 0.8.0
 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
@@ -137,7 +137,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_. Bitwise reproducibility of the results are not guaranteed in different versions of the slabcc.
+You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_. Bitwise reproducibility of the results is not guaranteed across the different versions.
 
 ============
 Installation 
@@ -163,7 +163,7 @@ The current version of the slabcc has been validated on:
 - CentOS Linux release 7.6.1810
  - with Intel C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
 - Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
- - with GNU C++ compiler 8.1.0, OpenBLAS 0.2.18, FFTW 3.3.4
+ - with GNU C++ compilers (5.5.0/6.5.0/8.1.0/9.1.0), OpenBLAS 0.2.18, FFTW 3.3.4
 - Microsoft Windows version 10.0.17134
  - with Intel C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
 
@@ -177,6 +177,7 @@ Known issues and limitations
 ==========================
 Release history highlights
 ==========================
+* 2019-06-13: version 0.8 - OO redesign
 * 2019-05-14: version 0.7 - Added discretization error mitigation
 * 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
 * 2019-03-18: version 0.5 - Added 2D model support

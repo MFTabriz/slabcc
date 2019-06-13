@@ -10,6 +10,10 @@
 using namespace std;
 using namespace arma;
 
+
+void write_mat2file(const mat& input, const string& output_file);
+
+
 //single-line output for vec
 template<typename T>
 ostream &operator << (ostream &o, const Row<T> &vec) {
