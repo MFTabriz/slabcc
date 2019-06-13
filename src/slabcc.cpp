@@ -33,12 +33,12 @@ int main(int argc, char *argv[]){
 	string CHGCAR_charged = "";
 	string opt_algo = "";			//optimization algorithm
 	mat charge_position;			//center of each Gaussian model charge
-	rowvec charge_fraction;			//charge of each Gaussian
+	rowvec charge_fraction;			//charge fraction in each Gaussian
 	mat charge_sigma;				//width of each Gaussian model charges
 	mat charge_rotations;			//rotation angles along each axis for the trivariate Gaussians
 	bool charge_trivariate = false; //use trivariate Gaussians
 	rowvec diel_in;					//diagonal elements of slab dielectric tensor
-	rowvec diel_out;				//diagonal elements of vacuum dielectric tensor
+	rowvec diel_out;				//diagonal elements of enviroment dielectric tensor
 	rowvec3 slabcenter;
 	uword normal_direction = 0;		//index of the normal direction (0/1/2)
 	rowvec2 interfaces;				//interfaces in relative coordinates, ordered as the user input 
@@ -51,11 +51,11 @@ int main(int argc, char *argv[]){
 	int extrapol_steps_num = 0;		//number of extrapolation steps for E_isolated calculation
 	double extrapol_steps_size = 0; //size of each extrapolation step with respect to the initial supercell size
 	bool optimize_charge_position = false;	//optimize the charge_position 
-	bool optimize_charge_sigma = false;	//optimize the charge_sigma
-	bool optimize_charge_rotation = false; //optimize the charge_rotation 
+	bool optimize_charge_sigma = false;		//optimize the charge_sigma
+	bool optimize_charge_rotation = false;	//optimize the charge_rotation 
 	bool optimize_charge_fraction = false;	//optimize the charge_fraction
-	bool optimize_interfaces = false;//optimize the position of interfaces
-	bool extrapolate = false;		//use the extrapolation for E-isolated calculations
+	bool optimize_interfaces = false;		//optimize the position of interfaces
+	bool extrapolate = false;	//use the extrapolation for E-isolated calculations
 	bool model_2D = false;		//the model is 2D
 	
 	// parameters read from the input file
@@ -105,9 +105,9 @@ int main(int argc, char *argv[]){
 	check_slabcc_compatiblity(Neutral_supercell, Charged_supercell);
 
 	//cell vectors of the CHGCAR and LOCPOT files (bohr)
-	const mat33 cell_vectors = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
+	const mat33 input_cell_vectors = abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling * ang_to_bohr;
 	const urowvec3 input_grid_size = SizeVec(Neutral_supercell.charge);
-	model.init_supercell(cell_vectors, input_grid_size);
+	model.init_supercell(input_cell_vectors, input_grid_size);
 
 	//(only works in the orthogonal case!)
 	model.cell_volume = prod(model.cell_vectors_lengths);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
 	Charged_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.potential *= -1.0;
-	model.V_ref0 = Defect_supercell.potential;
+	model.V_target0 = Defect_supercell.potential;
 
 	// total extra charge of the VASP calculation
 	model.defect_charge = accu(Defect_supercell.charge) * model.voxel_vol;
@@ -166,10 +166,10 @@ int main(int argc, char *argv[]){
 		const mat charge_position0 = model.charge_position;
 		const rowvec3 optimization_grid_size = opt_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 optimization_grid = { (uword)optimization_grid_size(0), (uword)optimization_grid_size(1), (uword)optimization_grid_size(2) };
-		model.update_supercell(model.cell_vectors, optimization_grid);
-		model.update_Vref();
+		model.change_grid(optimization_grid);
+		model.update_V_target();
 		optimize(opt_algo, opt_tol, max_eval, max_time, model, optimizer_activation_switches);
-		model.update_supercell(cell_vectors, input_grid_size);
+		model.change_grid(input_grid_size);
 
 		//write the unshifted optimized values to the file
 		output_log->info("\n[Optimized_model_parameters]");
@@ -214,6 +214,8 @@ int main(int argc, char *argv[]){
 			log->critical("Optimization failed!");
 			log->critical("Potential error of the initial parameters seems to be smaller than the optimized parameters! "
 							"You may want to change the initial guess for charge_position, change the optimization algorithm, or turn off the optimization.");
+			log->debug("Initial model potential RMSE: {}", model.initial_potential_RMSE);
+			log->debug("Optimized model potential RMSE: {}", model.potential_RMSE);
 			finalize_loggers();
 			exit(1);
 		}
@@ -270,11 +272,11 @@ int main(int argc, char *argv[]){
 	if (is_active(verbosity::write_planarAvg_file)) {
 		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * model.voxel_vol, "N");
 		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * model.voxel_vol, "C");
-		write_planar_avg(model.V_ref0, Defect_supercell.charge * model.voxel_vol, "D");
+		write_planar_avg(model.V_target0, Defect_supercell.charge * model.voxel_vol, "D");
 		write_planar_avg(real(model.V) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M");
 	}
 	else if (is_active(verbosity::write_normal_planarAvg)) {
-		write_planar_avg(model.V_ref0, Defect_supercell.charge * model.voxel_vol, "D", model.normal_direction);
+		write_planar_avg(model.V_target0, Defect_supercell.charge * model.voxel_vol, "D", model.normal_direction);
 		write_planar_avg(real(model.V) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M", model.normal_direction);
 	}
 
@@ -311,13 +313,10 @@ int main(int argc, char *argv[]){
 
 		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
-		model.update_supercell(model.cell_vectors, extrapolation_grid);
-		model.update_Vref();
-
+		model.change_grid(extrapolation_grid);
+		model.update_V_target();
 		model.adjust_extrapolation_params(extrapol_steps_num, extrapol_steps_size, extrapol_grid_x);
 		
-
-
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
 		const rowvec2 interface_pos = model.interfaces * model.cell_vectors_lengths(model.normal_direction);
@@ -329,7 +328,7 @@ int main(int argc, char *argv[]){
 		rowvec Es = zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
 		tie(Es, sizes) = model.extrapolate(extrapol_steps_num, extrapol_steps_size);
 
-		if (model_2D) {
+		if (model.type == model_type::monolayer) {
 			const rowvec3 unit_cell = model.cell_vectors_lengths / max(model.cell_vectors_lengths);
 			const auto radius = 10.0;
 			const auto ewald_shells = generate_shells(unit_cell, radius);
@@ -350,7 +349,7 @@ int main(int argc, char *argv[]){
 			E_isolated = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
 			E_correction = E_isolated - EperModel0 - model.total_charge * dV;
 		}
-		else {
+		else { // bulk and slab models
 			const colvec pols = polyfit(sizes, Es, 1);
 			const colvec evals = polyval(pols, sizes.t());
 			const auto linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;
@@ -378,7 +377,7 @@ int main(int argc, char *argv[]){
 		log->info("E_isolated from extrapolation with {}x{} steps: {}", to_string(extrapol_steps_num), to_string(extrapol_steps_size), ::to_string(E_isolated));
 	}
 	else {
-		if (model_2D) {
+		if (model.type == model_type::monolayer) {
 			E_isolated = model.Eiso_bessel();
 			E_correction = E_isolated - EperModel0 - model.total_charge * dV;
 			log->info("E_isolated from the Bessel expansion of the Poisson equation: {}", ::to_string(E_isolated));

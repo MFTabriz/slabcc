@@ -4,27 +4,9 @@
 
 #include "slabcc_model.hpp"
 
-void slabcc_model::update_supercell(const mat33& new_vectors, const urowvec3& new_grid) {
-	// TODO: check if the change is uniform both in the vector sizes and the grid size
-	const rowvec3 cell_vectors_lengths0 = cell_vectors_lengths;
-	init_supercell(new_vectors, new_grid);
-	interfaces *= cell_vectors_lengths0(normal_direction) / cell_vectors_lengths(normal_direction);
-	charge_position *=cell_vectors_lengths0(normal_direction) / cell_vectors_lengths(normal_direction);
-	
-}
-
-void slabcc_model::init_supercell(const mat33& new_vectors, const urowvec3& new_grid) {
-	cell_vectors = new_vectors;
-	cell_grid = new_grid;
-	for (uword i = 0; i < 3; ++i) {
-		cell_vectors_lengths(i) = norm(cell_vectors.col(i));
-	}
-	voxel_vol = prod(cell_vectors_lengths / cell_grid);
-}
 
 void slabcc_model::set_input_variables(const input_data& inputfile_variables) {
 	normal_direction = inputfile_variables.normal_direction;
-	model_2d = inputfile_variables.model_2D;
 	interfaces = inputfile_variables.interfaces;
 	diel_in = inputfile_variables.diel_in;
 	diel_out = inputfile_variables.diel_out;
@@ -34,7 +16,58 @@ void slabcc_model::set_input_variables(const input_data& inputfile_variables) {
 	charge_rotations = inputfile_variables.charge_rotations;
 	charge_fraction = inputfile_variables.charge_fraction;
 	trivariate_charge = inputfile_variables.trivariate;
+	set_model_type(inputfile_variables.model_2D, diel_in, diel_out);
 };
+
+void slabcc_model::set_model_type(const bool& model_2d, const rowvec& diel_in, const rowvec& diel_out) {
+	if (approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
+		this->type = model_type::bulk;
+	}
+	else if (model_2d) {
+		this->type = model_type::monolayer;
+	}
+	else {
+		this->type = model_type::slab;
+	}
+}
+
+void slabcc_model::init_supercell(const mat33& new_vectors, const urowvec3& new_grid) {
+	cell_vectors = new_vectors;
+	cell_grid = new_grid;
+	update_cell_vectors_lengths();
+	update_voxel_vol();
+}
+
+void slabcc_model::change_grid(const urowvec3& new_cell_grid) {
+	cell_grid = new_cell_grid;
+	update_voxel_vol();
+}
+
+void slabcc_model::change_size(const mat33& new_cell_vectors) {
+	auto log = spdlog::get("loggers");
+	const rowvec3 cell_vectors_lengths0 = cell_vectors_lengths;
+	cell_vectors = new_cell_vectors;
+	update_cell_vectors_lengths();
+	update_voxel_vol();
+
+	interfaces *= cell_vectors_lengths0(normal_direction) / cell_vectors_lengths(normal_direction);
+	charge_position *= cell_vectors_lengths0(normal_direction) / cell_vectors_lengths(normal_direction);
+
+	const rowvec3 scaling = cell_vectors_lengths / cell_vectors_lengths0;
+	if (abs(max(scaling) - min(scaling)) > 0.00001) {
+		log->debug("Model cell scaling is anisotropic!");
+	}
+}
+
+void slabcc_model::update_voxel_vol() {
+	voxel_vol = prod(cell_vectors_lengths / cell_grid);
+}
+
+void slabcc_model::update_cell_vectors_lengths() {
+	for (uword i = 0; i < 3; ++i) {
+		cell_vectors_lengths(i) = norm(cell_vectors.col(i));
+	}
+}
 
 void slabcc_model::dielectric_profiles_gen() {
 	const auto length = cell_vectors_lengths(normal_direction);
@@ -150,7 +183,7 @@ void slabcc_model::gaussian_charges_gen() {
 
 		total_charge = accu(real(CHG)) * voxel_vol;
 	}while(had_discretization_error());
-	update_Vref();
+	update_V_target();
 }
 
 tuple<vector<double>, vector<double>, vector<double>, vector<double>> slabcc_model::data_packer(opt_switches optimize) const {
@@ -341,45 +374,43 @@ bool slabcc_model::had_discretization_error() {
 		}
 		const rowvec3 new_grid_size = 1.2 * conv_to<rowvec>::from(cell_grid);
 		const urowvec3 new_grid = { (uword)new_grid_size(0), (uword)new_grid_size(1), (uword)new_grid_size(2) };
-		update_supercell(cell_vectors, new_grid);
-		log->debug("Grid size was adjusted to: {}", to_string(cell_grid));
+		change_grid(new_grid);
+		log->debug("Model charge grid size was adjusted to: {}", to_string(cell_grid));
 		return true;
 	}
 	return false;
 }
 
-void slabcc_model::update_Vref() {
+void slabcc_model::update_V_target() {
 	auto log = spdlog::get("loggers");
-	if (as_size(cell_grid) != arma::size(V_ref)) {
-		V_ref.set_size(as_size(cell_grid));
-		V_ref.zeros();
-		const rowvec new_grid_x = linspace<rowvec>(1.0, V_ref0.n_rows, cell_grid(0));
-		const rowvec new_grid_y = linspace<rowvec>(1.0, V_ref0.n_cols, cell_grid(1));
-		const rowvec new_grid_z = linspace<rowvec>(1.0, V_ref0.n_slices, cell_grid(2));
+	if (as_size(cell_grid) != arma::size(V_target)) {
+		V_target.set_size(as_size(cell_grid));
+		V_target.zeros();
+		const rowvec new_grid_x = linspace<rowvec>(1.0, V_target0.n_rows, cell_grid(0));
+		const rowvec new_grid_y = linspace<rowvec>(1.0, V_target0.n_cols, cell_grid(1));
+		const rowvec new_grid_z = linspace<rowvec>(1.0, V_target0.n_slices, cell_grid(2));
 
-		V_ref = interp3(V_ref0, new_grid_x, new_grid_y, new_grid_z);
-		V_ref -= accu(V_ref) / V_ref.n_elem;
-		log->debug("New grid size: " + to_string(SizeVec(V_ref)));
+		V_target = interp3(V_target0, new_grid_x, new_grid_y, new_grid_z);
+		V_target -= accu(V_target) / V_target.n_elem;
+		log->debug("New potential grid size: " + to_string(SizeVec(V_target)));
 	}
 }
 
 void slabcc_model::adjust_extrapolation_params(int &extrapol_steps_num, double &extrapol_steps_size, double &extrapol_grid_x) {
 	auto log = spdlog::get("loggers");
 
-	//discretization error flag
-	bool q_error = false;
 	const mat33 cell_vectors0 = cell_vectors;
 	const urowvec3 grid0 = cell_grid;
 
 	//Force discretization error checks
 	for (auto n = extrapol_steps_num - 1; n > 0; --n) {
 		const double extrapol_factor = extrapol_steps_size * n + 1;
-		update_supercell(cell_vectors0 * extrapol_factor, cell_grid);
+		change_size(cell_vectors0 * extrapol_factor);
 		gaussian_charges_gen();
 		//Adjust the parameters
 		if (as_size(grid0)!= as_size(cell_grid)) {
 			string adjusted_parameters = "";
-			if (!model_2d) {
+			if (type!=model_type::monolayer) {
 				if (extrapol_steps_num > 4) {
 					extrapol_steps_num = 4;
 					adjusted_parameters += " extrapolate_steps_number=" + to_string(extrapol_steps_num);
@@ -392,12 +423,12 @@ void slabcc_model::adjust_extrapolation_params(int &extrapol_steps_num, double &
 			log->debug("Adjusted parameters:{}", adjusted_parameters);
 		}
 	}
-	update_supercell(cell_vectors0, grid0);
+	change_size(cell_vectors0);
+	change_grid(grid0);
 }
 
 tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
-	const bool model_bulk = approx_equal(diel_in, diel_out, "absdiff", 0.02);
-	const bool model_slab = !model_2d && !model_bulk ? true : false;
+
 
 	auto log = spdlog::get("loggers");
 	const mat33 cell_vectors0 = cell_vectors;
@@ -408,9 +439,8 @@ tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double 
 	rowvec Es = arma::zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
 	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
 		const double extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
-		update_supercell(cell_vectors0 * extrapol_factor, cell_grid);
-
-		if (model_slab) {
+		change_size(cell_vectors0 * extrapol_factor);
+		if (this->type == model_type::slab) {
 			//increase the slab thickness
 			const uvec interface_sorted_i = sort_index(interfaces);
 			interfaces(interface_sorted_i(1)) = interfaces(interface_sorted_i(0)) + slab_thickness;
@@ -518,8 +548,7 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* mode
 	auto log = spdlog::get("loggers");
 
 	//input data
-	//const auto d = static_cast<opt_data*>(slabcc_data);
-	slabcc_model model = *static_cast<slabcc_model*>(model_ptr);
+	slabcc_model &model = *static_cast<slabcc_model*>(model_ptr);
 	model.data_unpacker(x);
 	rowvec normalized_charge_fraction = model.charge_fraction;
 
@@ -536,13 +565,13 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* mode
 	model.dielectric_profiles_gen();
 
 	model.V = poisson_solver_3D(model.CHG, model.dielectric_profiles, model.cell_vectors_lengths, model.normal_direction);
-	model.V_diff = real(model.V) * Hartree_to_eV - model.V_ref;
+	model.V_diff = real(model.V) * Hartree_to_eV - model.V_target;
 	//bigger output for out-of-bounds input: quadratic penalty
 	const double bounds_correction = bounds_factor + 10 * bounds_factor * bounds_factor;
-	const double potential_RMSE = sqrt(accu(square(model.V_diff)) / model.V_diff.n_elem) + bounds_correction;
+	model.potential_RMSE = sqrt(accu(square(model.V_diff)) / model.V_diff.n_elem) + bounds_correction;
 
 	if (model.initial_potential_RMSE < 0) {
-		model.initial_potential_RMSE = potential_RMSE;
+		model.initial_potential_RMSE = model.potential_RMSE;
 	}
 
 
@@ -573,9 +602,9 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* mode
 	if (bounds_correction > 0) {
 		log->debug("Out of the bounds correction to the RMSE: {}", bounds_correction);
 	}
-	log->debug("Potential Root Mean Square Error: {}", potential_RMSE);
+	log->debug("Potential Root Mean Square Error: {}", model.potential_RMSE);
 
-	return potential_RMSE;
+	return model.potential_RMSE;
 }
 
 void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, slabcc_model& model, const opt_switches& optimize) {
