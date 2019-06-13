@@ -20,14 +20,18 @@ void slabcc_model::set_input_variables(const input_data& inputfile_variables) {
 };
 
 void slabcc_model::set_model_type(const bool& model_2d, const rowvec& diel_in, const rowvec& diel_out) {
+	auto log = spdlog::get("loggers");
 	if (approx_equal(diel_in, diel_out, "absdiff", 0.02)) {
 		this->type = model_type::bulk;
+		log->debug("Model type: Bulk");
 	}
 	else if (model_2d) {
 		this->type = model_type::monolayer;
+		log->debug("Model type: 2D");
 	}
 	else {
 		this->type = model_type::slab;
+		log->debug("Model type: Slab");
 	}
 }
 
@@ -190,7 +194,7 @@ tuple<vector<double>, vector<double>, vector<double>, vector<double>> slabcc_mod
 	auto log = spdlog::get("loggers");
 	//size of the first step for each parameter
 	const double move_step = 1; //Ang
-	const double sigma_step = 0.5;
+	const double sigma_step = 0.2;
 	const double fraction_step = 0.2;
 	const double rotation_step = 0.2; //rad
 	const rowvec3 relative_move_step = move_step * ang_to_bohr / cell_vectors_lengths;
@@ -224,13 +228,12 @@ tuple<vector<double>, vector<double>, vector<double>, vector<double>> slabcc_mod
 		if (optimize.charge_sigma) {
 			if (trivariate_charge) {
 				low_b.insert(low_b.end(), { 0.1, 0.1, 0.1 });
-				upp_b.insert(upp_b.end(), { 7, 7, 7 });
+				upp_b.insert(upp_b.end(), { 6, 6, 6 });
 			}
 			else {
 				low_b.insert(low_b.end(), { 0.1, charge_sigma(i, 1), charge_sigma(i, 2) });
-				upp_b.insert(upp_b.end(), { 7, charge_sigma(i, 1), charge_sigma(i, 2) });
+				upp_b.insert(upp_b.end(), { 6, charge_sigma(i, 1), charge_sigma(i, 2) });
 			}
-
 		}
 		else {
 			low_b.insert(low_b.end(), { charge_sigma(i, 0), charge_sigma(i, 1), charge_sigma(i, 2) });
@@ -363,7 +366,7 @@ void slabcc_model::verify_charge_optimization() const {
 bool slabcc_model::had_discretization_error() {
 	auto log = spdlog::get("loggers");
 	if (abs(defect_charge - total_charge) > 0.00001) {
-		log->debug("The amount of the extra charge in model is not the same as the extra charge in the VASP input files.");
+		log->debug("The amount of the extra charge in the model is not the same as the extra charge in the VASP input files.");
 		log->debug("Model charge error: {}", abs(defect_charge - total_charge));
 		if (charge_sigma.max() > 6) {
 			log->critical("charge_sigma value is too large, the model charge is fairly delocalized and the model supercell cannot contain the whole Gaussian charge and the present charge correction method is not suitable for this cases!");

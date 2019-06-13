@@ -25,7 +25,7 @@ struct cli_params {
 };
 
 //defines the minimum verbosity level for each type of action
-enum class verbosity :int {
+enum class verbosity:int {
 	info = 1,					//spdlog->info()
 	write_normal_planarAvg = 1, //write the planar average of defect and model LOCPOT files
 	debug = 2,					//spdlog->debug()
