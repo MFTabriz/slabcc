@@ -97,6 +97,7 @@ void input_data::verify() const {
 			}
 			else {
 				log->warn("charge_sigma is not defined properly! charge_sigma={} will be used.", to_string(charge_sigma.col(0)));
+				charge_sigma = repmat(charge_sigma.col(0), 1, 3);
 			}
 		}
 		else if (sigma_cols == 1) {

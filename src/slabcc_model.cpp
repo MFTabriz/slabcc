@@ -331,16 +331,18 @@ bool slabcc_model::had_discretization_error() {
 	auto log = spdlog::get("loggers");
 	if (abs(defect_charge - total_charge) > 0.00001) {
 		log->debug("The amount of the extra charge in model is not the same as the extra charge in the VASP input files.");
+		log->debug("Model charge error: {}", abs(defect_charge - total_charge));
 		if (charge_sigma.max() > 6) {
 			log->critical("charge_sigma value is too large, the model charge is fairly delocalized and the model supercell cannot contain the whole Gaussian charge and the present charge correction method is not suitable for this cases!");
 			finalize_loggers();
 			exit(1);
-		}
-		if (charge_sigma.min() < 0.3) {
+		} else if (charge_sigma.min() < 0.3) {
 			log->debug("Possible discretization error was detected!");
-			cell_grid *= 1.2;
-			log->debug("Grid size was adjusted to: {}", to_string(cell_grid));
 		}
+		const rowvec3 new_grid_size = 1.2 * conv_to<rowvec>::from(cell_grid);
+		const urowvec3 new_grid = { (uword)new_grid_size(0), (uword)new_grid_size(1), (uword)new_grid_size(2) };
+		update_supercell(cell_vectors, new_grid);
+		log->debug("Grid size was adjusted to: {}", to_string(cell_grid));
 		return true;
 	}
 	return false;
@@ -369,36 +371,28 @@ void slabcc_model::adjust_extrapolation_params(int &extrapol_steps_num, double &
 	const mat33 cell_vectors0 = cell_vectors;
 	const urowvec3 grid0 = cell_grid;
 
-	//check for the discretization errors
-	do {
-		q_error = false;
-		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(grid0);
-		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0),(uword)extrapolation_grid_size(1),(uword)extrapolation_grid_size(2) };
-		for (auto n = extrapol_steps_num - 1; n > 0; --n) {
-			const double extrapol_factor = extrapol_steps_size * n + 1;
-			update_supercell(cell_vectors0 * extrapol_factor, extrapolation_grid);
-			gaussian_charges_gen();
-			//Adjust the parameters
-			if (abs(defect_charge - total_charge) > 0.00001) {
-				q_error = true;
-				string adjusted_parameters = "";
-				if (!model_2d) {
-					if (extrapol_steps_num > 4) {
-						extrapol_steps_num = 4;
-						adjusted_parameters += " extrapolate_steps_number=" + to_string(extrapol_steps_num);
-					}
-					if (extrapol_steps_size > 0.25) {
-						extrapol_steps_size = 0.25;
-						adjusted_parameters += " extrapolate_steps_size=" + to_string(extrapol_steps_size);
-					}
+	//Force discretization error checks
+	for (auto n = extrapol_steps_num - 1; n > 0; --n) {
+		const double extrapol_factor = extrapol_steps_size * n + 1;
+		update_supercell(cell_vectors0 * extrapol_factor, cell_grid);
+		gaussian_charges_gen();
+		//Adjust the parameters
+		if (as_size(grid0)!= as_size(cell_grid)) {
+			string adjusted_parameters = "";
+			if (!model_2d) {
+				if (extrapol_steps_num > 4) {
+					extrapol_steps_num = 4;
+					adjusted_parameters += " extrapolate_steps_number=" + to_string(extrapol_steps_num);
 				}
-				log->debug("Adjusted parameters:{}", adjusted_parameters);
-				break;
+				if (extrapol_steps_size > 0.25) {
+					extrapol_steps_size = 0.25;
+					adjusted_parameters += " extrapolate_steps_size=" + to_string(extrapol_steps_size);
+				}
 			}
+			log->debug("Adjusted parameters:{}", adjusted_parameters);
 		}
-		update_supercell(cell_vectors0, grid0);
-	} while (q_error);
-
+	}
+	update_supercell(cell_vectors0, grid0);
 }
 
 tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
@@ -520,12 +514,12 @@ rowvec slabcc_model::Uk(rowvec k) const {
 	return Uk;
 }
 
-double potential_error(const vector<double>& x, vector<double>& grad, void* slabcc_data) {
+double potential_error(const vector<double>& x, vector<double>& grad, void* model_ptr) {
 	auto log = spdlog::get("loggers");
 
 	//input data
-	const auto d = static_cast<opt_data*>(slabcc_data);
-	slabcc_model& model = d->model;
+	//const auto d = static_cast<opt_data*>(slabcc_data);
+	slabcc_model model = *static_cast<slabcc_model*>(model_ptr);
 	model.data_unpacker(x);
 	rowvec normalized_charge_fraction = model.charge_fraction;
 
@@ -584,10 +578,9 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* slab
 	return potential_RMSE;
 }
 
-void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, opt_data& opt_data, const opt_switches& optimize) {
+void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, slabcc_model& model, const opt_switches& optimize) {
 
 	auto log = spdlog::get("loggers");
-	slabcc_model& model = opt_data.model;
 	auto opt_algorithm = nlopt::LN_COBYLA;
 	if (opt_algo == "BOBYQA") {
 		opt_algorithm = nlopt::LN_BOBYQA;
@@ -595,13 +588,14 @@ void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval
 	else if (opt_algo == "SBPLX") {
 		opt_algorithm = nlopt::LN_SBPLX;
 	}
-	;	vector<double> opt_param, low_b, upp_b, step_size;
+	
+	vector<double> opt_param, low_b, upp_b, step_size;
 	tie(opt_param, low_b, upp_b, step_size) = model.data_packer(optimize);
 	nlopt::opt opt(opt_algorithm, opt_param.size());
 	opt.set_lower_bounds(low_b);
 	opt.set_upper_bounds(upp_b);
 	opt.set_initial_step(step_size);
-	opt.set_min_objective(potential_error, &opt_data);
+	opt.set_min_objective(potential_error, &model);
 	opt.set_xtol_rel(opt_tol);
 	if (max_eval > 0) {
 		opt.set_maxeval(max_eval);

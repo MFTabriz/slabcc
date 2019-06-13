@@ -149,7 +149,6 @@ int main(int argc, char *argv[]){
 	Charged_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.potential *= -1.0;
-
 	model.V_ref0 = Defect_supercell.potential;
 
 	// total extra charge of the VASP calculation
@@ -167,10 +166,9 @@ int main(int argc, char *argv[]){
 		const mat charge_position0 = model.charge_position;
 		const rowvec3 optimization_grid_size = opt_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 optimization_grid = { (uword)optimization_grid_size(0), (uword)optimization_grid_size(1), (uword)optimization_grid_size(2) };
-		model.cell_grid = optimization_grid;
+		model.update_supercell(model.cell_vectors, optimization_grid);
 		model.update_Vref();
-		opt_data optimizer_data = { model };
-		optimize(opt_algo, opt_tol, max_eval, max_time, optimizer_data, optimizer_activation_switches);
+		optimize(opt_algo, opt_tol, max_eval, max_time, model, optimizer_activation_switches);
 		model.update_supercell(cell_vectors, input_grid_size);
 
 		//write the unshifted optimized values to the file
@@ -186,7 +184,6 @@ int main(int argc, char *argv[]){
 		if (optimize_charge_sigma) {
 			const mat opt_charge_sigma = model.trivariate_charge ? model.charge_sigma : model.charge_sigma.col(0);
 			output_log->info("charge_sigma_optimized = {}", to_string(opt_charge_sigma));
-			// todo: change to read the model_cell directly!
 			model.verify_charge_optimization();
 		
 		}
@@ -221,10 +218,9 @@ int main(int argc, char *argv[]){
 			exit(1);
 		}
 	}
-	opt_data optimizer_data = { model };
 	auto local_param = model.data_packer();
 	vector<double> gradients = {};
-	model.potential_RMSE = potential_error(get<0>(local_param), gradients, &optimizer_data);
+	model.potential_RMSE = potential_error(get<0>(local_param), gradients, &model);
 	const bool bulk_model = approx_equal(diel_in, diel_out, "absdiff", 0.02);
 	const bool isotropic_screening = (abs(diel_in(0) - diel_in(1)) < 0.02) && (abs(diel_in(0) - diel_in(2)) < 0.02);
 
@@ -313,12 +309,14 @@ int main(int argc, char *argv[]){
 	double E_correction = 0;
 	if (extrapolate) {
 
-		model.adjust_extrapolation_params(extrapol_steps_num, extrapol_steps_size, extrapol_grid_x);
-		
 		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
-		model.cell_grid = extrapolation_grid;
+		model.update_supercell(model.cell_vectors, extrapolation_grid);
 		model.update_Vref();
+
+		model.adjust_extrapolation_params(extrapol_steps_num, extrapol_steps_size, extrapol_grid_x);
+		
+
 
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");

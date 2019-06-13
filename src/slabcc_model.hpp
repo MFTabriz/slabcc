@@ -116,21 +116,13 @@ private:
 
 };
 
-
-
-//input data for the optimizer function
-struct opt_data {
-	slabcc_model& model;
-};
-
 // runs the NLOPT with:
 // algorithm: "opt_algo"
 // tolerance for error: "opt_tol"
 // max number of evaluations: "max_eval"
 // reference to the data: "opt_data"
 // reference to the variables to be optimized: "opt_vars"
-void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, opt_data& opt_data, const opt_switches& optimize);
-
+void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, slabcc_model& model, const opt_switches& optimize);
 
 //calculates local: V, V_diff, rhoM (without jellium), diels, Q
 //returns: root mean squared error (RMSE) of the model charge potential 
