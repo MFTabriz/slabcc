@@ -113,9 +113,8 @@ struct slabcc_model {
 	// increases the grid size if there is huge discretization error in the model charge
 	bool had_discretization_error();
 
-	//check for the discretization error and adjust the extrapol_grid_x
-	//for the 2d models extrapol_steps_num and extrapol_steps_size may also be adjusted
-	void adjust_extrapolation_params(int& extrapol_steps_num, double& extrapol_steps_size, double& extrapol_grid_x);
+	// check for the discretization error and adjust the grid_size
+	void check_extrapolation_grid(const int& extrapol_steps_num, const double& extrapol_steps_size, const double& extrapol_grid_x);
 
 private:
 	rowvec Uk(rowvec k) const;

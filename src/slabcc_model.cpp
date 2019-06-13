@@ -378,7 +378,7 @@ bool slabcc_model::had_discretization_error() {
 		const rowvec3 new_grid_size = 1.2 * conv_to<rowvec>::from(cell_grid);
 		const urowvec3 new_grid = { (uword)new_grid_size(0), (uword)new_grid_size(1), (uword)new_grid_size(2) };
 		change_grid(new_grid);
-		log->debug("Model charge grid size was adjusted to: {}", to_string(cell_grid));
+		log->debug("New model charge grid size: {}", to_string(cell_grid));
 		return true;
 	}
 	return false;
@@ -399,39 +399,20 @@ void slabcc_model::update_V_target() {
 	}
 }
 
-void slabcc_model::adjust_extrapolation_params(int &extrapol_steps_num, double &extrapol_steps_size, double &extrapol_grid_x) {
-	auto log = spdlog::get("loggers");
+void slabcc_model::check_extrapolation_grid(const int &extrapol_steps_num, const double &extrapol_steps_size, const double &extrapol_grid_x) {
 
 	const mat33 cell_vectors0 = cell_vectors;
-	const urowvec3 grid0 = cell_grid;
 
 	//Force discretization error checks
 	for (auto n = extrapol_steps_num - 1; n > 0; --n) {
 		const double extrapol_factor = extrapol_steps_size * n + 1;
 		change_size(cell_vectors0 * extrapol_factor);
 		gaussian_charges_gen();
-		//Adjust the parameters
-		if (as_size(grid0)!= as_size(cell_grid)) {
-			string adjusted_parameters = "";
-			if (type!=model_type::monolayer) {
-				if (extrapol_steps_num > 4) {
-					extrapol_steps_num = 4;
-					adjusted_parameters += " extrapolate_steps_number=" + to_string(extrapol_steps_num);
-				}
-				if (extrapol_steps_size > 0.25) {
-					extrapol_steps_size = 0.25;
-					adjusted_parameters += " extrapolate_steps_size=" + to_string(extrapol_steps_size);
-				}
-			}
-			log->debug("Adjusted parameters:{}", adjusted_parameters);
-		}
 	}
 	change_size(cell_vectors0);
-	change_grid(grid0);
 }
 
 tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
-
 
 	auto log = spdlog::get("loggers");
 	const mat33 cell_vectors0 = cell_vectors;

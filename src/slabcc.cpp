@@ -315,7 +315,7 @@ int main(int argc, char *argv[]){
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
 		model.change_grid(extrapolation_grid);
 		model.update_V_target();
-		model.adjust_extrapolation_params(extrapol_steps_num, extrapol_steps_size, extrapol_grid_x);
+		model.check_extrapolation_grid(extrapol_steps_num, extrapol_steps_size, extrapol_grid_x);
 		
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
