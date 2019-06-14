@@ -82,7 +82,6 @@ int main(int argc, char *argv[]){
 
 	vector<pair<string, string>> calculation_results;
 
-
 	//promises for async read of CHGCAR and POTCAR files
 	vector<future<cube>> future_cells;
 
@@ -169,7 +168,6 @@ int main(int argc, char *argv[]){
 		model.change_grid(optimization_grid);
 		model.update_V_target();
 		optimize(opt_algo, opt_tol, max_eval, max_time, model, optimizer_activation_switches);
-		model.change_grid(input_grid_size);
 
 		//write the unshifted optimized values to the file
 		output_log->info("\n[Optimized_model_parameters]");
@@ -220,14 +218,15 @@ int main(int argc, char *argv[]){
 			exit(1);
 		}
 	}
+
+
+
 	auto local_param = model.data_packer();
 	vector<double> gradients = {};
 	model.potential_RMSE = potential_error(get<0>(local_param), gradients, &model);
-	const bool bulk_model = approx_equal(diel_in, diel_out, "absdiff", 0.02);
-	const bool isotropic_screening = (abs(diel_in(0) - diel_in(1)) < 0.02) && (abs(diel_in(0) - diel_in(2)) < 0.02);
-
+	const bool isotropic_screening = accu(abs(diff(diel_in))) < 0.02;
 	if (model.potential_RMSE > 0.1) {
-		if (bulk_model && isotropic_screening) {
+		if (model.type == model_type::bulk && isotropic_screening) {
 			log->debug("RMSE of the model charge potential is large but for the bulk models with an isotropic screening (dielectric tensor) "
 			"this shouldn't make much difference in the total correction energy!");
 		}
@@ -289,7 +288,7 @@ int main(int argc, char *argv[]){
 	calculation_results.emplace_back("dV", ::to_string(dV));
 
 	if (abs(dV) > 0.05) {
-		if (bulk_model && isotropic_screening) {
+		if (model.type == model_type::bulk && isotropic_screening) {
 			log->debug("The potential alignment term (dV) is relatively large. But in the isotropic bulk models "
 			"this should not make much difference in the total energy correction value!");
 		}
@@ -363,9 +362,11 @@ int main(int argc, char *argv[]){
 
 			if (extrapol_error_periodic > 0.05) {
 				log->debug("Extrapolation energy slopes: {}", to_string(slopes));
-				log->critical("The extrapolated energies are not scaling linearly as expected! "
-				"The slab thickness may be too small for this extrapolation algorithm. "
-				"For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file.");
+				log->critical("The extrapolated energies are not scaling linearly as expected!");
+				if (model.type != model_type::bulk) {
+					log->critical("The slab thickness may be too small for this extrapolation algorithm. "
+						"For calculating the charge correction energy for the 2D models use \"2D_model = yes\" in the input file.");
+				}
 				finalize_loggers();
 				exit(1);
 			}

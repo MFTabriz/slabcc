@@ -1,6 +1,7 @@
-:Last updated: 13 June 2019
-:version: 0.8.0
-
+.. |Version| image:: https://img.shields.io/badge/version-0.8-blue.svg
+   :alt: Version 0.8
+.. |Update| image:: https://img.shields.io/badge/Last%20update-14.06.2019-informational.svg
+   :alt: Last update - 14 June 2019 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
@@ -11,7 +12,7 @@
    :alt: Test Set
    :target: https://doi.org/10.5281/zenodo.1419758
 
-|Zenodo| |Travis| |Codacy|
+ |Version| |Update| |Travis| |Codacy| |Zenodo|
 
 .. sectnum::
 
@@ -76,7 +77,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     normal_direction = y
     interfaces = 0.25 0.75
 
- By default the program will also:
+ The program will use the default values for the other parameters to:
 
  - Load the CHGCAR of charged and neutralized systems. 
  - Load the LOCPOT of charged and neutralized systems.  
@@ -119,7 +120,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
-5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α < 0.2) is necessary. A large extrapolation grid size is also required to calculate the energies accurately::
+5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -128,7 +129,6 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     2D_model = yes
     extrapolate = yes
     extrapolate_steps_number = 20
-    extrapolate_grid_x = 4.5
     charge_position = 0.5 0.4 0.56
     interfaces =  0.66 0.46
     normal_direction = z
@@ -158,14 +158,14 @@ Installation
 Validation
 ==========
 We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
-The current version of the slabcc has been validated on:
+The current version of the slabcc has been built/validated on:
 
 - CentOS Linux release 7.6.1810
- - with Intel C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
+ - with Intel C/C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
 - Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
- - with GNU C++ compilers (5.5.0/6.5.0/8.1.0/9.1.0), OpenBLAS 0.2.18, FFTW 3.3.4
+ - with GNU C/C++ compilers (5.5.0/6.5.0/8.1.0/9.1.0), OpenBLAS 0.2.18, FFTW 3.3.4
 - Microsoft Windows version 10.0.17134
- - with Intel C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
+ - with Intel C/C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
 
 ==================================
 Known issues and limitations

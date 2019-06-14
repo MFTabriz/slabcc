@@ -228,11 +228,11 @@ tuple<vector<double>, vector<double>, vector<double>, vector<double>> slabcc_mod
 		if (optimize.charge_sigma) {
 			if (trivariate_charge) {
 				low_b.insert(low_b.end(), { 0.1, 0.1, 0.1 });
-				upp_b.insert(upp_b.end(), { 6, 6, 6 });
+				upp_b.insert(upp_b.end(), { 7, 7, 7 });
 			}
 			else {
 				low_b.insert(low_b.end(), { 0.1, charge_sigma(i, 1), charge_sigma(i, 2) });
-				upp_b.insert(upp_b.end(), { 6, charge_sigma(i, 1), charge_sigma(i, 2) });
+				upp_b.insert(upp_b.end(), { 7, charge_sigma(i, 1), charge_sigma(i, 2) });
 			}
 		}
 		else {
@@ -558,9 +558,8 @@ double potential_error(const vector<double>& x, vector<double>& grad, void* mode
 		model.initial_potential_RMSE = model.potential_RMSE;
 	}
 
-
 	log->debug("-----------------------------------------");
-	if (!approx_equal(model.diel_in, model.diel_out, "absdiff", 0.02)) {
+	if (model.type != model_type::bulk) {
 		const rowvec2 unshifted_interfaces = fmod_p(model.interfaces - model.rounded_relative_shift(model.normal_direction), 1);
 		log->debug(" > interfaces={}", ::to_string(unshifted_interfaces));
 	}
