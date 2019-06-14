@@ -1,7 +1,7 @@
 .. |Version| image:: https://img.shields.io/badge/version-0.8-blue.svg
    :alt: Version 0.8
 .. |Update| image:: https://img.shields.io/badge/Last%20update-14.06.2019-informational.svg
-   :alt: Last update - 14 June 2019 
+   :alt: Last update 14 June 2019 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
@@ -12,7 +12,7 @@
    :alt: Test Set
    :target: https://doi.org/10.5281/zenodo.1419758
 
- |Version| |Update| |Travis| |Codacy| |Zenodo|
+|Version| |Update| |Travis| |Codacy| |Zenodo|
 
 .. sectnum::
 
