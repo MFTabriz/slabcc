@@ -201,7 +201,7 @@ Installation
 3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
 4. **Cleanup:** You can run `make clean` to remove the compiled objects, and static library files. `make distclean` additionally removes all the compiled objects in the external libraries.
 
-**Note**: By default, the code will be compiled for the specific architecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
+**Note**: By default, the code will be compiled for the specific microarchitecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
 
 ==========
 Validation

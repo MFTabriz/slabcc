@@ -388,7 +388,6 @@ void slabcc_model::update_V_target() {
 	auto log = spdlog::get("loggers");
 	if (as_size(cell_grid) != arma::size(V_target)) {
 		V_target.set_size(as_size(cell_grid));
-		V_target.zeros();
 		const rowvec new_grid_x = linspace<rowvec>(1.0, V_target0.n_rows, cell_grid(0));
 		const rowvec new_grid_y = linspace<rowvec>(1.0, V_target0.n_cols, cell_grid(1));
 		const rowvec new_grid_z = linspace<rowvec>(1.0, V_target0.n_slices, cell_grid(2));

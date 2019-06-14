@@ -163,6 +163,7 @@ int main(int argc, char *argv[]){
 	if (optimize_any) {
 		const rowvec2 shifted_interfaces0 = model.interfaces;
 		const mat charge_position0 = model.charge_position;
+		const urowvec3 cell_grid0 = model.cell_grid;
 		const rowvec3 optimization_grid_size = opt_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 optimization_grid = { (uword)optimization_grid_size(0), (uword)optimization_grid_size(1), (uword)optimization_grid_size(2) };
 		model.change_grid(optimization_grid);
@@ -217,9 +218,11 @@ int main(int argc, char *argv[]){
 			finalize_loggers();
 			exit(1);
 		}
+		if (cell_grid0(0) > model.cell_grid(0)) {
+			model.change_grid(cell_grid0);
+			model.update_V_target();
+		}
 	}
-
-
 
 	auto local_param = model.data_packer();
 	vector<double> gradients = {};
