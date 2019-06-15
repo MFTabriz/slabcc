@@ -108,11 +108,7 @@ int main(int argc, char *argv[]){
 	const urowvec3 input_grid_size = SizeVec(Neutral_supercell.charge);
 	model.init_supercell(input_cell_vectors, input_grid_size);
 
-	//(only works in the orthogonal case!)
-	model.cell_volume = prod(model.cell_vectors_lengths);
-
 	const rowvec3 relative_shift = 0.5 - slabcenter;
-
 	model.rounded_relative_shift = round(model.cell_grid % relative_shift) / model.cell_grid;
 
 	model.interfaces = fmod(model.interfaces + model.rounded_relative_shift(normal_direction), 1);
@@ -168,7 +164,7 @@ int main(int argc, char *argv[]){
 		const urowvec3 optimization_grid = { (uword)optimization_grid_size(0), (uword)optimization_grid_size(1), (uword)optimization_grid_size(2) };
 		model.change_grid(optimization_grid);
 		model.update_V_target();
-		optimize(opt_algo, opt_tol, max_eval, max_time, model, optimizer_activation_switches);
+		model.optimize(opt_algo, opt_tol, max_eval, max_time, optimizer_activation_switches);
 
 		//write the unshifted optimized values to the file
 		output_log->info("\n[Optimized_model_parameters]");
@@ -316,9 +312,26 @@ int main(int argc, char *argv[]){
 		const rowvec3 extrapolation_grid_size = extrapol_grid_x * conv_to<rowvec>::from(model.cell_grid);
 		const urowvec3 extrapolation_grid = { (uword)extrapolation_grid_size(0), (uword)extrapolation_grid_size(1), (uword)extrapolation_grid_size(2) };
 		model.change_grid(extrapolation_grid);
-		model.update_V_target();
-		model.check_extrapolation_grid(extrapol_steps_num, extrapol_steps_size, extrapol_grid_x);
-		
+		model.adjust_extrapolation_grid(extrapol_steps_num, extrapol_steps_size);
+		if (as_size(model.cell_grid) != as_size(extrapolation_grid)) { //discretization error has been detected
+			if (model.type != model_type::monolayer) {
+				string adjusted_parameters = "";
+				if (extrapol_steps_num > 4) {
+					extrapol_steps_num = 4;
+					adjusted_parameters += " extrapolate_steps_number=" + to_string(extrapol_steps_num);
+				}
+				if (extrapol_steps_size > 0.25) {
+					extrapol_steps_size = 0.25;
+					adjusted_parameters += " extrapolate_steps_size=" + to_string(extrapol_steps_size);
+				}
+				if (adjusted_parameters != "") {
+					log->debug("Adjusted parameters:{}", adjusted_parameters);
+					model.change_grid(extrapolation_grid);
+					model.adjust_extrapolation_grid(extrapol_steps_num, extrapol_steps_size);
+				}
+			}
+		}
+
 		log->debug("--------------------------------------------------------");
 		log->debug("Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
 		const rowvec2 interface_pos = model.interfaces * model.cell_vectors_lengths(model.normal_direction);

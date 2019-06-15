@@ -23,6 +23,7 @@ enum class model_type :int {
 
 struct slabcc_model {
 
+	bool in_optimization = false;
 	// supercell info
 	rowvec3 cell_vectors_lengths = { 0, 0, 0 };	// length of the basis vectors (Bohr)
 	mat33 cell_vectors = zeros(3, 3);			// supercell vectors (Bohr)
@@ -47,6 +48,7 @@ struct slabcc_model {
 	double total_charge = 0;		// total charge in CHG
 	double defect_charge = 0;		// difference in the charge of the input files
 	bool trivariate_charge = false;
+	double last_charge_error = 0;		// error in the total charge of the model in the last check
 
 	//calculated data
 	double potential_RMSE = 0;
@@ -114,7 +116,19 @@ struct slabcc_model {
 	bool had_discretization_error();
 
 	// check for the discretization error and adjust the grid_size
-	void check_extrapolation_grid(const int& extrapol_steps_num, const double& extrapol_steps_size, const double& extrapol_grid_x);
+	void adjust_extrapolation_grid(const int& extrapol_steps_num, const double& extrapol_steps_size);
+	
+	// runs the NLOPT with:
+	// algorithm: "opt_algo"
+	// tolerance for error: "opt_tol"
+	// max number of evaluations: "max_eval"
+	// reference to the data: "opt_data"
+	// reference to the variables to be optimized: "opt_vars"
+	void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, const opt_switches& optimize);
+
+	//calculates local: V, V_diff, rhoM (without jellium), diels, Q
+	//returns: root mean squared error (RMSE) of the model charge potential 
+	double potential_error(const vector<double>& x, vector<double>& grad);
 
 private:
 	rowvec Uk(rowvec k) const;
@@ -126,14 +140,5 @@ private:
 	void set_model_type(const bool& model_2d, const rowvec& diel_in, const rowvec& diel_out);
 };
 
-// runs the NLOPT with:
-// algorithm: "opt_algo"
-// tolerance for error: "opt_tol"
-// max number of evaluations: "max_eval"
-// reference to the data: "opt_data"
-// reference to the variables to be optimized: "opt_vars"
-void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, slabcc_model& model, const opt_switches& optimize);
-
-//calculates local: V, V_diff, rhoM (without jellium), diels, Q
-//returns: root mean squared error (RMSE) of the model charge potential 
+//NLOPT wrapper for the slabcc_model::potential_error()
 double potential_error(const vector<double>& x, vector<double>& grad, void* slabcc_data);

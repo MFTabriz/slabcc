@@ -71,6 +71,9 @@ void slabcc_model::update_cell_vectors_lengths() {
 	for (uword i = 0; i < 3; ++i) {
 		cell_vectors_lengths(i) = norm(cell_vectors.col(i));
 	}
+
+	//(only works in the orthogonal case!)
+	cell_volume = prod(cell_vectors_lengths);
 }
 
 void slabcc_model::dielectric_profiles_gen() {
@@ -364,24 +367,34 @@ void slabcc_model::verify_charge_optimization() const {
 }
 
 bool slabcc_model::had_discretization_error() {
+	if (in_optimization) return false;
+
 	auto log = spdlog::get("loggers");
-	if (abs(defect_charge - total_charge) > 0.00001) {
-		log->debug("The amount of the extra charge in the model is not the same as the extra charge in the VASP input files.");
-		log->debug("Model charge error: {}", abs(defect_charge - total_charge));
-		if (charge_sigma.max() > 6) {
-			log->critical("charge_sigma value is too large, the model charge is fairly delocalized and the model supercell cannot contain the whole Gaussian charge and the present charge correction method is not suitable for this cases!");
-			finalize_loggers();
-			exit(1);
-		} else if (charge_sigma.min() < 0.3) {
-			log->debug("Possible discretization error was detected!");
-		}
-		const rowvec3 new_grid_size = 1.2 * conv_to<rowvec>::from(cell_grid);
-		const urowvec3 new_grid = { (uword)new_grid_size(0), (uword)new_grid_size(1), (uword)new_grid_size(2) };
-		change_grid(new_grid);
-		log->debug("New model charge grid size: {}", to_string(cell_grid));
-		return true;
+	const double tolerance = 1e-5; //minimum significant discretization error
+	const double new_charge_error = abs(defect_charge - total_charge);
+
+	if ((last_charge_error > tolerance) && (new_charge_error >= last_charge_error)) { 
+		//increasing the grid size is not helping
+		log->critical("Increasing the calculation grid size did not decrease the discretization error. Most probably the model charge is fairly delocalized!");
+		finalize_loggers();
+		exit(1);
 	}
-	return false;
+	else {
+		if (new_charge_error > tolerance) {
+			log->debug("Model charge error: {}", new_charge_error);
+			last_charge_error = new_charge_error;
+			
+			const rowvec3 new_grid_size = 1.2 * conv_to<rowvec>::from(cell_grid);
+			const urowvec3 new_grid = { (uword)new_grid_size(0), (uword)new_grid_size(1), (uword)new_grid_size(2) };
+			change_grid(new_grid);
+			log->debug("New model charge grid size: {}", to_string(cell_grid));
+			return true;
+		}
+		else {
+			last_charge_error = new_charge_error;
+			return false;
+		}
+	}
 }
 
 void slabcc_model::update_V_target() {
@@ -398,10 +411,11 @@ void slabcc_model::update_V_target() {
 	}
 }
 
-void slabcc_model::check_extrapolation_grid(const int &extrapol_steps_num, const double &extrapol_steps_size, const double &extrapol_grid_x) {
-
+void slabcc_model::adjust_extrapolation_grid(const int &extrapol_steps_num, const double &extrapol_steps_size) {
+	auto log = spdlog::get("loggers");
+	log->trace("Checking for the extrapolation grid size");
 	const mat33 cell_vectors0 = cell_vectors;
-
+	
 	//Force discretization error checks
 	for (auto n = extrapol_steps_num - 1; n > 0; --n) {
 		const double extrapol_factor = extrapol_steps_size * n + 1;
@@ -528,70 +542,75 @@ rowvec slabcc_model::Uk(rowvec k) const {
 }
 
 double potential_error(const vector<double>& x, vector<double>& grad, void* model_ptr) {
+	slabcc_model& model = *static_cast<slabcc_model*>(model_ptr);
+	return model.potential_error(x, grad);
+}
+
+double slabcc_model::potential_error(const vector<double>& x, vector<double>& grad) {
 	auto log = spdlog::get("loggers");
 
-	//input data
-	slabcc_model &model = *static_cast<slabcc_model*>(model_ptr);
-	model.data_unpacker(x);
-	rowvec normalized_charge_fraction = model.charge_fraction;
+	data_unpacker(x);
+	rowvec normalized_charge_fraction = charge_fraction;
 
 	//total charge error
 	double bounds_factor = 0;
 
-	if (model.charge_fraction(model.charge_fraction.n_elem - 1) < 0) {
-		bounds_factor = -model.charge_fraction(model.charge_fraction.n_elem - 1);
+	if (charge_fraction(charge_fraction.n_elem - 1) < 0) {
+		bounds_factor = -charge_fraction(charge_fraction.n_elem - 1);
 		normalized_charge_fraction(normalized_charge_fraction.n_elem - 1) = 0;
 		normalized_charge_fraction /= (bounds_factor + 1);
 	}
 
-	model.gaussian_charges_gen();
-	model.dielectric_profiles_gen();
+	gaussian_charges_gen();
+	dielectric_profiles_gen();
 
-	model.V = poisson_solver_3D(model.CHG, model.dielectric_profiles, model.cell_vectors_lengths, model.normal_direction);
-	model.V_diff = real(model.V) * Hartree_to_eV - model.V_target;
+	V = poisson_solver_3D(CHG, dielectric_profiles, cell_vectors_lengths, normal_direction);
+	V_diff = real(V) * Hartree_to_eV - V_target;
 	//bigger output for out-of-bounds input: quadratic penalty
 	const double bounds_correction = bounds_factor + 10 * bounds_factor * bounds_factor;
-	model.potential_RMSE = sqrt(accu(square(model.V_diff)) / model.V_diff.n_elem) + bounds_correction;
+	potential_RMSE = sqrt(accu(square(V_diff)) /V_diff.n_elem) + bounds_correction;
 
-	if (model.initial_potential_RMSE < 0) {
-		model.initial_potential_RMSE = model.potential_RMSE;
+	if (initial_potential_RMSE < 0) {
+		initial_potential_RMSE = potential_RMSE;
 	}
 
 	log->debug("-----------------------------------------");
-	if (model.type != model_type::bulk) {
-		const rowvec2 unshifted_interfaces = fmod_p(model.interfaces - model.rounded_relative_shift(model.normal_direction), 1);
+	if (this->type != model_type::bulk) {
+		const rowvec2 unshifted_interfaces = fmod_p(interfaces - rounded_relative_shift(normal_direction), 1);
 		log->debug(" > interfaces={}", ::to_string(unshifted_interfaces));
 	}
 
-	const mat unshifted_charge_position = fmod_p(model.charge_position - repmat(model.rounded_relative_shift, model.charge_position.n_rows, 1), 1);
+	const mat unshifted_charge_position = fmod_p(charge_position - repmat(rounded_relative_shift, charge_position.n_rows, 1), 1);
 
 	for (uword i = 0; i < normalized_charge_fraction.n_elem; ++i) {
 		log->debug("{}> charge_position={}", i + 1, ::to_string(unshifted_charge_position.row(i)));
-		if (model.trivariate_charge) {
-			log->debug("{}> charge_sigma={}", i + 1, ::to_string(model.charge_sigma.row(i)));
-			if (abs(model.charge_rotations).max() > 0) {
-				const rowvec3 rotation = model.charge_rotations.row(i) * 180.0 / PI;
+		if (trivariate_charge) {
+			log->debug("{}> charge_sigma={}", i + 1, ::to_string(charge_sigma.row(i)));
+			if (abs(charge_rotations).max() > 0) {
+				const rowvec3 rotation = charge_rotations.row(i) * 180.0 / PI;
 				log->debug("{}> charge_rotation={}", i + 1, ::to_string(rotation));
 			}
 		}
 		else {
-			log->debug("{}> charge_sigma={}", i + 1, ::to_string(model.charge_sigma(i, 0)));
+			log->debug("{}> charge_sigma={}", i + 1, ::to_string(charge_sigma(i, 0)));
 		}
-		if (model.charge_fraction.n_elem > 1) {
-			log->debug("{}> charge_fraction={}", i + 1, model.charge_fraction(i));
+		if (charge_fraction.n_elem > 1) {
+			log->debug("{}> charge_fraction={}", i + 1, charge_fraction(i));
 		}
 	}
 	if (bounds_correction > 0) {
 		log->debug("Out of the bounds correction to the RMSE: {}", bounds_correction);
 	}
-	log->debug("Potential Root Mean Square Error: {}", model.potential_RMSE);
+	log->debug("Potential Root Mean Square Error: {}", potential_RMSE);
 
-	return model.potential_RMSE;
+	return potential_RMSE;
 }
 
-void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, slabcc_model& model, const opt_switches& optimize) {
+void slabcc_model::optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, const opt_switches& optimize) {
 
 	auto log = spdlog::get("loggers");
+	in_optimization = true;
+
 	auto opt_algorithm = nlopt::LN_COBYLA;
 	if (opt_algo == "BOBYQA") {
 		opt_algorithm = nlopt::LN_BOBYQA;
@@ -599,14 +618,14 @@ void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval
 	else if (opt_algo == "SBPLX") {
 		opt_algorithm = nlopt::LN_SBPLX;
 	}
-	
+
 	vector<double> opt_param, low_b, upp_b, step_size;
-	tie(opt_param, low_b, upp_b, step_size) = model.data_packer(optimize);
+	tie(opt_param, low_b, upp_b, step_size) = data_packer(optimize);
 	nlopt::opt opt(opt_algorithm, opt_param.size());
 	opt.set_lower_bounds(low_b);
 	opt.set_upper_bounds(upp_b);
 	opt.set_initial_step(step_size);
-	opt.set_min_objective(potential_error, &model);
+	opt.set_min_objective(::potential_error, this);
 	opt.set_xtol_rel(opt_tol);
 	if (max_eval > 0) {
 		opt.set_maxeval(max_eval);
@@ -615,16 +634,16 @@ void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval
 		opt.set_maxtime(60.0 * max_time);
 	}
 
-	const int sigma_per_charge = model.trivariate_charge ? 3 : 1;
+	const int sigma_per_charge = trivariate_charge ? 3 : 1;
 	const int var_per_charge = static_cast<int>(optimize.charge_position) * 3
 		+ static_cast<int>(optimize.charge_rotation) * 3
 		+ static_cast<int>(optimize.charge_sigma) * sigma_per_charge
 		+ static_cast<int>(optimize.charge_fraction) * 1;
-	const uword opt_parameters = model.charge_fraction.n_elem * var_per_charge + 2 * optimize.interfaces;
+	const uword opt_parameters = charge_fraction.n_elem * var_per_charge + 2 * optimize.interfaces;
 	log->trace("Started optimizing {} model parameters", opt_parameters);
 	log->trace("Optimization algorithm: " + string(opt.get_algorithm_name()));
 	try {
-		const nlopt::result nlopt_final_result = opt.optimize(opt_param, model.potential_RMSE);
+		const nlopt::result nlopt_final_result = opt.optimize(opt_param, potential_RMSE);
 		log->debug("-----------------------------------------");
 		if (nlopt_final_result == nlopt::MAXEVAL_REACHED) {
 			log->warn("Optimization ended after {} steps before reaching the requested accuracy!", max_eval);
@@ -638,7 +657,7 @@ void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval
 		log->error("Please start with better initial guess for the input parameters or use a different optimization algorithm.");
 	}
 
-	model.data_unpacker(opt_param);
-
+	data_unpacker(opt_param);
+	in_optimization = false;
 	log->trace("Optimization ended.");
 }
