@@ -2,6 +2,7 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
+
 #include "stdafx.h"
 #include "isolated.hpp"
 #include "vasp.hpp"
@@ -13,7 +14,6 @@ const double ang_to_bohr = 1e-10 / datum::a_0;  //1.88972612546
 const double Hartree_to_eV = datum::R_inf * datum::h * datum::c_0 / datum::eV * 2; //27.2113860193
 
 int main(int argc, char *argv[]){
-
 	slabcc_model model;
 	string input_file = "slabcc.in";
 	string output_file = "slabcc.out";
@@ -21,6 +21,7 @@ int main(int argc, char *argv[]){
 	bool output_diffs_only = false;
 	cli_params parameters_list = { input_file, output_file, log_file, output_diffs_only };
 	parameters_list.parse(argc, argv);
+	prepare_output_file(output_file);
 	initialize_loggers(log_file, output_file);
 	auto log = spdlog::get("loggers");
 	auto output_log = spdlog::get("output");
@@ -88,13 +89,13 @@ int main(int argc, char *argv[]){
 	//promises for async file writing (can be replaced by a deque if the number of files increases)
 	vector<future<void>> future_files;
 
-	future_cells.push_back(async(launch::async, read_CHGPOT, CHGCAR_neutral));
-	future_cells.push_back(async(launch::async, read_CHGPOT, CHGCAR_charged));
-	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_neutral));
-	future_cells.push_back(async(launch::async, read_CHGPOT, LOCPOT_charged));
+	future_cells.push_back(async(launch::async, read_VASP_grid_data, CHGCAR_neutral));
+	future_cells.push_back(async(launch::async, read_VASP_grid_data, CHGCAR_charged));
+	future_cells.push_back(async(launch::async, read_VASP_grid_data, LOCPOT_neutral));
+	future_cells.push_back(async(launch::async, read_VASP_grid_data, LOCPOT_charged));
 
-	supercell Neutral_supercell = read_POSCAR(CHGCAR_neutral);
-	supercell Charged_supercell = read_POSCAR(CHGCAR_charged);
+	supercell Neutral_supercell(CHGCAR_neutral);
+	supercell Charged_supercell(CHGCAR_charged);
 
 	Neutral_supercell.charge = future_cells.at(0).get();
 	Charged_supercell.charge = future_cells.at(1).get();
@@ -114,8 +115,8 @@ int main(int argc, char *argv[]){
 	model.interfaces = fmod(model.interfaces + model.rounded_relative_shift(normal_direction), 1);
 
 	if (!output_diffs_only) {
-		shift_structure(Neutral_supercell, model.rounded_relative_shift);
-		shift_structure(Charged_supercell, model.rounded_relative_shift);
+		Neutral_supercell.shift(model.rounded_relative_shift);
+		Charged_supercell.shift(model.rounded_relative_shift);
 		model.charge_position += repmat(model.rounded_relative_shift, model.charge_position.n_rows, 1);
 		model.charge_position = fmod_p(model.charge_position, 1);
 	}
@@ -127,16 +128,8 @@ int main(int argc, char *argv[]){
 	Defect_supercell.charge = Charged_supercell.charge - Neutral_supercell.charge;
 
 	if (is_active(verbosity::write_defect_file) || output_diffs_only) {
-		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_D.LOCPOT", Defect_supercell));
-		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_D.CHGCAR", Defect_supercell));
-	}
-
-	if (output_diffs_only) {
-		log->debug("Only the extra charge and the potential difference calculation have been requested!");
-		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model.voxel_vol, "D");
-		for (auto &promise : future_files) { promise.get(); }
-		finalize_loggers();
-		exit(0);
+		future_files.push_back(async(launch::async, &supercell::write_LOCPOT, Defect_supercell, "slabcc_D.LOCPOT"));
+		future_files.push_back(async(launch::async, &supercell::write_CHGCAR, Defect_supercell, "slabcc_D.CHGCAR"));
 	}
 
 	//normalize the charges and potentials
@@ -144,7 +137,22 @@ int main(int argc, char *argv[]){
 	Charged_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.charge *= -1.0 / model.cell_volume;
 	Defect_supercell.potential *= -1.0;
-	model.V_target0 = Defect_supercell.potential;
+	model.POT_target_on_input_grid = Defect_supercell.potential;
+
+	if (output_diffs_only) {
+		log->debug("Only the extra charge and the potential difference calculation have been requested!");
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model.voxel_vol, "D", model.cell_vectors_lengths);
+		for (auto& promise : future_files) { promise.get(); }
+		finalize_loggers();
+		exit(0);
+	}
+
+	if (is_active(verbosity::write_planarAvg_file)) {
+		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * model.voxel_vol, "N", model.cell_vectors_lengths);
+		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * model.voxel_vol, "C", model.cell_vectors_lengths);
+		write_planar_avg(Defect_supercell.potential, Defect_supercell.charge * model.voxel_vol, "D", model.cell_vectors_lengths);
+	}
+		
 
 	// total extra charge of the VASP calculation
 	model.defect_charge = accu(Defect_supercell.charge) * model.voxel_vol;
@@ -223,33 +231,8 @@ int main(int argc, char *argv[]){
 	auto local_param = model.data_packer();
 	vector<double> gradients = {};
 	model.potential_RMSE = potential_error(get<0>(local_param), gradients, &model);
-	const bool isotropic_screening = accu(abs(diff(diel_in))) < 0.02;
-	if (model.potential_RMSE > 0.1) {
-		if (model.type == model_type::bulk && isotropic_screening) {
-			log->debug("RMSE of the model charge potential is large but for the bulk models with an isotropic screening (dielectric tensor) "
-			"this shouldn't make much difference in the total correction energy!");
-		}
-		else {
-			log->warn("RMSE of the model charge potential is large. The calculated correction energies may not be accurate!");
-		}
-	}
+	model.check_V_error();
 
-	const auto V_error_x = conv_to<rowvec>::from(planar_average(0, model.V_diff));
-	const auto V_error_y = conv_to<rowvec>::from(planar_average(1, model.V_diff));
-	const auto V_error_z = conv_to<rowvec>::from(planar_average(2, model.V_diff));
-
-	//potential error in each direction
-	rowvec3 V_error_planars = { accu(square(V_error_x)), accu(square(V_error_y)), accu(square(V_error_z)) };
-	V_error_planars = sqrt(V_error_planars/ model.V_diff.n_elem);
-	log->debug("Directional RMSE: " + to_string(V_error_planars));
-	if (max(V_error_planars) / min(V_error_planars) > 10) {
-		log->warn("The potential error is highly anisotropic.");
-		log->warn("If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge "
-			"or the chosen dielectric tensor is not a good representation of the actual tensor! "
-			"This can be fixed by properly optimizing the model parameters, using multiple Gaussian charges, using trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model/method.");
-	}
-
-	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
 	log->debug("Cell dimensions (bohr): " + to_string(model.cell_vectors_lengths));
 	log->debug("Volume (bohr^3): {}", model.cell_volume);
 
@@ -259,33 +242,32 @@ int main(int argc, char *argv[]){
 		//charge is normalized to the VASP CHGCAR convention (rho * Vol)
 		//Also, positive value for the electron charge! (the probability of finding an electron)
 		Model_supercell.charge = -real(model.CHG) * model.voxel_vol * model.CHG.n_elem;
-		Model_supercell.potential = -real(model.V) * Hartree_to_eV;
-		future_files.push_back(async(launch::async, write_CHGPOT, "CHGCAR", "slabcc_M.CHGCAR", Model_supercell));
-		future_files.push_back(async(launch::async, write_CHGPOT, "LOCPOT", "slabcc_M.LOCPOT", Model_supercell));
+		Model_supercell.potential = -real(model.POT) * Hartree_to_eV;
+		future_files.push_back(async(launch::async, &supercell::write_CHGCAR, Model_supercell, "slabcc_M.CHGCAR"));
+		future_files.push_back(async(launch::async, &supercell::write_LOCPOT, Model_supercell, "slabcc_M.LOCPOT"));
 	}
 
 	if (is_active(verbosity::write_dielectric_file)) {
-		write_mat2file(model.dielectric_profiles, "slabcc_DIEL.dat");
+		model.dielectric_profiles.save("slabcc_DIEL.dat", raw_ascii);
 	}
 	if (is_active(verbosity::write_planarAvg_file)) {
-		write_planar_avg(Neutral_supercell.potential, Neutral_supercell.charge * model.voxel_vol, "N");
-		write_planar_avg(Charged_supercell.potential, Charged_supercell.charge * model.voxel_vol, "C");
-		write_planar_avg(model.V_target0, Defect_supercell.charge * model.voxel_vol, "D");
-		write_planar_avg(real(model.V) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M");
+		write_planar_avg(real(model.POT) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M", model.cell_vectors_lengths);
 	}
 	else if (is_active(verbosity::write_normal_planarAvg)) {
-		write_planar_avg(model.V_target0, Defect_supercell.charge * model.voxel_vol, "D", model.normal_direction);
-		write_planar_avg(real(model.V) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M", model.normal_direction);
+		write_planar_avg(real(model.POT) * Hartree_to_eV, real(model.CHG) * model.voxel_vol, "M", model.cell_vectors_lengths, model.normal_direction);
 	}
+	
+	model.verify_CHG(Defect_supercell.charge);
 
 	//add jellium to the charge (Because the V is normalized, it is not needed in solving the Poisson eq. but it is needed in the energy calculations)
 	model.CHG -= model.total_charge / model.cell_volume;
-	const uword farthest_element_index = model.total_charge < 0 ? real(model.V).index_max() : real(model.V).index_min();
 
-	const auto dV = model.V_diff(farthest_element_index);
+	const uword farthest_element_index = model.total_charge < 0 ? real(model.POT).index_max() : real(model.POT).index_min();
+
+	const auto dV = model.POT_diff(farthest_element_index);
 	log->info("Potential alignment (dV=): {}", ::to_string(dV));
 	calculation_results.emplace_back("dV", ::to_string(dV));
-
+	const bool isotropic_screening = accu(abs(diff(diel_in))) < 0.02;
 	if (abs(dV) > 0.05) {
 		if (model.type == model_type::bulk && isotropic_screening) {
 			log->debug("The potential alignment term (dV) is relatively large. But in the isotropic bulk models "
@@ -298,7 +280,7 @@ int main(int argc, char *argv[]){
 
 	log->debug("Calculation grid point for the potential alignment term: {}", to_string(ind2sub(as_size(model.cell_grid), farthest_element_index)));
 
-	const double EperModel0 = 0.5 * accu(real(model.V) % real(model.CHG)) * model.voxel_vol * Hartree_to_eV;
+	const double EperModel0 = 0.5 * accu(real(model.POT) % real(model.CHG)) * model.voxel_vol * Hartree_to_eV;
 	log->info("E_periodic of the model charge: {}", ::to_string(EperModel0));
 	calculation_results.emplace_back("E_periodic of the model charge", ::to_string(EperModel0));
 

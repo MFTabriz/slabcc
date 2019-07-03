@@ -1076,10 +1076,10 @@ span.boxed, span.framebox {
 <col class="field-body" />
 <tbody valign="top">
 <tr class="last-updated field">
-<th class="docinfo-name">Last updated:</th><td class="field-body">15 June 2019</td>
+<th class="docinfo-name">Last updated:</th><td class="field-body">04 July 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.8.1</td></tr>
+<td>0.8.2</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1330,7 +1330,7 @@ CHGCAR_charged = CHARGED_CHGCAR
 CHGCAR_neutral = UNCHARGED_CHGCAR
 2D_model = yes
 charge_position = 0.5 0.4 0.56
-interfaces =  0.66 0.46
+interfaces = 0.66 0.46
 normal_direction = z
 diel_in = 6.28 6.28 1.83
 diel_out = 1
@@ -1348,7 +1348,7 @@ CHGCAR_neutral = UNCHARGED_CHGCAR
 extrapolate = yes
 extrapolate_steps_number = 20
 charge_position = 0.5 0.4 0.56
-interfaces =  0.66 0.46
+interfaces = 0.66 0.46
 normal_direction = z
 diel_in = 6.28 6.28 1.83
 </pre>
@@ -1368,7 +1368,7 @@ diel_in = 6.28 6.28 1.83
 <blockquote>
 <ol class="arabic simple">
 <li><strong>Compiler:</strong> You need a C++ compiler with C++14 standard support (e.g. <a class="reference external" href="https://gcc.gnu.org/">g++</a> 5.0 or later, <a class="reference external" href="https://software.intel.com/en-us/c-compilers">icpc</a> 15.0 or later, etc.)</li>
-<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md">Armadillo documentations</a> for linking to the other BLAS replacements.</li>
+<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/blob/9.500.x/README.md">Armadillo documentations</a> for linking to the other BLAS replacements.</li>
 <li><strong>FFTW:</strong> If you don't have FFTW installed on your system follow the guide on the <a class="reference external" href="http://www.fftw.org/download.html">FFTW website</a>. Alternatively, you can use the FFTW interface of the MKL.</li>
 </ol>
 </blockquote>
@@ -1389,7 +1389,7 @@ The current version of the slabcc has been built/validated on:</p>
 </ul>
 <blockquote>
 <ul class="simple">
-<li>with Intel C/C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)</li>
+<li>with Intel C/C++ compilers 18.0.3, MKL 18.0.3, FFTW (from MKL)</li>
 </ul>
 </blockquote>
 <ul class="simple">
@@ -1405,7 +1405,8 @@ The current version of the slabcc has been built/validated on:</p>
 </ul>
 <blockquote>
 <ul class="simple">
-<li>with Intel C/C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5</li>
+<li>with Intel C/C++ compilers 19.0.4, MKL 19.0.4, FFTW 3.3.5</li>
+<li>with Microsoft C/C++ compilers 19.20.27508, MKL 19.0.4, FFTW 3.3.5</li>
 </ul>
 </blockquote>
 </div>
@@ -1570,12 +1571,14 @@ of the extrapolation may not be accurate!</p>
 <tr><td><tt class="docutils literal">extrapolate_steps_number</tt></td>
 <td>Number of the extrapolation steps in calculation of
 E<sub>isolated</sub> <a class="footnote-reference" href="#id6" id="id2">[1]</a></td>
-<td>4</td>
+<td><p class="first">10: for 2D models</p>
+<p class="last">4: for the rest</p></td>
 </tr>
 <tr><td><tt class="docutils literal">extrapolate_steps_size</tt></td>
 <td>Size of extrapolation steps with respect to the initial
 supercell size</td>
-<td>0.5</td>
+<td><p class="first">1: for 2D models</p>
+<p class="last">0.5: for the rest</p></td>
 </tr>
 <tr><td><tt class="docutils literal">interfaces</tt></td>
 <td><p class="first">Interfaces of the slab in normal direction</p>
@@ -1794,7 +1797,7 @@ slab_center = 0.5 0.5 0.25
 verbosity = 5
 
 [Optimized_model_parameters]
-interfaces_optimized =  0.942000748357 0.455672787711
+interfaces_optimized = 0.942000748357 0.455672787711
 charge_sigma_optimized = 1.4132676877
 charge_position_optimized = 0.501460639345 0.50145532106 0.385476689493;
 
@@ -1804,7 +1807,7 @@ E_periodic of the model charge = 2.0404453156
 E_isolated of the model charge = 2.59716677886
 Energy correction for the model charge (E_iso-E_per-q*dV) = 0.559635314929
 </pre>
-<p>Planar average files are written as a single column in plain text format and named as: &quot;slabcc_{1}{2}{XXX}.dat&quot; where:</p>
+<p>Planar average files are written as the double column in plain text format. The first column represents the coordinates along the axis (in Angstrom) and the second column is the planar average value. The files are named as: &quot;slabcc_{1}{2}{XXX}.dat&quot; where:</p>
 <ul class="simple">
 <li>{1}: <strong>N</strong>: Neutral system, <strong>C</strong>: Charged system, <strong>D</strong>: Difference</li>
 <li>{2}: <strong>X</strong>/<strong>Y</strong>/<strong>Z</strong>: Corresponds to the 1st, 2nd, and the 3rd axis in the input files</li>

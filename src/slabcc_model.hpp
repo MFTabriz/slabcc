@@ -1,6 +1,7 @@
 #pragma once
 #include "slabcc_math.hpp"
 #include "slabcc_input.hpp"
+#include "vasp.hpp"
 
 extern const double Hartree_to_eV;
 extern const double ang_to_bohr;
@@ -56,15 +57,17 @@ struct slabcc_model {
 	cx_cube CHG; // model charge distribution (e/bohr^3), negative for presence of the electron 
 
 	//potential resulted from the model charge (Hartree)
-	cx_cube V;
+	cx_cube POT;
 
-	//difference of the potential resulted from the model charge (V) and the target potential from QM calculations (V_target)  (eV)
-	cube V_diff;
+	//difference of the potential resulted from the model charge (POT) and the target potential from QM calculations (POT_target)  (eV)
+	cube POT_diff;
+
+	//reference target of the extra charge with the adjusted grid size (eV)
+	cube POT_target;
 
 	//original target potential of the extra charge in the input files (eV)
-	cube V_target0;
-	//reference target of the extra charge with the adjusted grid size (eV)
-	cube V_target;
+	cube POT_target_on_input_grid;
+
 	
 	mat dielectric_profiles;
 
@@ -78,7 +81,7 @@ struct slabcc_model {
 	// update "interfaces", "charge_position", "cell_vectors_lengths", and "voxel_vol"
 	void change_size(const mat33& new_cell_vectors);
 
-	//updates the V_target from the V_target0 to the model grid size
+	//updates the POT_target from the POT_target_on_input_grid to the model grid size
 	void update_V_target();
 
 	// must be checked before!
@@ -97,11 +100,13 @@ struct slabcc_model {
 
 	//pack the optimization variable structure and their lower and upper boundaries into std::vector<double> for NLOPT
 	//returned vectors are "optimization parameters", "lower boundaries", "upper boundaries"
-	//TODO: to keep the compatibility with MSVC, the default values must be replaced with std::optional in the C++17 standard version of slabcc
-	tuple<vector<double>, vector<double>, vector<double>, vector<double>> data_packer(opt_switches optimize = { false,false,false,false,false }) const;
+	tuple<vector<double>, vector<double>, vector<double>, vector<double>> data_packer(opt_switches optimize = opt_switches{ false,false,false,false,false }) const;
 
 	//writes the parameters from the optimization variable structure into the model
 	void data_unpacker(const vector<double>& optimizer_vars_vec);
+
+	//checks the amount of the charge between the interfaces for the model and compares it to the input files
+	void verify_CHG(const cube& defect_charge);
 
 	//calculate the changes in the interface positions and warn the user if the changes are too big
 	void verify_interface_optimization(const rowvec2& initial_interfaces) const;
@@ -126,9 +131,12 @@ struct slabcc_model {
 	// reference to the variables to be optimized: "opt_vars"
 	void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, const opt_switches& optimize);
 
-	//calculates local: V, V_diff, rhoM (without jellium), diels, Q
+	//calculates local: V, POT_diff, rhoM (without jellium), diels, Q
 	//returns: root mean squared error (RMSE) of the model charge potential 
 	double potential_error(const vector<double>& x, vector<double>& grad);
+
+	//checks the potential_RMSE and its directional values
+	void check_V_error();
 
 private:
 	rowvec Uk(rowvec k) const;

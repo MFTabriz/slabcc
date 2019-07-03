@@ -272,8 +272,8 @@ void input_data::parse(const string& input_file) const {
 	opt_grid_x = reader.GetReal("optimize_grid_x", 0.8);
 	extrapolate = reader.GetBoolean("extrapolate", model_2D ? false : true);
 	extrapol_grid_x = reader.GetReal("extrapolate_grid_x", 1);
-	extrapol_steps_num = reader.GetInteger("extrapolate_steps_number", 4);
-	extrapol_steps_size = reader.GetReal("extrapolate_steps_size", 0.5);
+	extrapol_steps_num = reader.GetInteger("extrapolate_steps_number", model_2D ? 10 : 4);
+	extrapol_steps_size = reader.GetReal("extrapolate_steps_size", model_2D ? 1 : 0.5);
 
 	reader.dump_parsed();
 

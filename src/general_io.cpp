@@ -102,18 +102,6 @@ void cli_params::parse(int argc, char *argv[]) {
 	}
 }
 
-void write_vec2file(const vector<double>& input, const string& output_file) {
-	ofstream out_file;
-	auto log = spdlog::get("loggers");
-	log->trace("Started writing " + output_file);
-
-	out_file.open(output_file);
-	out_file << fixed << showpos << setprecision(15);
-	for (const auto& i : input) { out_file << i << '\n'; }
-	out_file.close();
-
-}
-
 unsigned int xyz2int(const string& s) {
 	const char dir_char = tolower(s.at(0));
 	const unordered_map<char, unsigned int> dir_map{
@@ -139,6 +127,29 @@ string tolower(string in_str) noexcept {
 	return in_str;
 }
 
+void prepare_output_file(string& output_file) {
+	if (file_exists(output_file)) {
+		int counter = 1;
+		string backup_name = output_file + ".old" + to_string(counter);
+
+		while (file_exists(backup_name)) {
+			counter++;
+			backup_name = output_file + ".old" + to_string(counter);
+		}
+
+		if (rename(output_file.c_str(), backup_name.c_str())) {
+			//if we don't have the permission to rename the existing file
+			counter = 1;
+			string new_name= output_file + ".new" + to_string(counter);
+			while (file_exists(new_name)) {
+				counter++;
+				new_name = output_file + ".new" + to_string(counter);
+			}
+			output_file = new_name;
+		}
+	}
+}
+
 void initialize_loggers(const string& log_file, const string& output_file) {
 
 	const string tmp_file = "slabcc.tmp";
@@ -152,17 +163,6 @@ void initialize_loggers(const string& log_file, const string& output_file) {
 	combined_logger->set_pattern("%v");
 	combined_logger->set_level(spdlog::level::info);
 	spdlog::register_logger(combined_logger);
-
-	if (file_exists(output_file)) {
-		int counter = 1;
-		string backup_name = output_file + ".old" + to_string(counter);
-
-		while (file_exists(backup_name)) {
-			counter++;
-			backup_name = output_file + ".old" + to_string(counter);
-		}
-		rename(output_file.c_str() , backup_name.c_str());
-	}
 
 	auto output_logger = spdlog::basic_logger_mt("output", output_file);
 	output_logger->set_pattern("%v");

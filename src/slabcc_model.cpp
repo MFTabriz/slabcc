@@ -361,6 +361,7 @@ void slabcc_model::verify_charge_optimization() const {
 		if (abs(total_charge) * charge_fraction(i) > min_non_negligable_q) {
 			if (charge_sigma.row(i).max() > max_sigma) {
 				log->error("The model extra charge seems to be (at least partially) delocalized. The current charge correction method is not suitable for the delocalized charges.");
+				break;
 			}
 		}
 	}
@@ -370,21 +371,28 @@ bool slabcc_model::had_discretization_error() {
 	if (in_optimization) return false;
 
 	auto log = spdlog::get("loggers");
-	const double tolerance = 1e-5; //minimum significant discretization error
+	const double tolerance = 1e-4; //minimum significant discretization error
 	const double new_charge_error = abs(defect_charge - total_charge);
-
-	if ((last_charge_error > tolerance) && (new_charge_error >= last_charge_error)) { 
+	if ((last_charge_error > tolerance) && (new_charge_error > last_charge_error)) { 
 		//increasing the grid size is not helping
+		log->debug("Model charge error on the new grid size: {}", new_charge_error);
 		log->critical("Increasing the calculation grid size did not decrease the discretization error. Most probably the model charge is fairly delocalized!");
+
+		if (is_active(verbosity::write_planarAvg_file)) {
+			write_planar_avg(real(POT) * Hartree_to_eV, real(CHG) * voxel_vol, "M",  cell_vectors_lengths);
+		}
+		else if (is_active(verbosity::write_normal_planarAvg)) {
+			write_planar_avg(real(POT) * Hartree_to_eV, real(CHG) * voxel_vol, "M", cell_vectors_lengths, normal_direction);
+		}
+
 		finalize_loggers();
 		exit(1);
 	}
 	else {
 		if (new_charge_error > tolerance) {
-			log->debug("Model charge error: {}", new_charge_error);
+			log->debug("Model charge error on the former grid size: {}", new_charge_error);
 			last_charge_error = new_charge_error;
-			
-			const rowvec3 new_grid_size = 1.2 * conv_to<rowvec>::from(cell_grid);
+			const rowvec3 new_grid_size = 1.5 * conv_to<rowvec>::from(cell_grid);
 			const urowvec3 new_grid = { (uword)new_grid_size(0), (uword)new_grid_size(1), (uword)new_grid_size(2) };
 			change_grid(new_grid);
 			log->debug("New model charge grid size: {}", to_string(cell_grid));
@@ -399,30 +407,33 @@ bool slabcc_model::had_discretization_error() {
 
 void slabcc_model::update_V_target() {
 	auto log = spdlog::get("loggers");
-	if (as_size(cell_grid) != arma::size(V_target)) {
-		V_target.set_size(as_size(cell_grid));
-		const rowvec new_grid_x = linspace<rowvec>(1.0, V_target0.n_rows, cell_grid(0));
-		const rowvec new_grid_y = linspace<rowvec>(1.0, V_target0.n_cols, cell_grid(1));
-		const rowvec new_grid_z = linspace<rowvec>(1.0, V_target0.n_slices, cell_grid(2));
+	if (as_size(cell_grid) != arma::size(POT_target)) {
+		POT_target.set_size(as_size(cell_grid));
+		const rowvec new_grid_x = linspace<rowvec>(1.0, POT_target_on_input_grid.n_rows, cell_grid(0));
+		const rowvec new_grid_y = linspace<rowvec>(1.0, POT_target_on_input_grid.n_cols, cell_grid(1));
+		const rowvec new_grid_z = linspace<rowvec>(1.0, POT_target_on_input_grid.n_slices, cell_grid(2));
 
-		V_target = interp3(V_target0, new_grid_x, new_grid_y, new_grid_z);
-		V_target -= accu(V_target) / V_target.n_elem;
-		log->debug("New potential grid size: " + to_string(SizeVec(V_target)));
+		POT_target = interp3(POT_target_on_input_grid, new_grid_x, new_grid_y, new_grid_z);
+		POT_target -= accu(POT_target) / POT_target.n_elem;
+		log->debug("New potential grid size: " + to_string(SizeVec(POT_target)));
 	}
 }
 
 void slabcc_model::adjust_extrapolation_grid(const int &extrapol_steps_num, const double &extrapol_steps_size) {
+
 	auto log = spdlog::get("loggers");
-	log->trace("Checking for the extrapolation grid size");
+	log->trace("Checking the extrapolation grid size");
 	const mat33 cell_vectors0 = cell_vectors;
+	const double old_total_charge = total_charge;
 	
 	//Force discretization error checks
-	for (auto n = extrapol_steps_num - 1; n > 0; --n) {
-		const double extrapol_factor = extrapol_steps_size * n + 1;
+	for (auto step = extrapol_steps_num - 1; step > 0; --step) {
+		const double extrapol_factor = extrapol_steps_size * step + 1;
 		change_size(cell_vectors0 * extrapol_factor);
 		gaussian_charges_gen();
 	}
 	change_size(cell_vectors0);
+	total_charge = old_total_charge;
 }
 
 tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
@@ -564,11 +575,11 @@ double slabcc_model::potential_error(const vector<double>& x, vector<double>& gr
 	gaussian_charges_gen();
 	dielectric_profiles_gen();
 
-	V = poisson_solver_3D(CHG, dielectric_profiles, cell_vectors_lengths, normal_direction);
-	V_diff = real(V) * Hartree_to_eV - V_target;
+	POT = poisson_solver_3D(CHG, dielectric_profiles, cell_vectors_lengths, normal_direction);
+	POT_diff = real(POT) * Hartree_to_eV - POT_target;
 	//bigger output for out-of-bounds input: quadratic penalty
 	const double bounds_correction = bounds_factor + 10 * bounds_factor * bounds_factor;
-	potential_RMSE = sqrt(accu(square(V_diff)) /V_diff.n_elem) + bounds_correction;
+	potential_RMSE = sqrt(accu(square(POT_diff)) /POT_diff.n_elem) + bounds_correction;
 
 	if (initial_potential_RMSE < 0) {
 		initial_potential_RMSE = potential_RMSE;
@@ -660,4 +671,64 @@ void slabcc_model::optimize(const string& opt_algo, const double& opt_tol, const
 	data_unpacker(opt_param);
 	in_optimization = false;
 	log->trace("Optimization ended.");
+}
+
+void slabcc_model::check_V_error() {
+	auto log = spdlog::get("loggers");
+
+	const bool isotropic_screening = accu(abs(diff(diel_in))) < 0.02;
+	if (potential_RMSE > 0.1) {
+		if (type == model_type::bulk && isotropic_screening) {
+			log->debug("RMSE of the model charge potential is large but for the bulk models with an isotropic screening (dielectric tensor) "
+				"this shouldn't make much difference in the total correction energy!");
+		}
+		else {
+			log->warn("RMSE of the model charge potential is large. The calculated correction energies may not be accurate!");
+		}
+	}
+
+	const auto V_error_x = conv_to<rowvec>::from(planar_average(0, POT_diff));
+	const auto V_error_y = conv_to<rowvec>::from(planar_average(1, POT_diff));
+	const auto V_error_z = conv_to<rowvec>::from(planar_average(2, POT_diff));
+
+	//potential error in each direction
+	rowvec3 V_error_planars = { accu(square(V_error_x)), accu(square(V_error_y)), accu(square(V_error_z)) };
+	V_error_planars = sqrt(V_error_planars / POT_diff.n_elem);
+	log->debug("Directional RMSE: " + to_string(V_error_planars));
+	if (max(V_error_planars) / min(V_error_planars) > 10) {
+		log->warn("The potential error is highly anisotropic.");
+		log->warn("If the potential error is large, this usually means that either the extra charge is not properly described by the model Gaussian charge "
+			"or the chosen dielectric tensor is not a good representation of the actual tensor! "
+			"This can be fixed by properly optimizing the model parameters, using multiple Gaussian charges, using trivaritate Gaussians, or using the dielectric tensor calculated for the same VASP model/method.");
+	}
+
+	log->debug("Potential error anisotropy: {}", max(V_error_planars) / min(V_error_planars));
+}
+
+void slabcc_model::verify_CHG(const cube& defect_charge) {
+	auto log = spdlog::get("loggers");
+
+	if (this->type != model_type::bulk) {
+
+		//find the index of the interfaces
+
+		rowvec2 interfaces_index = cell_grid(normal_direction) * interfaces;
+		urowvec2 interfaces_grid_i = { (uword)interfaces_index(0), (uword)interfaces_index(1)};
+		interfaces_grid_i = sort(interfaces_grid_i);
+		vector<span> spans = { span(), span(), span(interfaces_grid_i(0),interfaces_grid_i(1)) };
+		swap(spans[normal_direction], spans[2]);
+		const double model_total = accu(real(CHG)) * voxel_vol;
+		const double model_in = accu(real(CHG(spans[0], spans[1], spans[2]))) * voxel_vol;
+		const double model_out = model_total - model_in;
+
+		const double defect_total = accu(defect_charge) * voxel_vol;
+		const double defect_in = accu(defect_charge(spans[0], spans[1], spans[2])) * voxel_vol;
+		const double defect_out = defect_total - defect_in;
+
+		//these two do NOT need to closely agree with each other!
+		log->debug("Total charge of the model slab (inside, outside): {}, {}", model_in, model_out);
+		log->debug("Total charge of the defect slab (inside, outside): {}, {}", defect_in, defect_out);
+
+
+	}
 }

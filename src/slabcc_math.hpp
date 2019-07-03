@@ -38,9 +38,9 @@ tuple<cube, cube, cube> meshgrid(const rowvec& v1, const rowvec& v2, const rowve
 //shifts a cube by a relative 3D vector [0 1]
 cube shift(cube cube_in, rowvec3 shifts);
 
-//Planar average of a cube in defined direction
+//Planar average of a cube in the defined direction
 //direction: 0,1,2 > x,y,z
-vector<double> planar_average(const uword& direction, const cube& cube_in);
+vec planar_average(const uword& direction, const cube& cube_in);
 
 
 //1D FFT of complex data.

@@ -1,7 +1,7 @@
-.. |Version| image:: https://img.shields.io/badge/version-0.8.1-blue.svg
-   :alt: Version 0.8.1
-.. |Update| image:: https://img.shields.io/badge/Last%20update-15.06.2019-informational.svg
-   :alt: Last update 15 June 2019 
+.. |Version| image:: https://img.shields.io/badge/version-0.8.2-blue.svg
+   :alt: Version 0.8.2
+.. |Update| image:: https://img.shields.io/badge/Last%20update-04.07.2019-informational.svg
+   :alt: Last update 04 July 2019 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
@@ -115,7 +115,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     CHGCAR_neutral = UNCHARGED_CHGCAR
     2D_model = yes
     charge_position = 0.5 0.4 0.56
-    interfaces =  0.66 0.46
+    interfaces = 0.66 0.46
     normal_direction = z
     diel_in = 6.28 6.28 1.83
     diel_out = 1
@@ -130,7 +130,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     extrapolate = yes
     extrapolate_steps_number = 20
     charge_position = 0.5 0.4 0.56
-    interfaces =  0.66 0.46
+    interfaces = 0.66 0.46
     normal_direction = z
     diel_in = 6.28 6.28 1.83
 
@@ -145,7 +145,7 @@ Installation
 1. **Prerequisites:**
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.500.x/README.md>`_ for linking to the other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
@@ -161,11 +161,12 @@ We are trying to keep the slabcc compatible with as many compilers as possible b
 The current version of the slabcc has been built/validated on:
 
 - CentOS Linux release 7.6.1810
- - with Intel C/C++ compiler 18.0.3, MKL 18.0.3, FFTW (from MKL)
+ - with Intel C/C++ compilers 18.0.3, MKL 18.0.3, FFTW (from MKL)
 - Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
  - with GNU C/C++ compilers (5.5.0/6.5.0/8.1.0/9.1.0), OpenBLAS 0.2.18, FFTW 3.3.4
 - Microsoft Windows version 10.0.17134
- - with Intel C/C++ compiler 19.0.4, MKL 19.0.4, FFTW 3.3.5
+ - with Intel C/C++ compilers 19.0.4, MKL 19.0.4, FFTW 3.3.5
+ - with Microsoft C/C++ compilers 19.20.27508, MKL 19.0.4, FFTW 3.3.5
 
 ==================================
 Known issues and limitations

@@ -36,9 +36,6 @@ enum class verbosity:int {
 	timing = 4,					//log the time passed from the start of the program
 };
 
-// writes each element of a vector in a separate line inside a text file named "output_file"
-void write_vec2file(const vector<double>& input, const string& output_file);
-
 //converts the first letter of the string from "a-b-c"/"x-y-z" to 0/1/2
 unsigned int xyz2int(const string& s);
 
@@ -46,8 +43,7 @@ unsigned int xyz2int(const string& s);
 char int2xyz(const unsigned int& i);
 
 inline bool file_exists(const string& name) {
-	ifstream f(name.c_str());
-	return f.good();
+	return ifstream(name.c_str()).good();
 }
 
 //decides if a functionality is active with the current verbosity level
@@ -65,6 +61,8 @@ void initialize_loggers(const string& log_file, const string& output_file);
 void update_loggers();
 void finalize_loggers();
 
+//renames the old output file if possible or changes the output file name
+void prepare_output_file(string& output_file);
 
 // bool to yes/no conversion
 string to_string(const bool& b);

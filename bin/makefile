@@ -75,7 +75,7 @@ LIB_PATHS = $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)
 SOURCE_INC_PATHS = -I../src/ -I../src/armadillo/include/ -I../src/inih/cpp/ -I../src/clara/single_include/ -I../src/spline/ -I../src/spdlog/
 CPPFLAGS = $(CPP_DEFS) $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)
 
-SOURCES = general_io.cpp arma_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
+SOURCES = general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
 OBJECTS = $(patsubst %.c,%.o,$(SOURCES:.cpp=.o))
 EXECUTABLE = slabcc
 

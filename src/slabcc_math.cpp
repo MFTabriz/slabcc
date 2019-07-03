@@ -80,19 +80,19 @@ cube shift(cube cube_in, rowvec3 shifts) {
 	return cube_in;
 }
 
-vector<double> planar_average(const uword& direction, const cube& cube_in) {
+vec planar_average(const uword& direction, const cube& cube_in) {
 	const uword dim_size = arma::size(cube_in)(direction);
-	vector<double> average(dim_size, 0);
+	vec average = vec(dim_size);
 	for (uword i = 0; i < dim_size; ++i) {
 		switch (direction) {
 		case 0:
-			average.at(i) = accu(cube_in(span(i), span(), span()));
+			average(i) = accu(cube_in(span(i), span(), span()));
 			break;
 		case 1:
-			average.at(i) = accu(cube_in(span(), span(i), span()));
+			average(i) = accu(cube_in(span(), span(i), span()));
 			break;
 		case 2:
-			average.at(i) = accu(cube_in(span(), span(), span(i)));
+			average(i) = accu(cube_in(span(), span(), span(i)));
 			break;
 		}
 	}
