@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 04 July 2019
-:version: 0.8.2
+:Last updated: 07 July 2019
+:version: 0.8.3
 
 .. sectnum::
 
@@ -177,7 +177,6 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     CHGCAR_neutral = UNCHARGED_CHGCAR
     2D_model = yes
     extrapolate = yes
-    extrapolate_steps_number = 20
     charge_position = 0.5 0.4 0.56
     interfaces = 0.66 0.46
     normal_direction = z
@@ -194,7 +193,7 @@ Installation
 1. **Prerequisites:**
 
  #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.500.x/README.md>`_ for linking to the other BLAS replacements.
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
 2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
@@ -367,6 +366,18 @@ The input file is processed as follows:
 |                              |input file's cell vectors                              |               |
 |                              |                                                       |               |
 |                              |``normal_direction = b``                               |               |
++------------------------------+-------------------------------------------------------+---------------+
+| ``optimize``                 |Optimizer master switch. Upon deactivation, it takes   |               |
+|                              |precedence over all the other optimization options:    |    true       |
+|                              |``optimize_charge_fraction``,                          |               |
+|                              |``optimize_charge_position``,                          |               |
+|                              |``optimize_charge_rotation``,                          |               |
+|                              |``optimize_charge_sigma``, and ``optimize_interfaces`` |               |
+|                              |                                                       |               |
+|                              |**true**: evaluate each of the optimization switches   |               |
+|                              |individually                                           |               |
+|                              |                                                       |               |
+|                              |**false**: deactivate all optimization switches        |               |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``optimize_algorithm``       |Optimization algorithm in the NLOPT library            |    BOBYQA     |
 |                              |                                                       |               |

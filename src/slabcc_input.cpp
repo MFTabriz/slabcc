@@ -16,6 +16,15 @@ void input_data::verify() const {
 	charge_rotations = fmod_p(charge_rotations + 90, 180) - 90;
 	charge_rotations *= PI / 180.0;
 
+	if (!optimize) {
+		log->debug("Optimizer has been deactivated. Model charge parameters will not be optimized!");
+		optimize_charge_fraction = false;
+		optimize_charge_position = false;
+		optimize_charge_rotation = false;
+		optimize_charge_sigma = false;
+		optimize_interface = false;
+	}
+
 	if ((max_eval != 0) && (max_eval < 3)) {
 		log->warn("Searching for the optimum model parameters only for {} steps most probably will not be any useful!", max_eval);
 	}
@@ -259,6 +268,7 @@ void input_data::parse(const string& input_file) const {
 	diel_in = reader.GetVec("diel_in", { 1,1,1 });
 	diel_out = reader.GetVec("diel_out", { 1,1,1 });
 	diel_erf_beta = reader.GetReal("diel_taper", 1);
+	optimize = reader.GetBoolean("optimize", true);
 	optimize_charge_position = reader.GetBoolean("optimize_charge_position", true);
 	optimize_charge_sigma = reader.GetBoolean("optimize_charge_sigma", true);
 	optimize_charge_rotation = reader.GetBoolean("optimize_charge_rotation", false);

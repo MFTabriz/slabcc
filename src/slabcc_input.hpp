@@ -13,7 +13,7 @@ struct input_data {
 	uword &normal_direction;
 	rowvec2 &interfaces;
 	double &diel_erf_beta, &opt_tol;
-	bool &optimize_charge_position, &optimize_charge_sigma, &optimize_charge_rotation, &optimize_charge_fraction, &optimize_interface, &extrapolate, &model_2D, &trivariate;
+	bool &optimize, &optimize_charge_position, &optimize_charge_sigma, &optimize_charge_rotation, &optimize_charge_fraction, &optimize_interface, &extrapolate, &model_2D, &trivariate;
 	double &opt_grid_x, &extrapol_grid_x;
 	int &max_eval, &max_time, &extrapol_steps_num;
 	double &extrapol_steps_size;

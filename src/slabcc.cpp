@@ -51,6 +51,7 @@ int main(int argc, char *argv[]){
 	int max_time = 0;				//maximum time for the optimization in minutes
 	int extrapol_steps_num = 0;		//number of extrapolation steps for E_isolated calculation
 	double extrapol_steps_size = 0; //size of each extrapolation step with respect to the initial supercell size
+	bool optimize = false;					//optimizer master switch. Overrides the others if this one is disabled!
 	bool optimize_charge_position = false;	//optimize the charge_position 
 	bool optimize_charge_sigma = false;		//optimize the charge_sigma
 	bool optimize_charge_rotation = false;	//optimize the charge_rotation 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]){
 		CHGCAR_neutral, LOCPOT_charged, LOCPOT_neutral, CHGCAR_charged,
 		opt_algo, charge_position, charge_fraction, charge_sigma, charge_rotations, slabcenter, diel_in, diel_out,
 		normal_direction, interfaces, diel_erf_beta,
-		opt_tol, optimize_charge_position, optimize_charge_sigma, optimize_charge_rotation, optimize_charge_fraction, optimize_interfaces, extrapolate, model_2D, charge_trivariate, opt_grid_x,
+		opt_tol, optimize, optimize_charge_position, optimize_charge_sigma, optimize_charge_rotation, optimize_charge_fraction, optimize_interfaces, extrapolate, model_2D, charge_trivariate, opt_grid_x,
 		extrapol_grid_x, max_eval, max_time, extrapol_steps_num, extrapol_steps_size };
 
 	inputfile_variables.parse(input_file);

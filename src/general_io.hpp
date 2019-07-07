@@ -61,7 +61,7 @@ void initialize_loggers(const string& log_file, const string& output_file);
 void update_loggers();
 void finalize_loggers();
 
-//renames the old output file if possible or changes the output file name
+//renames the old output file if possible or choose a new output file name
 void prepare_output_file(string& output_file);
 
 // bool to yes/no conversion

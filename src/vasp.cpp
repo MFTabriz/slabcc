@@ -13,7 +13,7 @@ void supercell::write_POSCAR(const string& file_name) const{
 	vector<int> defs = atoms.definition_order;
 	const auto end = unique(defs.begin(), defs.end(), [](const int& l, const int& r) noexcept { return  l == r; });
 	defs.erase(end, defs.end());
-	for (const int& i : defs) {
+	for (const auto& i : defs) {
 		const auto it = find(atoms.definition_order.begin(), atoms.definition_order.end(), i);
 		const auto pos = distance(atoms.definition_order.begin(), it);
 		out_file << " " << atoms.type.at(pos);

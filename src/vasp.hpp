@@ -59,7 +59,7 @@ struct supercell {
 
 
 	//generates a supercell and loads its data the POSCAR file
-	supercell(const string& file_name);
+	explicit supercell(const string& file_name);
 
 	//shifts the whole supercell (positions, charge, potential) by pos_shift as relative shift vector [0 1]
 	void shift(const rowvec3& pos_shift);

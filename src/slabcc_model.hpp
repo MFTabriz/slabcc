@@ -131,7 +131,7 @@ struct slabcc_model {
 	// reference to the variables to be optimized: "opt_vars"
 	void optimize(const string& opt_algo, const double& opt_tol, const int& max_eval, const int& max_time, const opt_switches& optimize);
 
-	//calculates local: V, POT_diff, rhoM (without jellium), diels, Q
+	//calculates local: POT, POT_diff, rhoM (without jellium), diels, Q
 	//returns: root mean squared error (RMSE) of the model charge potential 
 	double potential_error(const vector<double>& x, vector<double>& grad);
 

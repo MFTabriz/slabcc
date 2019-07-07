@@ -1,7 +1,7 @@
-.. |Version| image:: https://img.shields.io/badge/version-0.8.2-blue.svg
-   :alt: Version 0.8.2
-.. |Update| image:: https://img.shields.io/badge/Last%20update-04.07.2019-informational.svg
-   :alt: Last update 04 July 2019 
+.. |Version| image:: https://img.shields.io/badge/version-0.8.3-blue.svg
+   :alt: Version 0.8.3
+.. |Update| image:: https://img.shields.io/badge/Last%20update-07.07.2019-informational.svg
+   :alt: Last update 07 July 2019 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
@@ -128,7 +128,6 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     CHGCAR_neutral = UNCHARGED_CHGCAR
     2D_model = yes
     extrapolate = yes
-    extrapolate_steps_number = 20
     charge_position = 0.5 0.4 0.56
     interfaces = 0.66 0.46
     normal_direction = z

@@ -687,9 +687,9 @@ void slabcc_model::check_V_error() {
 		}
 	}
 
-	const auto V_error_x = conv_to<rowvec>::from(planar_average(0, POT_diff));
-	const auto V_error_y = conv_to<rowvec>::from(planar_average(1, POT_diff));
-	const auto V_error_z = conv_to<rowvec>::from(planar_average(2, POT_diff));
+	const auto V_error_x = planar_average(0, POT_diff);
+	const auto V_error_y = planar_average(1, POT_diff);
+	const auto V_error_z = planar_average(2, POT_diff);
 
 	//potential error in each direction
 	rowvec3 V_error_planars = { accu(square(V_error_x)), accu(square(V_error_y)), accu(square(V_error_z)) };

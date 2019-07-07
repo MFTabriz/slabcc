@@ -1076,10 +1076,10 @@ span.boxed, span.framebox {
 <col class="field-body" />
 <tbody valign="top">
 <tr class="last-updated field">
-<th class="docinfo-name">Last updated:</th><td class="field-body">04 July 2019</td>
+<th class="docinfo-name">Last updated:</th><td class="field-body">07 July 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.8.2</td></tr>
+<td>0.8.3</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1346,7 +1346,6 @@ CHGCAR_charged = CHARGED_CHGCAR
 CHGCAR_neutral = UNCHARGED_CHGCAR
 2D_model = yes
 extrapolate = yes
-extrapolate_steps_number = 20
 charge_position = 0.5 0.4 0.56
 interfaces = 0.66 0.46
 normal_direction = z
@@ -1368,7 +1367,7 @@ diel_in = 6.28 6.28 1.83
 <blockquote>
 <ol class="arabic simple">
 <li><strong>Compiler:</strong> You need a C++ compiler with C++14 standard support (e.g. <a class="reference external" href="https://gcc.gnu.org/">g++</a> 5.0 or later, <a class="reference external" href="https://software.intel.com/en-us/c-compilers">icpc</a> 15.0 or later, etc.)</li>
-<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/blob/9.500.x/README.md">Armadillo documentations</a> for linking to the other BLAS replacements.</li>
+<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md">Armadillo documentations</a> for linking to the other BLAS replacements.</li>
 <li><strong>FFTW:</strong> If you don't have FFTW installed on your system follow the guide on the <a class="reference external" href="http://www.fftw.org/download.html">FFTW website</a>. Alternatively, you can use the FFTW interface of the MKL.</li>
 </ol>
 </blockquote>
@@ -1605,6 +1604,22 @@ input file's cell vectors</p>
 <p class="last"><tt class="docutils literal">normal_direction = b</tt></p>
 </td>
 <td>z</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize</tt></td>
+<td><p class="first">
+Optimizer master switch. Upon deactivation, it takes
+precedence over all the other optimization options:
+<tt class="docutils literal">optimize_charge_fraction</tt>,
+<tt class="docutils literal">optimize_charge_position</tt>,
+<tt class="docutils literal">optimize_charge_rotation</tt>,
+<tt class="docutils literal">optimize_charge_sigma</tt>, and <tt class="docutils literal">optimize_interfaces</tt>
+</p>
+<p><strong>true</strong>: evaluate each of the optimization switches
+individually
+</p>
+<p class="last"><strong>false</strong>: deactivate all optimization switches</p>
+</td>
+<td>true</td>
 </tr>
 <tr><td><tt class="docutils literal">optimize_algorithm</tt></td>
 <td><p class="first">Optimization algorithm in the NLOPT library
