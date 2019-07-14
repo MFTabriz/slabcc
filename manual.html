@@ -1076,10 +1076,10 @@ span.boxed, span.framebox {
 <col class="field-body" />
 <tbody valign="top">
 <tr class="last-updated field">
-<th class="docinfo-name">Last updated:</th><td class="field-body">07 July 2019</td>
+<th class="docinfo-name">Last updated:</th><td class="field-body">15 July 2019</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
-<td>0.8.3</td></tr>
+<td>0.8.4</td></tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
@@ -1569,7 +1569,7 @@ of the extrapolation may not be accurate!</p>
 </tr>
 <tr><td><tt class="docutils literal">extrapolate_steps_number</tt></td>
 <td>Number of the extrapolation steps in calculation of
-E<sub>isolated</sub> <a class="footnote-reference" href="#id6" id="id2">[1]</a></td>
+E<sub>isolated</sub></td>
 <td><p class="first">10: for 2D models</p>
 <p class="last">4: for the rest</p></td>
 </tr>
@@ -1624,10 +1624,10 @@ individually
 <tr><td><tt class="docutils literal">optimize_algorithm</tt></td>
 <td><p class="first">Optimization algorithm in the NLOPT library
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/BOBYQA"><b>BOBYQA</b></a> :
-Bound Optimization BY Quadratic Approximation <a class="footnote-reference" href="#id7" id="id3">[2]</a></p>
+Bound Optimization BY Quadratic Approximation <a class="footnote-reference" href="#id7" id="id3">[1]</a></p>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/COBYLA"><b>COBYLA</b></a>:
-Constrained Optimization BY Linear Approximation <a class="footnote-reference" href="#id8" id="id4">[3]</a></p>
-<p><b>SBPLX</b>: S.G. Johnson's implementation of the Subplex (subspace-searching simplex) algorithm <a class="footnote-reference" href="#idm2" id="idm1">[4]</a></p>
+Constrained Optimization BY Linear Approximation <a class="footnote-reference" href="#id8" id="id4">[2]</a></p>
+<p><b>SBPLX</b>: S.G. Johnson's implementation of the Subplex (subspace-searching simplex) algorithm <a class="footnote-reference" href="#idm2" id="idm1">[3]</a></p>
 <p class="last"><tt class="docutils literal">optimize_algorithm = SBPLX</tt></p>
 </td>
 <td><p>BOBYQA</p>
@@ -1722,7 +1722,7 @@ for root mean square error of the model potential</td>
 <td>0.5 0.5 0.5</td>
 </tr>
 <tr><td><tt class="docutils literal">verbosity</tt></td>
-<td><p class="first">Verbosity of the program <a class="footnote-reference" href="#id9" id="id5">[5]</a></p>
+<td><p class="first">Verbosity of the program <a class="footnote-reference" href="#id9" id="id5">[4]</a></p>
 <p><strong>0</strong>: No extra info. Only write the output file.
 Logging is disabled.</p>
 <p><strong>1</strong>: Display calculated energy correction terms.
@@ -1739,34 +1739,28 @@ and dielectric profiles. Display debug info including the compilation machine in
 </tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.</td></tr>
-</tbody>
-</table>
 <table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>M.J.D. Powell, <a class="reference external" href="http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf">The BOBYQA algorithm for bound constrained optimization without derivatives</a>, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id3">[1]</a></td><td>M.J.D. Powell, <a class="reference external" href="http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf">The BOBYQA algorithm for bound constrained optimization without derivatives</a>, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id8" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[3]</a></td><td>M.J.D. Powell, <a class="reference external" href="https://doi.org/10.1017/S0962492900002841">Direct search algorithms for optimization calculations</a>, Acta Numerica, Vol. 7(1998) pp. 287-336</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>M.J.D. Powell, <a class="reference external" href="https://doi.org/10.1017/S0962492900002841">Direct search algorithms for optimization calculations</a>, Acta Numerica, Vol. 7(1998) pp. 287-336</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="idm2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#idm1">[4]</a></td><td>T.H. Rowan, <a class="reference external" href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.5708">Functional Stability Analysis of Numerical Algorithms</a>, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#idm1">[3]</a></td><td>T.H. Rowan, <a class="reference external" href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.5708">Functional Stability Analysis of Numerical Algorithms</a>, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Each verbosity level includes all the outputs from the lower verbosity options. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id5">[4]</a></td><td>Each verbosity level includes all the outputs from the lower verbosity options. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</td></tr>
 </tbody>
 </table>
 </div>

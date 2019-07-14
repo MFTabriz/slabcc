@@ -59,7 +59,7 @@ void slabcc_model::change_size(const mat33& new_cell_vectors) {
 
 	const rowvec3 scaling = cell_vectors_lengths / cell_vectors_lengths0;
 	if (abs(max(scaling) - min(scaling)) > 0.00001) {
-		log->debug("Model cell scaling is anisotropic!");
+		log->warn("Model cell scaling is anisotropic!");
 	}
 }
 
@@ -424,8 +424,7 @@ void slabcc_model::adjust_extrapolation_grid(const int &extrapol_steps_num, cons
 	auto log = spdlog::get("loggers");
 	log->trace("Checking the extrapolation grid size");
 	const mat33 cell_vectors0 = cell_vectors;
-	const double old_total_charge = total_charge;
-	
+	const double total_charge0 = total_charge;
 	//Force discretization error checks
 	for (auto step = extrapol_steps_num - 1; step > 0; --step) {
 		const double extrapol_factor = extrapol_steps_size * step + 1;
@@ -433,7 +432,7 @@ void slabcc_model::adjust_extrapolation_grid(const int &extrapol_steps_num, cons
 		gaussian_charges_gen();
 	}
 	change_size(cell_vectors0);
-	total_charge = old_total_charge;
+	total_charge = total_charge0;
 }
 
 tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
@@ -445,8 +444,8 @@ tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double 
 	const auto charge_position0 = charge_position;
 	const double slab_thickness = abs(interfaces(0) - interfaces(1));
 	rowvec Es = arma::zeros<rowvec>(extrapol_steps_num - 1), sizes = Es;
-	for (auto n = 0; n < extrapol_steps_num - 1; ++n) {
-		const double extrapol_factor = extrapol_steps_size * (1.0 + n) + 1;
+	for (auto step = 1; step < extrapol_steps_num; ++step) {
+		const double extrapol_factor = extrapol_steps_size * step + 1;
 		change_size(cell_vectors0 * extrapol_factor);
 		if (this->type == model_type::slab) {
 			//increase the slab thickness
@@ -478,8 +477,8 @@ tuple <rowvec, rowvec> slabcc_model::extrapolate(int extrapol_steps_num, double 
 			extrapolation_info += "\t" + to_string(charge_position(i, normal_direction) * cell_vectors_lengths(normal_direction));
 		}
 		log->debug(extrapolation_info);
-		Es(n) = EperModel;
-		sizes(n) = 1.0 / extrapol_factor;
+		Es(step-1) = EperModel;
+		sizes(step-1) = 1.0 / extrapol_factor;
 	}
 
 	return make_tuple(Es, sizes);
@@ -710,25 +709,44 @@ void slabcc_model::verify_CHG(const cube& defect_charge) {
 
 	if (this->type != model_type::bulk) {
 
-		//find the index of the interfaces
-
+		//find the grid index of the interfaces
 		rowvec2 interfaces_index = cell_grid(normal_direction) * interfaces;
 		urowvec2 interfaces_grid_i = { (uword)interfaces_index(0), (uword)interfaces_index(1)};
 		interfaces_grid_i = sort(interfaces_grid_i);
 		vector<span> spans = { span(), span(), span(interfaces_grid_i(0),interfaces_grid_i(1)) };
 		swap(spans[normal_direction], spans[2]);
+
 		const double model_total = accu(real(CHG)) * voxel_vol;
 		const double model_in = accu(real(CHG(spans[0], spans[1], spans[2]))) * voxel_vol;
 		const double model_out = model_total - model_in;
 
-		const double defect_total = accu(defect_charge) * voxel_vol;
-		const double defect_in = accu(defect_charge(spans[0], spans[1], spans[2])) * voxel_vol;
+		//The original defect may have a different grid size than the final model!
+		const urowvec3 defect_grid = SizeVec(defect_charge);
+		rowvec2 defect_interfaces_index = defect_grid(normal_direction) * interfaces;
+		urowvec2 defect_interfaces_grid_i = { (uword)defect_interfaces_index(0), (uword)defect_interfaces_index(1) };
+		defect_interfaces_grid_i = sort(defect_interfaces_grid_i);
+		vector<span> defect_spans = { span(), span(), span(defect_interfaces_grid_i(0),defect_interfaces_grid_i(1)) };
+		swap(defect_spans[normal_direction], defect_spans[2]);
+
+		const double defect_voxel_vol = prod(cell_vectors_lengths / defect_grid);
+		const double defect_total = accu(defect_charge) * defect_voxel_vol;
+		const double defect_in = accu(defect_charge(defect_spans[0], defect_spans[1], defect_spans[2])) * defect_voxel_vol;
 		const double defect_out = defect_total - defect_in;
 
-		//these two do NOT need to closely agree with each other!
+		//these two do NOT need to closely agree with each other if the charge is near the surface
 		log->debug("Total charge of the model slab (inside, outside): {}, {}", model_in, model_out);
 		log->debug("Total charge of the defect slab (inside, outside): {}, {}", defect_in, defect_out);
 
+		const bool large_charge_difference = abs(model_in - defect_in) > 0.1;
+		const mat relative_charge_interface_distance = abs(repmat(charge_position.col(normal_direction), 1, 2) - repmat(interfaces, charge_position.n_rows, 1));
+		const mat charge_interface_distance = relative_charge_interface_distance * cell_vectors_lengths(normal_direction) / ang_to_bohr;
+		const bool charge_near_surface = charge_interface_distance.min() < 1;
+
+		if (large_charge_difference && !charge_near_surface) {
+			log->debug("Minimum distance of the model charge centers to the surface (Ang): {}", charge_interface_distance.min());
+			log->debug("Difference of the charge inside of the slab in the defect and the model: {}", abs(model_in - defect_in));
+			log->warn("The amount of the charge inside and outside of the slab seems to be different in the input files and the slabcc model. The extra charge may be partially localized on the slab surfaces. ");
+		}
 
 	}
 }

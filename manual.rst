@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 07 July 2019
-:version: 0.8.3
+:Last updated: 15 July 2019
+:version: 0.8.4
 
 .. sectnum::
 
@@ -339,7 +339,7 @@ The input file is processed as follows:
 |                              |``extrapolate_grid_x = 1.8``                           |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Number of the extrapolation steps in calculation of    |10: for 2D     |
-| ``extrapolate_steps_number`` |E\ :sub:`isolated` \ [#]_                              |models         |
+| ``extrapolate_steps_number`` |E\ :sub:`isolated` \                                   |models         |
 |                              |                                                       |               |
 |                              |                                                       |4: for the rest|
 +------------------------------+-------------------------------------------------------+---------------+
@@ -486,7 +486,6 @@ The input file is processed as follows:
 |                              |calculation step (trace mode)                          |               |
 +------------------------------+-------------------------------------------------------+---------------+
 
-.. [#] Extrapolating the model to very large order will accumulate errors due to energy calculations for large systems over a coarse grid size.
 .. [#] M.J.D. Powell, `The BOBYQA algorithm for bound constrained optimization without derivatives <http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf>`_, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).
 .. [#] M.J.D. Powell, `Direct search algorithms for optimization calculations <https://doi.org/10.1017/S0962492900002841>`_, Acta Numerica, Vol. 7(1998) pp. 287-336
 .. [#] T.H. Rowan, `Functional Stability Analysis of Numerical Algorithms <https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.5708>`_, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.

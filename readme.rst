@@ -1,7 +1,7 @@
-.. |Version| image:: https://img.shields.io/badge/version-0.8.3-blue.svg
-   :alt: Version 0.8.3
-.. |Update| image:: https://img.shields.io/badge/Last%20update-07.07.2019-informational.svg
-   :alt: Last update 07 July 2019 
+.. |Version| image:: https://img.shields.io/badge/version-0.8.4-blue.svg
+   :alt: Version 0.8.4
+.. |Update| image:: https://img.shields.io/badge/Last%20update-15.07.2019-informational.svg
+   :alt: Last update 15 July 2019 
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
