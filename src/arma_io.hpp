@@ -7,71 +7,63 @@
 #include <iomanip>
 #include <iostream>
 
-using namespace std;
-using namespace arma;
-
-
-//single-line output for vec
-template<typename T>
-ostream &operator << (ostream &o, const Row<T> &vec) {
-	for (uword elem = 0; elem < vec.n_elem; ++elem) {
-		o << vec(elem);
-		if (elem != vec.n_elem - 1) {
-			o << " ";
-		}
-	}
-	return o;
-}
-
-template<typename T>
-ostream &operator << (ostream &o, const subview<T> &vec) {
-	for (uword elem = 0; elem < vec.n_elem; ++elem) {
-		o << vec(elem);
-		if (elem != vec.n_elem - 1) {
-			o  << " ";
-		}
-	}
-
-	return o;
-}
-
-//single-line output for mat
-template<typename T>
-ostream &operator << (ostream &o, const Mat<T> &mat) {
-	mat.each_row([&o](const Row<T> &row) { o << row << "; "; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, Row<T> &vec) {
-	vec.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, subview_row<T> vec) {
-	vec.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, Cube<T> &c) {
-	c.for_each([&o](T &elem) { o >> elem; });
-	return o;
-}
-
-template<typename T>
-istream &operator >> (istream &o, Mat<T> &m) {
-	m.for_each([&o](T &elem) { o >> elem; });
-	return o;
+// single-line output for vec
+template <typename T>
+std::ostream &operator<<(std::ostream &o, const arma::Row<T> &vec) {
+  for (arma::uword elem = 0; elem < vec.n_elem; ++elem) {
+    o << vec(elem);
+    if (elem != vec.n_elem - 1) {
+      o << " ";
+    }
+  }
+  return o;
 }
 
 template <typename T>
-string to_string(T input) {
-	ostringstream output;
-	output << setprecision(15);
-	output << input;
-	return output.str();
+std::ostream &operator<<(std::ostream &o, const arma::subview<T> &vec) {
+  for (arma::uword elem = 0; elem < vec.n_elem; ++elem) {
+    o << vec(elem);
+    if (elem != vec.n_elem - 1) {
+      o << " ";
+    }
+  }
+
+  return o;
 }
 
+// single-line output for mat
+template <typename T>
+std::ostream &operator<<(std::ostream &o, const arma::Mat<T> &mat) {
+  mat.each_row([&o](const arma::Row<T> &row) { o << row << "; "; });
+  return o;
+}
 
+template <typename T>
+std::istream &operator>>(std::istream &o, arma::Row<T> &vec) {
+  vec.for_each([&o](T &elem) { o >> elem; });
+  return o;
+}
+
+template <typename T>
+std::istream &operator>>(std::istream &o, arma::subview_row<T> vec) {
+  vec.for_each([&o](T &elem) { o >> elem; });
+  return o;
+}
+
+template <typename T>
+std::istream &operator>>(std::istream &o, arma::Cube<T> &c) {
+  c.for_each([&o](T &elem) { o >> elem; });
+  return o;
+}
+
+template <typename T>
+std::istream &operator>>(std::istream &o, arma::Mat<T> &m) {
+  m.for_each([&o](T &elem) { o >> elem; });
+  return o;
+}
+
+template <typename T> std::string to_string(T input) {
+  std::ostringstream output;
+  output << std::setprecision(15) << input;
+  return output.str();
+}
