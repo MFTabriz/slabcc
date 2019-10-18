@@ -7,6 +7,18 @@ env:
     - ARCH=haswell
 jobs:
   include:
+    - name: "clang-format checks"
+      os: linux
+      dist: xenial
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - clang-format
+      before_install: true
+      script:
+        - ./utils/format_check.sh
+      after_script: true
     - name: "GCC 5 Build on Linux xenial"
       os: linux
       dist: xenial
