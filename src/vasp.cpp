@@ -12,9 +12,9 @@ void supercell::write_POSCAR(const std::string &file_name) const {
            << scaling << '\n';
   cell_vectors.t().raw_print(out_file);
   std::vector<int> defs = atoms.definition_order;
-  const auto end = unique(
-      defs.begin(), defs.end(),
-      [](const int &l, const int &r) noexcept { return l == r; });
+  const auto end =
+      std::unique(defs.begin(), defs.end(),
+                  [](const int &l, const int &r) noexcept { return l == r; });
   defs.erase(end, defs.end());
   for (const auto &i : defs) {
     const auto it = std::find(atoms.definition_order.begin(),
