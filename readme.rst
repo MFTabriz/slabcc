@@ -2,9 +2,12 @@
    :alt: Version 0.8.4
 .. |Update| image:: https://img.shields.io/badge/Last%20update-15.07.2019-informational.svg
    :alt: Last update 15 July 2019 
-.. |Style| image:: https://img.shields.io/badge/coding%20style-LLVM-black
-   :alt: Coding style
+.. |Style| image:: https://img.shields.io/badge/code%20style-LLVM-black
+   :alt: Code style
    :target: https://llvm.org/docs/CodingStandards.html
+.. |Standard| image:: https://img.shields.io/badge/c%2B%2B-%3E%3D14-informational
+   :alt: C++ Standard
+   :target: https://en.cppreference.com/w/cpp/compiler_support#cpp14
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
@@ -18,7 +21,7 @@
    :alt: License: BSD-2-Clause
    :target: https://opensource.org/licenses/BSD-2-Clause
 
-|Version| |Update| |Style| |Travis| |Codacy| |Zenodo| |License|
+|Version| |Update| |Style| |Standard| |Travis| |Codacy| |Zenodo| |License|
 
 .. sectnum::
 
