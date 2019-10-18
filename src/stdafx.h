@@ -4,27 +4,27 @@ constexpr auto SLABCC_VERSION_MAJOR = 0;
 constexpr auto SLABCC_VERSION_MINOR = 8;
 constexpr auto SLABCC_VERSION_PATCH = 4;
 
-//comment the next line while developing the code! Uncommenting will disable the range checks in Armadillo. Makefile may override this!
-//#define ARMA_NO_DEBUG
+// comment the next line while developing the code! Uncommenting will disable
+// the range checks in Armadillo. Makefile may override this! 
 
+//#define ARMA_NO_DEBUG
 
 #include "targetver.h"
 
 #include <future>
 
-#include <stdio.h>
-#include <iomanip> 
-#include <iostream> 
-#include <fstream> 
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
+#include <stdio.h>
 
 #include <chrono>
-#include <vector>  
+#include <string>
 #include <unordered_map>
-#include <string>  
+#include <vector>
 
-#include <algorithm> 
-
+#include <algorithm>
 
 #ifdef MKL
 #include "mkl_service.h"

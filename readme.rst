@@ -2,6 +2,9 @@
    :alt: Version 0.8.4
 .. |Update| image:: https://img.shields.io/badge/Last%20update-15.07.2019-informational.svg
    :alt: Last update 15 July 2019 
+.. |Style| image:: https://img.shields.io/badge/coding%20style-LLVM-black
+   :alt: Coding style
+   :target: https://llvm.org/docs/CodingStandards.html
 .. |Travis| image:: https://travis-ci.org/MFTabriz/slabcc.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/MFTabriz/slabcc
@@ -11,8 +14,11 @@
 .. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1419758.svg
    :alt: Test Set
    :target: https://doi.org/10.5281/zenodo.1419758
+.. |License| image:: https://img.shields.io/badge/License-BSD--2--Clause-blue
+   :alt: License: BSD-2-Clause
+   :target: https://opensource.org/licenses/BSD-2-Clause
 
-|Version| |Update| |Travis| |Codacy| |Zenodo|
+|Version| |Update| |Style| |Travis| |Codacy| |Zenodo| |License|
 
 .. sectnum::
 
