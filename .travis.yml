@@ -1,14 +1,15 @@
 language: cpp
 sudo: required
-env: 
+env:
   global:
     - OPENBLAS_NUM_THREADS=1
-matrix:
+jobs:
   include:
-    - os: linux
+    - name: "GCC 5 Build on Linux xenial"
+      os: linux
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         - SET_COMPILERS="sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc && sudo ln -s /usr/bin/g++-5 /usr/bin/g++"
       addons:
         apt:
@@ -20,10 +21,11 @@ matrix:
             - gfortran-5
             - libopenblas-dev
             - fftw3-dev
-    - os: linux
+    - name: "GCC 6 Build on Linux xenial"
+      os: linux
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         - SET_COMPILERS="sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc && sudo ln -s /usr/bin/g++-6 /usr/bin/g++"
       addons:
         apt:
@@ -35,11 +37,11 @@ matrix:
             - gfortran-6
             - libopenblas-dev
             - fftw3-dev
- 
-    - os: linux
+    - name: "GCC 8 Build on Linux xenial"
+      os: linux
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         - SET_COMPILERS="sudo ln -s /usr/bin/gcc-8 /usr/bin/gcc && sudo ln -s /usr/bin/g++-8 /usr/bin/g++"
       addons:
         apt:
@@ -51,11 +53,11 @@ matrix:
             - gfortran-8
             - libopenblas-dev
             - fftw3-dev
-            
-    - os: linux
+    - name: "GCC 9 Build on Linux xenial"
+      os: linux
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         - SET_COMPILERS="sudo ln -s /usr/bin/gcc-9 /usr/bin/gcc && sudo ln -s /usr/bin/g++-9 /usr/bin/g++"
       addons:
         apt:
@@ -80,10 +82,7 @@ install: true
 script:
     - cd ./bin/ && mv -f makefile.dbg makefile
     - make
-    
+
 after_script:
     - ./slabcc -v
     - ldd -v slabcc
-    
-notifications:
-    email: false
