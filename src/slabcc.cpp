@@ -3,15 +3,12 @@
 // See the accompanying LICENSE.txt file for terms.
 
 #include "isolated.hpp"
+#include "slabcc_consts.hpp"
 #include "slabcc_model.hpp"
 #include "stdafx.h"
 #include "vasp.hpp"
 
 int verbosity_level = 0;
-const double ang_to_bohr = 1e-10 / arma::datum::a_0; // 1.88972612546
-const double Hartree_to_eV = arma::datum::R_inf * arma::datum::h *
-                             arma::datum::c_0 / arma::datum::eV *
-                             2; // 27.2113860193
 
 int main(int argc, char *argv[]) {
   slabcc_model model;
@@ -144,15 +141,15 @@ int main(int argc, char *argv[]) {
   check_slabcc_compatiblity(Neutral_supercell, Charged_supercell);
 
   // cell vectors of the CHGCAR and LOCPOT files (bohr)
-  const arma::mat33 input_cell_vectors = abs(Neutral_supercell.cell_vectors) *
-                                         Neutral_supercell.scaling *
-                                         ang_to_bohr;
+  const arma::mat33 input_cell_vectors =
+      arma::abs(Neutral_supercell.cell_vectors) * Neutral_supercell.scaling *
+      ang_to_bohr;
   const arma::urowvec3 input_grid_size = SizeVec(Neutral_supercell.charge);
   model.init_supercell(input_cell_vectors, input_grid_size);
 
   const arma::rowvec3 relative_shift = 0.5 - slabcenter;
   model.rounded_relative_shift =
-      round(model.cell_grid % relative_shift) / model.cell_grid;
+      arma::round(model.cell_grid % relative_shift) / model.cell_grid;
 
   model.interfaces = fmod(
       model.interfaces + model.rounded_relative_shift(normal_direction), 1);
@@ -160,8 +157,8 @@ int main(int argc, char *argv[]) {
   if (!output_diffs_only) {
     Neutral_supercell.shift(model.rounded_relative_shift);
     Charged_supercell.shift(model.rounded_relative_shift);
-    model.charge_position +=
-        repmat(model.rounded_relative_shift, model.charge_position.n_rows, 1);
+    model.charge_position += arma::repmat(model.rounded_relative_shift,
+                                          model.charge_position.n_rows, 1);
     model.charge_position = fmod_p(model.charge_position, 1);
   }
   log->debug("Slab normal direction index (0-2): {}", model.normal_direction);
@@ -236,9 +233,9 @@ int main(int argc, char *argv[]) {
     const arma::rowvec3 optimization_grid_size =
         opt_grid_x * arma::conv_to<arma::rowvec>::from(model.cell_grid);
     const arma::urowvec3 optimization_grid = {
-        (arma::uword)optimization_grid_size(0),
-        (arma::uword)optimization_grid_size(1),
-        (arma::uword)optimization_grid_size(2)};
+        static_cast<arma::uword>(optimization_grid_size(0)),
+        static_cast<arma::uword>(optimization_grid_size(1)),
+        static_cast<arma::uword>(optimization_grid_size(2))};
     model.change_grid(optimization_grid);
     model.update_V_target();
     model.optimize(opt_algo, opt_tol, max_eval, max_time,
@@ -405,9 +402,9 @@ int main(int argc, char *argv[]) {
     const arma::rowvec3 extrapolation_grid_size =
         extrapol_grid_x * arma::conv_to<arma::rowvec>::from(model.cell_grid);
     const arma::urowvec3 extrapolation_grid = {
-        (arma::uword)extrapolation_grid_size(0),
-        (arma::uword)extrapolation_grid_size(1),
-        (arma::uword)extrapolation_grid_size(2)};
+        static_cast<arma::uword>(extrapolation_grid_size(0)),
+        static_cast<arma::uword>(extrapolation_grid_size(1)),
+        static_cast<arma::uword>(extrapolation_grid_size(2))};
     model.change_grid(extrapolation_grid);
     model.adjust_extrapolation_grid(extrapol_steps_num, extrapol_steps_size);
     if (as_size(model.cell_grid) !=
@@ -475,10 +472,11 @@ int main(int argc, char *argv[]) {
       E_isolated = cs.at(0) + (cs.at(1) - madelung_term) / cs.at(3);
       E_correction = E_isolated - EperModel0 - model.total_charge * dV;
     } else { // bulk and slab models
-      const arma::colvec pols = polyfit(sizes, Es, 1);
-      const arma::colvec evals = polyval(pols, sizes.t());
-      const auto linearfit_MSE = accu(square(evals.t() - Es)) / Es.n_elem * 100;
-      const arma::rowvec slopes = diff(Es) / diff(sizes);
+      const arma::colvec pols = arma::polyfit(sizes, Es, 1);
+      const arma::colvec evals = arma::polyval(pols, sizes.t());
+      const auto linearfit_MSE =
+          arma::accu(arma::square(evals.t() - Es)) / Es.n_elem * 100;
+      const arma::rowvec slopes = arma::diff(Es) / arma::diff(sizes);
       const auto extrapol_error_periodic =
           abs(slopes(0) - slopes(slopes.n_elem - 1));
       log->debug("--------------------------------------------------------");

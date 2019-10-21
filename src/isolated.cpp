@@ -19,7 +19,7 @@ std::vector<double> nonlinear_fit(const double &opt_tol,
   try {
     opt.optimize(fit_parameters, fit_MSE);
   } catch (const std::exception &e) {
-    log->error("Nonlinear fitting failed: " + std::string(e.what()));
+    log->error("Nonlinear fitting failed: {}", std::string(e.what()));
   }
 
   return fit_parameters;

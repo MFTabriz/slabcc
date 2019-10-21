@@ -1,10 +1,8 @@
 #pragma once
+#include "slabcc_consts.hpp"
 #include "slabcc_input.hpp"
 #include "slabcc_math.hpp"
 #include "vasp.hpp"
-
-extern const double Hartree_to_eV;
-extern const double ang_to_bohr;
 
 struct opt_variable {
   arma::rowvec2 &interfaces;

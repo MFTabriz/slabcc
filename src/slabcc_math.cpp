@@ -112,7 +112,6 @@ arma::vec planar_average(const arma::uword &direction,
 }
 
 arma::cx_vec fft(arma::vec X) {
-  // TODO: should come up with a better solution than reinterpret_cast
   arma::cx_vec out(X.n_elem);
   fftw_plan plan = fftw_plan_dft_r2c_1d(
       X.n_elem, X.memptr(), reinterpret_cast<fftw_complex *>(out.memptr()),

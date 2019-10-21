@@ -3,9 +3,8 @@
 // See the accompanying LICENSE.txt file for terms.
 
 #pragma once
+#include "slabcc_consts.hpp"
 #include "slabcc_math.hpp"
-// TODO: CONSTEXPER
-extern const double ang_to_bohr;
 
 // These functions are processing the VASP files:
 // read/write POSCAR, CHGCAR, LOCPOT files

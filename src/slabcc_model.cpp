@@ -123,8 +123,6 @@ void slabcc_model::gaussian_charges_gen() {
         0, cell_vectors_lengths(2) - cell_vectors_lengths(2) / cell_grid(2),
         cell_grid(2));
 
-    CHG = arma::zeros<arma::cx_cube>(as_size(cell_grid));
-
     for (arma::uword i = 0; i < charge_fraction.n_elem; ++i) {
       // shift the axis reference to position of the Gaussian charge center
       arma::rowvec x =
@@ -191,6 +189,8 @@ void slabcc_model::gaussian_charges_gen() {
       // checked!
 
       const double Q = charge_fraction(i) * defect_charge;
+      CHG = arma::zeros<arma::cx_cube>(as_size(cell_grid));
+
       if (trivariate_charge) {
         CHG += arma::cx_cube(
             Q / (pow(2 * PI, 1.5) * arma::prod(charge_sigma.row(i))) *
@@ -222,11 +222,11 @@ slabcc_model::data_packer(opt_switches optimize) const {
   const arma::rowvec3 relative_move_step =
       move_step * ang_to_bohr / cell_vectors_lengths;
   //------interfaces----
-  std::vector<double> step_size = {relative_move_step(normal_direction),
-                                   relative_move_step(normal_direction)};
-  std::vector<double> opt_param = {interfaces(0), interfaces(1)};
-  std::vector<double> low_b = {0, 0}; // lower bounds
-  std::vector<double> upp_b = {1, 1}; // upper bounds
+  std::vector<double> step_size{relative_move_step(normal_direction),
+                                relative_move_step(normal_direction)};
+  std::vector<double> opt_param{interfaces(0), interfaces(1)};
+  std::vector<double> low_b{0, 0}; // lower bounds
+  std::vector<double> upp_b{1, 1}; // upper bounds
   if (!optimize.interfaces) {
     low_b = opt_param;
     upp_b = opt_param;
@@ -458,11 +458,7 @@ bool slabcc_model::had_discretization_error() {
       log->debug("Model charge error on the former grid size: {}",
                  new_charge_error);
       last_charge_error = new_charge_error;
-      const arma::rowvec3 new_grid_size =
-          1.5 * arma::conv_to<arma::rowvec>::from(cell_grid);
-      const arma::urowvec3 new_grid = {(arma::uword)new_grid_size(0),
-                                       (arma::uword)new_grid_size(1),
-                                       (arma::uword)new_grid_size(2)};
+      const arma::urowvec3 new_grid = cell_grid + cell_grid / 2;
       change_grid(new_grid);
       log->debug("New model charge grid size: {}", to_string(cell_grid));
       return true;
@@ -843,8 +839,9 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
 
     // find the grid index of the interfaces
     arma::rowvec2 interfaces_index = cell_grid(normal_direction) * interfaces;
-    arma::urowvec2 interfaces_grid_i = {(arma::uword)interfaces_index(0),
-                                        (arma::uword)interfaces_index(1)};
+    arma::urowvec2 interfaces_grid_i = {
+        static_cast<arma::uword>(interfaces_index(0)),
+        static_cast<arma::uword>(interfaces_index(1))};
     interfaces_grid_i = arma::sort(interfaces_grid_i);
     std::vector<arma::span> spans = {
         arma::span(), arma::span(),
@@ -861,8 +858,8 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
     arma::rowvec2 defect_interfaces_index =
         defect_grid(normal_direction) * interfaces;
     arma::urowvec2 defect_interfaces_grid_i = {
-        (arma::uword)defect_interfaces_index(0),
-        (arma::uword)defect_interfaces_index(1)};
+        static_cast<arma::uword>(defect_interfaces_index(0)),
+        static_cast<arma::uword>(defect_interfaces_index(1))};
     defect_interfaces_grid_i = sort(defect_interfaces_grid_i);
     std::vector<arma::span> defect_spans = {
         arma::span(), arma::span(),
