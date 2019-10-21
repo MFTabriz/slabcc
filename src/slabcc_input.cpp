@@ -6,7 +6,7 @@
 
 void input_data::verify() const {
   auto log = spdlog::get("loggers");
-  charge_sigma = abs(charge_sigma);
+  charge_sigma = arma::abs(charge_sigma);
   max_eval = abs(max_eval);
   max_time = abs(max_time);
   interfaces = fmod_p(interfaces, 1);
@@ -101,8 +101,9 @@ void input_data::verify() const {
 
   if (charge_sigma.n_elem == 1) {
     charge_sigma = charge_sigma(0) * arma::ones(charge_number, 3);
-    log->debug("Only one charge_sigma is defined!");
-
+    if (trivariate) {
+      log->debug("Only one charge_sigma is defined!");
+    }
   } else if (sigma_rows == charge_number) {
     if (sigma_cols == 3) {
       if (trivariate) {
@@ -110,7 +111,7 @@ void input_data::verify() const {
       } else {
         const arma::mat isotropic_sig = arma::repmat(charge_sigma.col(0), 1, 3);
         const arma::mat sig_diff = arma::abs(isotropic_sig - charge_sigma);
-        if (any(vectorise(sig_diff) > 0.01)) {
+        if (arma::any(arma::vectorise(sig_diff) > 0.01)) {
           charge_sigma = isotropic_sig;
           log->warn("charge_sigma is not defined properly! charge_sigma={} "
                     "will be used.",

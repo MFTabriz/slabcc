@@ -81,13 +81,13 @@ void INIReader::dump_compilation_info() const {
 void INIReader::dump_env_info() const {
   auto log = spdlog::get("loggers");
   log->debug("-----------enviroment variables------------");
-  const std::vector<std::string> env_variables = {
+  const std::vector<std::string> env_variables{
       "OMP_DYNAMIC",  "OMP_SCHEDULE",  "OMP_NUM_THREADS", "MKL_NUM_THREADS",
       "KMP_AFFINITY", "OMP_PROC_BIND", "OMP_PLACES",      "GOMP_CPU_AFFINITY"};
-  const std::vector<std::string> slurm_vars = {
+  const std::vector<std::string> slurm_vars{
       "SLURM_JOB_ID", "SLURM_SUBMIT_DIR", "SLURM_NTASKS", "SLURM_JOB_NODELIST"};
-  const std::vector<std::string> pbs_vars = {"PBS_JOBID", "PBS_O_WORKDIR",
-                                             "PBS_NP", "PBS_NODEFILE"};
+  const std::vector<std::string> pbs_vars{"PBS_JOBID", "PBS_O_WORKDIR",
+                                          "PBS_NP", "PBS_NODEFILE"};
 
   if (getenv(slurm_vars.at(0).c_str())) {
     for (const auto &var : slurm_vars) {
@@ -173,7 +173,8 @@ void INIReader::dump_parsed() const {
                   "supported parameters.",
                   param_in_file);
       } else {
-        log->warn("Unrecognized parameter in the input file: " + param_in_file);
+        log->warn("Unrecognized parameter in the input file: {}",
+                  param_in_file);
       }
     }
   }

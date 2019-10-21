@@ -5,11 +5,10 @@
 #pragma once
 #include "arma_io.hpp"
 #include "general_io.hpp"
+#include "slabcc_consts.hpp"
 #include "spline.hpp"
 #include <armadillo>
 #include <fftw3.h>
-
-#define PI arma::datum::pi
 
 // These functions extend the functionality of the included Armadillo library by
 // providing:
