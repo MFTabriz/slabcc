@@ -1,7 +1,7 @@
 .. |Version| image:: https://img.shields.io/badge/version-0.8.4-blue.svg
    :alt: Version 0.8.4
-.. |Update| image:: https://img.shields.io/badge/Last%20update-15.07.2019-informational.svg
-   :alt: Last update 15 July 2019 
+.. |Update| image:: https://img.shields.io/badge/Last%20update-20.02.2020-informational.svg
+   :alt: Last update 20 Feb 2020
 .. |Style| image:: https://img.shields.io/badge/code%20style-LLVM-black
    :alt: Code style
    :target: https://llvm.org/docs/CodingStandards.html
@@ -129,7 +129,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
-5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
+5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT

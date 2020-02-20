@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 15 July 2019
+:Last updated: 20 Feb 2020
 :version: 0.8.4
 
 .. sectnum::
@@ -169,7 +169,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
-5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
+5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
