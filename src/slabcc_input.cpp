@@ -7,12 +7,12 @@
 void input_data::verify() const {
   auto log = spdlog::get("loggers");
   charge_sigma = arma::abs(charge_sigma);
-  max_eval = abs(max_eval);
-  max_time = abs(max_time);
+  max_eval = std::abs(max_eval);
+  max_time = std::abs(max_time);
   interfaces = fmod_p(interfaces, 1);
-  extrapol_grid_x = abs(extrapol_grid_x);
-  opt_grid_x = abs(opt_grid_x);
-  opt_tol = abs(opt_tol);
+  extrapol_grid_x = std::abs(extrapol_grid_x);
+  opt_grid_x = std::abs(opt_grid_x);
+  opt_tol = std::abs(opt_tol);
   charge_rotations = fmod_p(charge_rotations + 90, 180) - 90;
   charge_rotations *= PI / 180.0;
 
@@ -259,7 +259,7 @@ void input_data::verify() const {
         }
       }
 
-      if (abs(inplane_diels(0) - inplane_diels(1)) > 0.01) {
+      if (std::abs(inplane_diels(0) - inplane_diels(1)) > 0.01) {
         log->debug("In-plane dielectric constants: {}",
                    to_string(inplane_diels));
         log->error("In-plane dielectric constants are not equal. The current "

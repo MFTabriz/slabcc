@@ -109,7 +109,7 @@ void cli_params::parse(int argc, char *argv[]) {
 }
 
 unsigned int xyz2int(const std::string &s) {
-  const char dir_char = tolower(s.at(0));
+  const char dir_char = std::tolower(s.at(0));
   const std::unordered_map<char, unsigned int> dir_map{
       {'0', 0}, {'x', 0}, {'a', 0}, {'1', 1}, {'y', 1},
       {'b', 1}, {'2', 2}, {'z', 2}, {'c', 2},
@@ -143,7 +143,7 @@ void prepare_output_file(std::string &output_file) {
       backup_name = output_file + ".old" + to_string(counter);
     }
 
-    if (rename(output_file.c_str(), backup_name.c_str())) {
+    if (std::rename(output_file.c_str(), backup_name.c_str())) {
       // if we don't have the permission to rename the existing file
       counter = 1;
       std::string new_name = output_file + ".new" + to_string(counter);
@@ -194,7 +194,7 @@ void finalize_loggers() {
     }
   }
   messages_list.close();
-  remove(tmp_file.c_str());
+  std::remove(tmp_file.c_str());
   output_log->flush();
 }
 void update_loggers() {

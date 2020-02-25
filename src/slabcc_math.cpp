@@ -80,7 +80,7 @@ arma::cube shift(arma::cube cube_in, arma::rowvec3 shifts) {
     return {};
   }
 
-  shifts = round(arma::rowvec3(SizeVec(cube_in) % shifts));
+  shifts = arma::round(arma::rowvec3(SizeVec(cube_in) % shifts));
   for (arma::uword i = 0; i < 3; ++i) {
     cube_in = shift(cube_in, shifts(i), i);
   }
@@ -120,7 +120,7 @@ arma::cx_vec fft(arma::vec X) {
   fftw_destroy_plan(plan);
 
   for (arma::uword i = out.n_elem / 2 + 1; i < out.n_elem; ++i)
-    out(i) = conj(out(X.n_rows - i));
+    out(i) = std::conj(out(X.n_rows - i));
 
   return out;
 }
@@ -147,16 +147,17 @@ arma::cx_cube fft(arma::cube X) {
   out.resize(X.n_rows, X.n_cols, X.n_slices);
 
   for (arma::uword i = X.n_rows / 2 + 1; i < X.n_rows; ++i) {
-    out(i, 0, 0) = conj(out(X.n_rows - i, 0, 0));
+    out(i, 0, 0) = std::conj(out(X.n_rows - i, 0, 0));
     for (arma::uword j = 1; j < X.n_cols; ++j) {
-      out(i, j, 0) = conj(out(X.n_rows - i, X.n_cols - j, 0));
+      out(i, j, 0) = std::conj(out(X.n_rows - i, X.n_cols - j, 0));
     }
     for (arma::uword k = 1; k < X.n_slices; ++k) {
-      out(i, 0, k) = conj(out(X.n_rows - i, 0, X.n_slices - k));
+      out(i, 0, k) = std::conj(out(X.n_rows - i, 0, X.n_slices - k));
     }
     for (arma::uword j = 1; j < X.n_cols; ++j) {
       for (arma::uword k = 1; k < X.n_slices; ++k) {
-        out(i, j, k) = conj(out(X.n_rows - i, X.n_cols - j, X.n_slices - k));
+        out(i, j, k) =
+            std::conj(out(X.n_rows - i, X.n_cols - j, X.n_slices - k));
       }
     }
   }
@@ -221,7 +222,7 @@ arma::mat fmod_p(arma::mat mat_in, const double &denom) noexcept {
 double fmod_p(double num, const double &denom) noexcept {
   num = fmod(num, denom);
   if (num < 0)
-    num += abs(denom);
+    num += std::abs(denom);
   return num;
 }
 

@@ -122,7 +122,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
             max_line *= 2;
             if (max_line > INI_MAX_LINE)
                 max_line = INI_MAX_LINE;
-            new_line = realloc(line, max_line);
+            new_line = (char *)realloc(line, max_line);
             if (!new_line) {
                 free(line);
                 return -2;

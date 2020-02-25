@@ -33,7 +33,7 @@ double fit_eval(const std::vector<double> &c, std::vector<double> &grad,
   const auto madelung_term = d->madelung_term;
   const arma::rowvec model_energies =
       c.at(0) + c.at(1) * scales + c.at(2) * arma::square(scales) +
-      (c.at(1) - madelung_term) / c.at(3) * exp(-c.at(3) * scales);
+      (c.at(1) - madelung_term) / c.at(3) * arma::exp(-c.at(3) * scales);
   const auto fit_MSE = arma::accu(arma::square(energies - model_energies));
   return fit_MSE;
 }

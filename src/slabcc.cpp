@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
   // total extra charge of the VASP calculation
   model.defect_charge = accu(Defect_supercell.charge) * model.voxel_vol;
 
-  if (abs(model.defect_charge) < 0.001) {
+  if (std::abs(model.defect_charge) < 0.001) {
     log->debug("Total extra charge: {}", model.defect_charge);
     log->warn("Total extra charge seems to be very small. Please make sure the "
               "path to the input CHGCAR files are "
@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
       // TODO: need a better algorithm to handle the swaps and PBCs similar to
       // verify_interface_optimization()
       const arma::mat charge_position_change =
-          abs(charge_position0 - model.charge_position);
+          arma::abs(charge_position0 - model.charge_position);
       if (charge_position_change.max() > 0.1) {
         log->warn("The optimized position for the extra charge is "
                   "significantly different from the initial value. "
@@ -331,8 +331,8 @@ int main(int argc, char *argv[]) {
     // Also, positive value for the electron charge! (the probability of finding
     // an electron)
     Model_supercell.charge =
-        -real(model.CHG) * model.voxel_vol * model.CHG.n_elem;
-    Model_supercell.potential = -real(model.POT) * Hartree_to_eV;
+        -arma::real(model.CHG) * model.voxel_vol * model.CHG.n_elem;
+    Model_supercell.potential = -arma::real(model.POT) * Hartree_to_eV;
     future_files.push_back(std::async(std::launch::async,
                                       &supercell::write_CHGCAR, Model_supercell,
                                       "slabcc_M.CHGCAR"));
@@ -367,8 +367,9 @@ int main(int argc, char *argv[]) {
   const auto dV = model.POT_diff(farthest_element_index);
   log->info("Potential alignment (dV=): {}", to_string(dV));
   calculation_results.emplace_back("dV", to_string(dV));
-  const bool isotropic_screening = arma::accu(abs(diff(diel_in))) < 0.02;
-  if (abs(dV) > 0.05) {
+  const bool isotropic_screening =
+      arma::accu(arma::abs(arma::diff(diel_in))) < 0.02;
+  if (std::abs(dV) > 0.05) {
     if (model.type == model_type::bulk && isotropic_screening) {
       log->debug("The potential alignment term (dV) is relatively large. But "
                  "in the isotropic bulk models "
@@ -456,7 +457,8 @@ int main(int argc, char *argv[]) {
       const auto ewald_shells = generate_shells(unit_cell, radius);
       const auto madelung_const =
           jellium_madelung_constant(ewald_shells, unit_cell, 1);
-      auto madelung_term = -pow(model.total_charge, 2) * madelung_const / 2;
+      auto madelung_term =
+          -std::pow(model.total_charge, 2) * madelung_const / 2;
       nonlinear_fit_data fit_data = {Es, sizes, madelung_term};
       const auto cs = nonlinear_fit(1e-10, fit_data);
 
@@ -478,7 +480,7 @@ int main(int argc, char *argv[]) {
           arma::accu(arma::square(evals.t() - Es)) / Es.n_elem * 100;
       const arma::rowvec slopes = arma::diff(Es) / arma::diff(sizes);
       const auto extrapol_error_periodic =
-          abs(slopes(0) - slopes(slopes.n_elem - 1));
+          std::abs(slopes(0) - slopes(slopes.n_elem - 1));
       log->debug("--------------------------------------------------------");
       log->debug("Linear fit: Eper(Model) = {}/scaling + {}",
                  to_string(pols(0)), to_string(pols(1)));

@@ -89,24 +89,24 @@ void INIReader::dump_env_info() const {
   const std::vector<std::string> pbs_vars{"PBS_JOBID", "PBS_O_WORKDIR",
                                           "PBS_NP", "PBS_NODEFILE"};
 
-  if (getenv(slurm_vars.at(0).c_str())) {
+  if (std::getenv(slurm_vars.at(0).c_str())) {
     for (const auto &var : slurm_vars) {
-      if (const char *env_p = getenv(var.c_str())) {
+      if (const char *env_p = std::getenv(var.c_str())) {
         log->debug(">> {}={}", var, env_p);
       }
     }
   }
 
-  if (getenv(pbs_vars.at(0).c_str())) {
+  if (std::getenv(pbs_vars.at(0).c_str())) {
     for (const auto &var : pbs_vars) {
-      if (const char *env_p = getenv(var.c_str())) {
+      if (const char *env_p = std::getenv(var.c_str())) {
         log->debug(">> {}={}", var, env_p);
       }
     }
   }
 
   for (const auto &var : env_variables) {
-    if (const char *env_p = getenv(var.c_str())) {
+    if (const char *env_p = std::getenv(var.c_str())) {
       log->debug(">> {}={}", var, env_p);
     }
   }
@@ -122,9 +122,9 @@ void INIReader::dump_env_info() const {
 
   auto start_date_time = std::chrono::system_clock::now();
   auto tt = std::chrono::system_clock::to_time_t(start_date_time);
-  auto timeinfo = localtime(&tt);
+  auto timeinfo = std::localtime(&tt);
   char time_string_buffer[80];
-  strftime(time_string_buffer, 80, "System clock: %F %T", timeinfo);
+  std::strftime(time_string_buffer, 80, "System clock: %F %T", timeinfo);
   log->debug(time_string_buffer);
 }
 
@@ -132,7 +132,8 @@ void INIReader::dump_parsed() const {
 
   auto log = spdlog::get("loggers");
   auto output_log = spdlog::get("output");
-  sort(_parsed.begin(), _parsed.end(), [](const auto &lhs, const auto &rhs) {
+  std::sort(_parsed.begin(), _parsed.end(),
+            [](const auto &lhs, const auto &rhs) {
     return tolower(rhs.at(0)) > tolower(lhs.at(0));
   });
   update_loggers();
@@ -166,7 +167,7 @@ void INIReader::dump_parsed() const {
       }
     }
     if (!has_parsed) {
-      if (find(deprecated_params.begin(), deprecated_params.end(),
+      if (std::find(deprecated_params.begin(), deprecated_params.end(),
                param_in_file) != deprecated_params.end()) {
         log->warn("The parameter \"{}\" in deprecated! Please refer to this "
                   "version of the slabcc's manual for a complete list of the "
@@ -236,7 +237,7 @@ long INIReader::GetInteger(const std::string &name,
   const std::string valstr = Get(name);
   const char *value = valstr.c_str();
   char *end;
-  const long n = strtol(value, &end, 0);
+  const long n = std::strtol(value, &end, 0);
   const long result = end > value ? n : default_value;
   _parsed.push_back({name, std::to_string(result)});
   return result;
@@ -247,7 +248,7 @@ double INIReader::GetReal(const std::string &name,
   const std::string valstr = Get(name);
   const char *value = valstr.c_str();
   char *end;
-  const double n = strtod(value, &end);
+  const double n = std::strtod(value, &end);
   const double result = end > value ? n : default_value;
   _parsed.push_back({name, ::to_string(result)});
   return result;

@@ -60,7 +60,7 @@ void slabcc_model::change_size(const arma::mat33 &new_cell_vectors) {
                      cell_vectors_lengths(normal_direction);
 
   const arma::rowvec3 scaling = cell_vectors_lengths / cell_vectors_lengths0;
-  if (abs(max(scaling) - min(scaling)) > 0.00001) {
+  if (std::abs(max(scaling) - min(scaling)) > 0.00001) {
     log->warn("Model cell scaling is anisotropic!");
   }
 }
@@ -71,7 +71,7 @@ void slabcc_model::update_voxel_vol() {
 
 void slabcc_model::update_cell_vectors_lengths() {
   for (arma::uword i = 0; i < 3; ++i) {
-    cell_vectors_lengths(i) = norm(cell_vectors.col(i));
+    cell_vectors_lengths(i) = arma::norm(cell_vectors.col(i));
   }
 
   //(only works in the orthogonal case!)
@@ -97,14 +97,14 @@ void slabcc_model::dielectric_profiles_gen() {
     const arma::rowvec2 distances =
         fmod_p(positions(k) - interfaces_cartesian + length / 2, length) -
         length / 2;
-    if (abs(distances(0)) < abs(distances(1))) {
+    if (std::abs(distances(0)) < std::abs(distances(1))) {
       min_distance = distances(0);
       diel_side = -1;
     } else {
       min_distance = distances(1);
     }
 
-    const auto diel_edge = erf(min_distance / diel_erf_beta);
+    const auto diel_edge = std::erf(min_distance / diel_erf_beta);
     dielectric_profiles.row(k) =
         (diel_diff * diel_side * diel_edge + diel_sum) / 2;
   }
@@ -133,18 +133,18 @@ void slabcc_model::gaussian_charges_gen() {
           z0 - arma::accu(cell_vectors.col(2) * charge_position(i, 2));
       // handle the minimum distance from the mirror charges
       for (auto &pos : x) {
-        if (abs(pos) > cell_vectors_lengths(0) / 2) {
-          pos = cell_vectors_lengths(0) - abs(pos);
+        if (std::abs(pos) > cell_vectors_lengths(0) / 2) {
+          pos = cell_vectors_lengths(0) - std::abs(pos);
         }
       }
       for (auto &pos : y) {
-        if (abs(pos) > cell_vectors_lengths(1) / 2) {
-          pos = cell_vectors_lengths(1) - abs(pos);
+        if (std::abs(pos) > cell_vectors_lengths(1) / 2) {
+          pos = cell_vectors_lengths(1) - std::abs(pos);
         }
       }
       for (auto &pos : z) {
-        if (abs(pos) > cell_vectors_lengths(2) / 2) {
-          pos = cell_vectors_lengths(2) - abs(pos);
+        if (std::abs(pos) > cell_vectors_lengths(2) / 2) {
+          pos = cell_vectors_lengths(2) - std::abs(pos);
         }
       }
 
@@ -156,17 +156,17 @@ void slabcc_model::gaussian_charges_gen() {
       if (arma::max(arma::abs(rotation_angle)) > 0.002) {
         const arma::mat33 rot_x = {
             {1, 0, 0},
-            {0, cos(rotation_angle(0)), -sin(rotation_angle(0))},
-            {0, sin(rotation_angle(0)), cos(rotation_angle(0))}};
+            {0, std::cos(rotation_angle(0)), -std::sin(rotation_angle(0))},
+            {0, std::sin(rotation_angle(0)), std::cos(rotation_angle(0))}};
 
         const arma::mat33 rot_y = {
-            {cos(rotation_angle(1)), 0, sin(rotation_angle(1))},
+            {std::cos(rotation_angle(1)), 0, std::sin(rotation_angle(1))},
             {0, 1, 0},
-            {-sin(rotation_angle(1)), 0, cos(rotation_angle(1))}};
+            {-std::sin(rotation_angle(1)), 0, std::cos(rotation_angle(1))}};
 
         const arma::mat33 rot_z = {
-            {cos(rotation_angle(2)), -sin(rotation_angle(2)), 0},
-            {sin(rotation_angle(2)), cos(rotation_angle(2)), 0},
+            {std::cos(rotation_angle(2)), -std::sin(rotation_angle(2)), 0},
+            {std::sin(rotation_angle(2)), std::cos(rotation_angle(2)), 0},
             {0, 0, 1}};
 
         const arma::mat33 rotation_mat = rot_x * rot_y * rot_z;
@@ -193,15 +193,16 @@ void slabcc_model::gaussian_charges_gen() {
 
       if (trivariate_charge) {
         CHG += arma::cx_cube(
-            Q / (pow(2 * PI, 1.5) * arma::prod(charge_sigma.row(i))) *
-                exp(-arma::square(xs) / (2 * square(charge_sigma(i, 0))) -
-                    arma::square(ys) / (2 * square(charge_sigma(i, 1))) -
-                    arma::square(zs) / (2 * square(charge_sigma(i, 2)))),
+            Q / (std::pow(2 * PI, 1.5) * arma::prod(charge_sigma.row(i))) *
+                arma::exp(-arma::square(xs) / (2 * square(charge_sigma(i, 0))) -
+                          arma::square(ys) / (2 * square(charge_sigma(i, 1))) -
+                          arma::square(zs) / (2 * square(charge_sigma(i, 2)))),
             arma::zeros(as_size(cell_grid)));
       } else {
-        CHG += arma::cx_cube(Q / pow((charge_sigma(i, 0) * sqrt(2 * PI)), 3) *
-                                 exp(-r2 / (2 * square(charge_sigma(i, 0)))),
-                             arma::zeros(as_size(cell_grid)));
+        CHG += arma::cx_cube(
+            Q / std::pow((charge_sigma(i, 0) * std::sqrt(2 * PI)), 3) *
+                arma::exp(-r2 / (2 * square(charge_sigma(i, 0)))),
+            arma::zeros(as_size(cell_grid)));
       }
     }
 
@@ -349,7 +350,7 @@ void slabcc_model::data_unpacker(
       charge_fraction(i) =
           optimizer_vars_vec.at(fraction_offset + i * variables_per_charge);
     } else {
-      charge_fraction(i) = 1.0 - accu(charge_fraction);
+      charge_fraction(i) = 1.0 - arma::accu(charge_fraction);
     }
   }
 }
@@ -369,14 +370,14 @@ void slabcc_model::verify_interface_optimization(
 
   const arma::rowvec3 mirroring_template = {-1, 0, 1};
   const arma::mat interface_all_mirrors =
-      repmat(mirroring_template, 2, 1) +
-      repmat(unshifted__interfaces.t(), 1, 3);
+      arma::repmat(mirroring_template, 2, 1) +
+      arma::repmat(unshifted__interfaces.t(), 1, 3);
   const arma::mat interface_n0_shiftes =
-      abs(interface_all_mirrors - unshifted_initial_interfaces(0));
-  arma::vec interface_n0_distances = min(interface_n0_shiftes, 1);
+      arma::abs(interface_all_mirrors - unshifted_initial_interfaces(0));
+  arma::vec interface_n0_distances = arma::min(interface_n0_shiftes, 1);
   const arma::mat interface_n1_shiftes =
-      abs(interface_all_mirrors - unshifted_initial_interfaces(1));
-  arma::vec interface_n1_distances = min(interface_n1_shiftes, 1);
+      arma::abs(interface_all_mirrors - unshifted_initial_interfaces(1));
+  arma::vec interface_n1_distances = arma::min(interface_n1_shiftes, 1);
   const arma::rowvec2 total_changes = {
       interface_n0_distances(0) + interface_n1_distances(1),
       interface_n0_distances(1) + interface_n1_distances(0)};
@@ -416,7 +417,7 @@ void slabcc_model::verify_charge_optimization() const {
   const double min_non_negligable_q = 0.01;
   auto log = spdlog::get("loggers");
   for (arma::uword i = 0; i < charge_fraction.n_elem; ++i) {
-    if (abs(total_charge) * charge_fraction(i) > min_non_negligable_q) {
+    if (std::abs(total_charge) * charge_fraction(i) > min_non_negligable_q) {
       if (charge_sigma.row(i).max() > max_sigma) {
         log->error("The model extra charge seems to be (at least partially) "
                    "delocalized. The current charge correction method is not "
@@ -433,7 +434,7 @@ bool slabcc_model::had_discretization_error() {
 
   auto log = spdlog::get("loggers");
   const double tolerance = 1e-4; // minimum significant discretization error
-  const double new_charge_error = abs(defect_charge - total_charge);
+  const double new_charge_error = std::abs(defect_charge - total_charge);
   if ((last_charge_error > tolerance) &&
       (new_charge_error > last_charge_error)) {
     // increasing the grid size is not helping
@@ -512,7 +513,7 @@ slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
   const arma::rowvec3 cell_vectors_lengths0 = cell_vectors_lengths;
   const auto interfaces0 = interfaces;
   const auto charge_position0 = charge_position;
-  const double slab_thickness = abs(interfaces(0) - interfaces(1));
+  const double slab_thickness = std::abs(interfaces(0) - interfaces(1));
   arma::rowvec Es = arma::zeros<arma::rowvec>(extrapol_steps_num - 1),
                sizes = Es;
   for (auto step = 1; step < extrapol_steps_num; ++step) {
@@ -520,7 +521,7 @@ slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
     change_size(cell_vectors0 * extrapol_factor);
     if (this->type == model_type::slab) {
       // increase the slab thickness
-      const arma::uvec interface_sorted_i = sort_index(interfaces);
+      const arma::uvec interface_sorted_i = arma::sort_index(interfaces);
       interfaces(interface_sorted_i(1)) =
           interfaces(interface_sorted_i(0)) + slab_thickness;
       // move the charges to the same distance from their original nearest
@@ -530,8 +531,8 @@ slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
         const arma::rowvec2 initial_distance_to_interfaces =
             (charge_position0(charge_i, normal_direction) - interfaces0) *
             cell_vectors_lengths0(normal_direction);
-        if (abs(initial_distance_to_interfaces(0)) <
-            abs(initial_distance_to_interfaces(1))) {
+        if (std::abs(initial_distance_to_interfaces(0)) <
+            std::abs(initial_distance_to_interfaces(1))) {
           charge_position(charge_i, normal_direction) =
               interfaces(0) + initial_distance_to_interfaces(0) /
                                   cell_vectors_lengths(normal_direction);
@@ -584,7 +585,7 @@ double slabcc_model::Eiso_bessel() const {
   // hand-tuned adaptive grid based on the derivative of the Uk ~~log(k)
   for (int ki = 0; ki < K_max; ++ki) {
     const int grid_density =
-        static_cast<int>(pow(10, -log((ki + 1) / 100.0)) / 5.0) + 1;
+        static_cast<int>(std::pow(10, -std::log((ki + 1) / 100.0)) / 5.0) + 1;
     K = arma::join_horiz(
         K, arma::linspace<arma::rowvec>(ki + K_min, ki + 1, grid_density));
   }
@@ -593,10 +594,10 @@ double slabcc_model::Eiso_bessel() const {
   // eq. 7 in the SI (Supplementary Information for `First-principles
   // electrostatic potentials for reliable alignment at interfaces and defects`)
   const arma::rowvec integrand =
-      K % exp(-square(K) * pow(charge_sigma(0, 0), 2)) % Uk(K);
-  const arma::mat integral = trapz(K, integrand, 1);
+      K % arma::exp(-arma::square(K) * std::pow(charge_sigma(0, 0), 2)) % Uk(K);
+  const arma::mat integral = arma::trapz(K, integrand, 1);
   const double Q = charge_fraction(0) * total_charge;
-  const double U_total = pow(Q, 2) * integral(0) * Hartree_to_eV;
+  const double U_total = std::pow(Q, 2) * integral(0) * Hartree_to_eV;
 
   return U_total;
 }
@@ -628,23 +629,23 @@ arma::rowvec slabcc_model::Uk(arma::rowvec k) const {
   const arma::mat Ag2 = Gz0.t() * Gz0;
   const arma::cx_double coef(0, -1); // compiler-specific problem!
   const arma::cx_mat rhok =
-      exp(coef * Gz0 * z0 - Gz02 * pow(charge_sigma(0, 0), 2) / 2.0);
+      arma::exp(coef * Gz0 * z0 - Gz02 * std::pow(charge_sigma(0, 0), 2) / 2.0);
   const arma::cx_mat rhok_t = rhok.t();
   const arma::cx_mat rho = ifft(rhok_t);
   arma::rowvec Uk = arma::zeros(arma::size(k));
 
   const arma::cx_mat Ag12 = Ag1 % Ag2;
-  const auto cosGL_2 = cos(Gz0 * length(normal) / 2.0);
+  const auto cosGL_2 = arma::cos(Gz0 * length(normal) / 2.0);
   for (arma::uword i = 0; i < k.n_elem; ++i) {
     const arma::cx_mat Ag = Ag12 + Ag1p * k(i) * k(i);
     const double keff = k(i);
     const arma::mat Kinvg =
-        arma::diagmat(dielbulk * length(normal) * (pow(keff, 2) + Gz02) /
-                      (1 - exp(-keff * length(normal) / 2.0) * cosGL_2));
+        arma::diagmat(dielbulk * length(normal) * (std::pow(keff, 2) + Gz02) /
+                      (1 - std::exp(-keff * length(normal) / 2.0) * cosGL_2));
     const arma::cx_mat Dg = Kinvg + length(normal) * Ag;
     const auto VGz = arma::solve(Dg, rhok_t);
     const auto Vz = ifft(VGz) * LGz;
-    Uk(i) = real(arma::accu(Vz % rho));
+    Uk(i) = std::real(arma::accu(Vz % rho));
   }
 
   return Uk;
@@ -677,12 +678,13 @@ double slabcc_model::potential_error(const std::vector<double> &x,
 
   POT = poisson_solver_3D(CHG, dielectric_profiles, cell_vectors_lengths,
                           normal_direction);
-  POT_diff = real(POT) * Hartree_to_eV - POT_target;
+  POT_diff = arma::real(POT) * Hartree_to_eV - POT_target;
   // bigger output for out-of-bounds input: quadratic penalty
   const double bounds_correction =
       bounds_factor + 10 * bounds_factor * bounds_factor;
-  potential_RMSE = sqrt(arma::accu(arma::square(POT_diff)) / POT_diff.n_elem) +
-                   bounds_correction;
+  potential_RMSE =
+      std::sqrt(arma::accu(arma::square(POT_diff)) / POT_diff.n_elem) +
+      bounds_correction;
 
   if (initial_potential_RMSE < 0) {
     initial_potential_RMSE = potential_RMSE;
@@ -705,7 +707,7 @@ double slabcc_model::potential_error(const std::vector<double> &x,
                to_string(unshifted_charge_position.row(i)));
     if (trivariate_charge) {
       log->debug("{}> charge_sigma={}", i + 1, to_string(charge_sigma.row(i)));
-      if (abs(charge_rotations).max() > 0) {
+      if (arma::abs(charge_rotations).max() > 0) {
         const arma::rowvec3 rotation = charge_rotations.row(i) * 180.0 / PI;
         log->debug("{}> charge_rotation={}", i + 1, to_string(rotation));
       }
@@ -793,7 +795,8 @@ void slabcc_model::optimize(const std::string &opt_algo, const double &opt_tol,
 void slabcc_model::check_V_error() {
   auto log = spdlog::get("loggers");
 
-  const bool isotropic_screening = accu(abs(diff(diel_in))) < 0.02;
+  const bool isotropic_screening =
+      arma::accu(arma::abs(arma::diff(diel_in))) < 0.02;
   if (potential_RMSE > 0.1) {
     if (type == model_type::bulk && isotropic_screening) {
       log->debug("RMSE of the model charge potential is large but for the bulk "
@@ -829,7 +832,7 @@ void slabcc_model::check_V_error() {
   }
 
   log->debug("Potential error anisotropy: {}",
-             max(V_error_planars) / min(V_error_planars));
+             arma::max(V_error_planars) / arma::min(V_error_planars));
 }
 
 void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
@@ -860,7 +863,7 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
     arma::urowvec2 defect_interfaces_grid_i = {
         static_cast<arma::uword>(defect_interfaces_index(0)),
         static_cast<arma::uword>(defect_interfaces_index(1))};
-    defect_interfaces_grid_i = sort(defect_interfaces_grid_i);
+    defect_interfaces_grid_i = arma::sort(defect_interfaces_grid_i);
     std::vector<arma::span> defect_spans = {
         arma::span(), arma::span(),
         arma::span(defect_interfaces_grid_i(0), defect_interfaces_grid_i(1))};
@@ -870,7 +873,8 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
         arma::prod(cell_vectors_lengths / defect_grid);
     const double defect_total = arma::accu(defect_charge) * defect_voxel_vol;
     const double defect_in =
-        accu(defect_charge(defect_spans[0], defect_spans[1], defect_spans[2])) *
+        arma::accu(
+            defect_charge(defect_spans[0], defect_spans[1], defect_spans[2])) *
         defect_voxel_vol;
     const double defect_out = defect_total - defect_in;
 
@@ -881,10 +885,10 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
     log->debug("Total charge of the defect slab (inside, outside): {}, {}",
                defect_in, defect_out);
 
-    const bool large_charge_difference = abs(model_in - defect_in) > 0.1;
+    const bool large_charge_difference = std::abs(model_in - defect_in) > 0.1;
     const arma::mat relative_charge_interface_distance =
-        abs(arma::repmat(charge_position.col(normal_direction), 1, 2) -
-            arma::repmat(interfaces, charge_position.n_rows, 1));
+        arma::abs(arma::repmat(charge_position.col(normal_direction), 1, 2) -
+                  arma::repmat(interfaces, charge_position.n_rows, 1));
     const arma::mat charge_interface_distance =
         relative_charge_interface_distance *
         cell_vectors_lengths(normal_direction) / ang_to_bohr;
@@ -896,11 +900,11 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
                  charge_interface_distance.min());
       log->debug("Difference of the charge inside of the slab in the defect "
                  "and the model: {}",
-                 abs(model_in - defect_in));
+                 std::abs(model_in - defect_in));
       log->warn(
           "The amount of the charge inside and outside of the slab seems to be "
           "different in the input files and the slabcc model. The extra charge "
-          "may be partially localized on the slab surfaces. ");
+          "may be partially localized on the slab surfaces.");
     }
   }
 }

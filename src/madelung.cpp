@@ -62,7 +62,7 @@ double madelung_real_sum(const arma::mat &shells,
   double sum = 0;
   for (arma::uword i = 0; i < shells.n_rows; ++i) {
     const double distance = arma::norm(shells.row(i) % lattice_vectors);
-    sum += erfc(G * distance) / distance;
+    sum += std::erfc(G * distance) / distance;
   }
   return sum;
 }
@@ -74,9 +74,9 @@ double madelung_reciprocal_sum(const arma::mat &shells,
   for (arma::uword i = 0; i < shells.n_rows; ++i) {
     const double G2 =
         arma::accu(arma::square(shells.row(i) % reciprocal_lattice_vec));
-    sum += exp(-G2 / (4 * pow(G, 2))) / (G2 / (4 * pow(G, 2)));
+    sum += std::exp(-G2 / (4 * std::pow(G, 2))) / (G2 / (4 * std::pow(G, 2)));
   }
-  return sum / pow(G, 2);
+  return sum / std::pow(G, 2);
 }
 
 double jellium_madelung_constant(const arma::mat &shells,
@@ -86,8 +86,9 @@ double jellium_madelung_constant(const arma::mat &shells,
   const double reciprocal_sum =
       madelung_reciprocal_sum(shells, 2 * PI / lattice_vectors, G);
   const double inverse_unit_vol = PI / arma::prod(lattice_vectors);
-  double madelung_constant = -(inverse_unit_vol * reciprocal_sum + real_sum -
-                               2 * G / sqrt(PI) - inverse_unit_vol / pow(G, 2));
-  madelung_constant *= pow(arma::prod(lattice_vectors), 1.0 / 3);
+  double madelung_constant =
+      -(inverse_unit_vol * reciprocal_sum + real_sum - 2 * G / std::sqrt(PI) -
+        inverse_unit_vol / std::pow(G, 2));
+  madelung_constant *= std::pow(arma::prod(lattice_vectors), 1.0 / 3);
   return madelung_constant;
 }

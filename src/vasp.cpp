@@ -12,9 +12,9 @@ void supercell::write_POSCAR(const std::string &file_name) const {
            << scaling << '\n';
   cell_vectors.t().raw_print(out_file);
   std::vector<int> defs = atoms.definition_order;
-  const auto end =
-      std::unique(defs.begin(), defs.end(),
-                  [](const int &l, const int &r) noexcept { return l == r; });
+  const auto end = std::unique(
+      defs.begin(),
+      defs.end(), [](const int &l, const int &r) noexcept { return l == r; });
   defs.erase(end, defs.end());
   for (const auto &i : defs) {
     const auto it = std::find(atoms.definition_order.begin(),
@@ -140,16 +140,17 @@ supercell::supercell(const std::string &file_name) {
   atoms.position.set_size(atom_counter, 3);
   atoms.constrains.resize(atom_counter, std::vector<bool>(3, 0));
   std::getline(infile, temp_line);
-  if (tolower(temp_line.at(0)) == 's') {
+  if (std::tolower(temp_line.at(0)) == 's') {
     selective_dynamics = true;
     std::getline(infile, temp_line);
   } else {
     selective_dynamics = false;
   }
 
-  if ((tolower(temp_line.at(0)) == 'k') || (tolower(temp_line.at(0)) == 'c')) {
+  if ((std::tolower(temp_line.at(0)) == 'k') ||
+      (std::tolower(temp_line.at(0)) == 'c')) {
     coordination_system = "cartesian";
-  } else if (tolower(temp_line.at(0)) == 'd') {
+  } else if (std::tolower(temp_line.at(0)) == 'd') {
     coordination_system = "direct"; // in VASP it means relative!!
   } else {
     log->critical("Unknown coordination system type in " + file_name);
@@ -284,9 +285,10 @@ void check_slabcc_compatiblity(const supercell &Neutral_supercell,
   auto log = spdlog::get("loggers");
 
   // equal size
-  if (!approx_equal(Neutral_supercell.cell_vectors * Neutral_supercell.scaling,
-                    Charged_supercell.cell_vectors * Charged_supercell.scaling,
-                    "reldiff", 0.001)) {
+  if (!arma::approx_equal(
+          Neutral_supercell.cell_vectors * Neutral_supercell.scaling,
+          Charged_supercell.cell_vectors * Charged_supercell.scaling, "reldiff",
+          0.001)) {
     log->debug(
         "Neutral supercell vectors: " +
         to_string(Neutral_supercell.cell_vectors * Neutral_supercell.scaling));
