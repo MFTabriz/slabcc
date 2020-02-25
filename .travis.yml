@@ -12,8 +12,6 @@ jobs:
       compiler: gcc
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
           packages:
             - clang-format-9
       before_install: true

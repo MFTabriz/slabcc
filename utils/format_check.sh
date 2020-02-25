@@ -1,7 +1,7 @@
 #! /bin/bash
 files_to_check="$(find src/* -maxdepth 0 -name '*.cpp' -or -name '*.hpp')"
 for f in ${files_to_check}; do
-	d=$(diff -u "$f" <(clang-format-9 -style=file "$f") || true)
+	d=$(diff -u "$f" <(clang-format-9 --verbose -style=file "$f") || true)
 	if ! [ -z "$d" ]; then
 		printf ":\n%s\n" "$d"
 		fail=1
