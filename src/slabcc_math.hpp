@@ -106,7 +106,7 @@ arma::Cube<T> shift(const arma::Cube<T> &A, const arma::sword &N,
   arma::imat sub_shift =
       arma::conv_to<arma::imat>::from(arma::ind2sub(arma::size(A), index_init));
   const arma::uword size = arma::size(A)(dim);
-  sub_shift.row(dim).for_each([&N, &size ](arma::sword & i) noexcept {
+  sub_shift.row(dim).for_each([&N, &size](arma::sword &i) noexcept {
     i += N;
     while (i < 0)
       i += size;

@@ -1,5 +1,4 @@
 language: cpp
-sudo: required
 env:
   global:
     - OPENBLAS_NUM_THREADS=1
@@ -9,14 +8,17 @@ jobs:
   include:
     - name: "clang-format checks"
       os: linux
-      dist: xenial
+      dist: bionic
       compiler: gcc
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
-            - clang-format
+            - clang-format-9
       before_install: true
       script:
+        - clang-format-9 --version
         - ./utils/format_check.sh
       after_script: true
     - name: "GCC 5 Build on Linux xenial"
