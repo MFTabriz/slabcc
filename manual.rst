@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 20 Feb 2020
+:Last updated: 26 Feb 2020
 :version: 0.8.4
 
 .. sectnum::
@@ -192,7 +192,7 @@ Installation
 ============
 1. **Prerequisites:**
 
- #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
+ #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
@@ -682,7 +682,7 @@ __ check_
 
 10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table`_ for complete list of the output files.
 
- Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
+ Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the (charge corrected) total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
 
 .. _cite:
 
@@ -690,6 +690,15 @@ __ check_
 
  Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
   
+12. **How can I extract the files in slabcc_data.tar.xz?**   
+
+    tar -xvf slabcc_data.tar.xz
+
+13. **Something is not working! What should I do?**
+
+	* If you need help wih compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
+	* If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`_.
+
 ==================================
 Known issues and limitations
 ==================================
@@ -710,7 +719,7 @@ Release history highlights
 ===========================
 Copyright and attributions
 ===========================
-Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
 
 The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
 
@@ -760,7 +769,7 @@ Included third-party components
 
 License
 -------
-Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

@@ -885,7 +885,7 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
     log->debug("Total charge of the defect slab (inside, outside): {}, {}",
                defect_in, defect_out);
 
-    const bool large_charge_difference = std::abs(model_in - defect_in) > 0.1;
+    const bool large_charge_difference = std::abs(model_in - defect_in) > 0.2;
     const arma::mat relative_charge_interface_distance =
         arma::abs(arma::repmat(charge_position.col(normal_direction), 1, 2) -
                   arma::repmat(interfaces, charge_position.n_rows, 1));

@@ -1076,7 +1076,7 @@ span.boxed, span.framebox {
 <col class="field-body" />
 <tbody valign="top">
 <tr class="last-updated field">
-<th class="docinfo-name">Last updated:</th><td class="field-body">20 Feb 2020</td>
+<th class="docinfo-name">Last updated:</th><td class="field-body">26 Feb 2020</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
 <td>0.8.4</td></tr>
@@ -1366,7 +1366,7 @@ diel_in = 6.28 6.28 1.83
 </ol>
 <blockquote>
 <ol class="arabic simple">
-<li><strong>Compiler:</strong> You need a C++ compiler with C++14 standard support (e.g. <a class="reference external" href="https://gcc.gnu.org/">g++</a> 5.0 or later, <a class="reference external" href="https://software.intel.com/en-us/c-compilers">icpc</a> 15.0 or later, etc.)</li>
+<li><strong>Compiler:</strong> You need a C++ compiler with <a class="reference external" href="https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features">C++14 standard support</a> (e.g. <a class="reference external" href="https://gcc.gnu.org/">g++</a> 5.0 or later)</li>
 <li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="http://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md">Armadillo documentations</a> for linking to the other BLAS replacements.</li>
 <li><strong>FFTW:</strong> If you don't have FFTW installed on your system follow the guide on the <a class="reference external" href="http://www.fftw.org/download.html">FFTW website</a>. Alternatively, you can use the FFTW interface of the MKL.</li>
 </ol>
@@ -1982,10 +1982,20 @@ LCHARG = .TRUE.
 <li><strong>Can I run the slabcc on a computational cluster?</strong> Yes. BUT… Although slabcc hugely benefits from the multicore architecture of the computation nodes using OpenMP, it has not yet been parallelized using MPI. Therefore, It won’t use more than one machine at a time.</li>
 <li><strong>Is the slabcc free? Can I use its source code in my own software?</strong> slabcc is released under the 2-Clause BSD <a class="reference internal" href="#license">license</a> which permits this software to be modified, redistributed and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)</li>
 <li><strong>How accurate are the slabcc results?</strong> The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means that the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few <a class="reference internal" href="#known-issues-and-limitations">known issues and limitations</a> to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the <a class="reference internal" href="#license">license</a> explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.</li>
-<li id="check"><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <tt class="docutils literal">slabcc_MZCHG.dat</tt> and <tt class="docutils literal">slabcc_MZPOT.dat</tt>, with <tt class="docutils literal">slabcc_DZCHG.dat</tt> and <tt class="docutils literal">slabcc_DZPOT.dat</tt>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</li>
-<p>Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</p>
-<li id="cite"><strong>How should I cite the slabcc?</strong> Please cite the slabcc as: (You can <a class="reference external" href="https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&amp;format=application%2Fx-research-info-systems&amp;withabstract=true">download the citation in the RIS format from here</a>!)</li>
-<p>Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SLABCC: Total energy correction code for charged periodic slab models</em>, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: <a class="reference external" href="https://doi.org/10.1016/j.cpc.2019.02.018">10.1016/j.cpc.2019.02.018</a></p>
+<li id="check"><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <tt class="docutils literal">slabcc_MZCHG.dat</tt> and <tt class="docutils literal">slabcc_MZPOT.dat</tt>, with <tt class="docutils literal">slabcc_DZCHG.dat</tt> and <tt class="docutils literal">slabcc_DZPOT.dat</tt>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.
+<p>Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the (charge corrected) total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</p></li>
+<li id="cite"><strong>How should I cite the slabcc?</strong> Please cite the slabcc as: (You can <a class="reference external" href="https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&amp;format=application%2Fx-research-info-systems&amp;withabstract=true">download the citation in the RIS format from here</a>!)
+<p>Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SLABCC: Total energy correction code for charged periodic slab models</em>, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: <a class="reference external" href="https://doi.org/10.1016/j.cpc.2019.02.018">10.1016/j.cpc.2019.02.018</a></p></li>
+<li><strong>How can I extract the files in slabcc_data.tar.xz?</strong>
+<pre class="literal-block">
+tar -xvf slabcc_data.tar.xz
+</pre></li>
+<li><strong>Something is not working! What should I do?</strong>
+<ul class="simple">
+<li>If you need help wih compiling the code or running it on a cluster, please contact your <a class="reference external" href="https://en.wikipedia.org/wiki/System_administrator">system administrator</a>.</li>
+<li>If you have found a bug in the code, please report it <a class="reference external" href="https://github.com/MFTabriz/slabcc/issues/new">here</a>.</li>
+</ul>
+</li>
 </ol>
  </div>
 <div class="section" id="known-issues-and-limitations">
@@ -2012,7 +2022,7 @@ LCHARG = .TRUE.
 </div>
 <div class="section" id="copyright-and-attributions">
 <h1><a class="toc-backref" href="#id36">11&nbsp;&nbsp;&nbsp;Copyright and attributions</a></h1>
-<p>Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz</p>
+<p>Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz</p>
 <p>The source codes and all the documentations are available under The 2-Clause BSD License. For more information see <a class="reference internal" href="#license">license</a>.</p>
 <div class="line-block">
 <div class="line">This code uses several open source components each of which are located under a separate sub-directory in the <tt class="docutils literal">src/</tt>. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.</div>
@@ -2089,7 +2099,7 @@ LCHARG = .TRUE.
 </div>
 <div class="section" id="license">
 <h2><a class="toc-backref" href="#id39">11.2&nbsp;&nbsp;&nbsp;License</a></h2>
-<p>Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz</p>
+<p>Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz</p>
 <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
 <ol class="arabic simple">
 <li>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>

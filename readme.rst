@@ -1,7 +1,7 @@
 .. |Version| image:: https://img.shields.io/badge/version-0.8.4-blue.svg
    :alt: Version 0.8.4
-.. |Update| image:: https://img.shields.io/badge/Last%20update-20.02.2020-informational.svg
-   :alt: Last update 20 Feb 2020
+.. |Update| image:: https://img.shields.io/badge/Last%20update-26.02.2020-informational.svg
+   :alt: Last update 26 Feb 2020
 .. |Style| image:: https://img.shields.io/badge/code%20style-LLVM-black
    :alt: Code style
    :target: https://llvm.org/docs/CodingStandards.html
@@ -152,7 +152,7 @@ Installation
 ============
 1. **Prerequisites:**
 
- #. **Compiler:** You need a C++ compiler with C++14 standard support (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later, `icpc <https://software.intel.com/en-us/c-compilers>`_ 15.0 or later, etc.) 
+ #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.500.x/README.md>`_ for linking to the other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
@@ -196,7 +196,7 @@ Release history highlights
 ===========================
 Copyright and attributions
 ===========================
-Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
 
 The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
 
@@ -246,7 +246,7 @@ Included third-party components
 
 License
 -------
-Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
