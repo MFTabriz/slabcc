@@ -690,13 +690,15 @@ __ check_
 
  Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
   
-12. **How can I extract the files in slabcc_data.tar.xz?**   
+12. **How can I extract the files in slabcc_data.tar.xz?** You can use the `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:  
 
     tar -xvf slabcc_data.tar.xz
 
+ Alternatively, you can use the `WinRAR <https://www.rarlab.com>`_ or `7zip <https://www.7-zip.org>`_.
+ 
 13. **Something is not working! What should I do?**
 
-	* If you need help wih compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
+	* If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
 	* If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`_.
 
 ==================================
