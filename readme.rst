@@ -14,9 +14,9 @@
 .. |Codacy| image:: https://api.codacy.com/project/badge/Grade/85d640604a454870b04081617ed538c9
    :alt: Codacy Badge
    :target: https://www.codacy.com/app/MFTabriz/slabcc
-.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1419758.svg
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1323558.svg
    :alt: Test Set
-   :target: https://doi.org/10.5281/zenodo.1419758
+   :target: https://doi.org/10.5281/zenodo.1323558
 .. |License| image:: https://img.shields.io/badge/License-BSD--2--Clause-blue
    :alt: License: BSD-2-Clause
    :target: https://opensource.org/licenses/BSD-2-Clause
