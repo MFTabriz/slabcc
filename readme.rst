@@ -1,7 +1,7 @@
 .. |Version| image:: https://img.shields.io/badge/version-0.8.4-blue.svg
    :alt: Version 0.8.4
-.. |Update| image:: https://img.shields.io/badge/Last%20update-26.02.2020-informational.svg
-   :alt: Last update 26 Feb 2020
+.. |Update| image:: https://img.shields.io/badge/Last%20update-10.11.2020-informational.svg
+   :alt: Last update 10 Nov. 2020
 .. |Style| image:: https://img.shields.io/badge/code%20style-LLVM-black
    :alt: Code style
    :target: https://llvm.org/docs/CodingStandards.html
@@ -156,8 +156,8 @@ Installation
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.500.x/README.md>`_ for linking to the other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
-2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
-3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
+2. **Configuration:** You must edit the `bin/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries.
+3. **Compilation:** Run the command `make` in the `bin/` to compile the slabcc.
 4. **Cleanup:** You can run `make clean` to remove the compiled objects, and static library files. `make distclean` additionally removes all the compiled objects in the external libraries.
 
 **Note**: By default, the code will be compiled for the specific microarchitecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.

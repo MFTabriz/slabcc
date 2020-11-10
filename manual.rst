@@ -1,6 +1,6 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 26 Feb 2020
+:Last updated: 10 Nov. 2020
 :version: 0.8.4
 
 .. sectnum::
@@ -196,8 +196,8 @@ Installation
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
-2. **Configuration:** You must edit the `src/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries. 
-3. **Compilation:** Run the command `make` in the `src/` to compile the slabcc.
+2. **Configuration:** You must edit the `bin/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries.
+3. **Compilation:** Run the command `make` in the `bin/` to compile the slabcc.
 4. **Cleanup:** You can run `make clean` to remove the compiled objects, and static library files. `make distclean` additionally removes all the compiled objects in the external libraries.
 
 **Note**: By default, the code will be compiled for the specific microarchitecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.

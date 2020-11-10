@@ -1076,7 +1076,7 @@ span.boxed, span.framebox {
 <col class="field-body" />
 <tbody valign="top">
 <tr class="last-updated field">
-<th class="docinfo-name">Last updated:</th><td class="field-body">26 Feb 2020</td>
+<th class="docinfo-name">Last updated:</th><td class="field-body">10 Nov. 2020</td>
 </tr>
 <tr><th class="docinfo-name">Version:</th>
 <td>0.8.4</td></tr>
@@ -1372,8 +1372,8 @@ diel_in = 6.28 6.28 1.83
 </ol>
 </blockquote>
 <ol class="arabic simple" start="2">
-<li><strong>Configuration:</strong> You must edit the <tt class="docutils literal">src/makefile</tt> to choose your compiler and add the paths to FFTW and BLAS libraries.</li>
-<li><strong>Compilation:</strong> Run the command <tt class="docutils literal">make</tt> in the <tt class="docutils literal">src/</tt> to compile the slabcc.</li>
+<li><strong>Configuration:</strong> You must edit the <tt class="docutils literal">bin/makefile</tt> to choose your compiler and add the paths to FFTW and BLAS libraries.</li>
+<li><strong>Compilation:</strong> Run the command <tt class="docutils literal">make</tt> in the <tt class="docutils literal">bin/</tt> to compile the slabcc.</li>
 <li><strong>Cleanup:</strong> You can run <tt class="docutils literal">make clean</tt> to remove the compiled objects, and static library files. <tt class="docutils literal">make distclean</tt> additionally removes all the compiled objects in the external libraries.</li>
 </ol>
 <p><strong>Note</strong>: By default, the code will be compiled for the specific microarchitecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the <tt class="docutils literal"><span class="pre">-march</span></tt> flag.</p>
