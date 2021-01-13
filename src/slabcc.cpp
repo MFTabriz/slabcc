@@ -549,11 +549,6 @@ int main(int argc, char *argv[]) {
   }
   output_log->flush();
 
-  // making sure all the files are written
-  for (auto &promise : future_files) {
-    promise.get();
-  }
-
   log->trace("Calculations successfully ended!");
   return 0;
 }
