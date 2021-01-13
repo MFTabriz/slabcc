@@ -443,15 +443,6 @@ bool slabcc_model::had_discretization_error() {
                   "discretization error. Most probably the model charge is "
                   "fairly delocalized!");
 
-    if (is_active(verbosity::write_planarAvg_file)) {
-      write_planar_avg(arma::real(POT) * Hartree_to_eV,
-                       arma::real(CHG) * voxel_vol, "M", cell_vectors_lengths);
-    } else if (is_active(verbosity::write_normal_planarAvg)) {
-      write_planar_avg(arma::real(POT) * Hartree_to_eV,
-                       arma::real(CHG) * voxel_vol, "M", cell_vectors_lengths,
-                       normal_direction);
-    }
-
     finalize_loggers();
     exit(1);
   } else {
