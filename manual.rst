@@ -1,7 +1,7 @@
 **Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
 
-:Last updated: 10 Nov. 2020
-:version: 0.8.4
+:Last updated: 13 Jan. 2021
+:version: 0.8.5
 
 .. sectnum::
 
@@ -14,7 +14,7 @@ SLABCC calculates an *a posteriori* energy correction for charged slab models un
 
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
  
-This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using a simple Gaussian model.
+This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using Gaussian models.
 The model charge is assumed to be embedded in a medium with dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) which is orthogonal to the slab.
 The energy correction is calculated as:
 
@@ -771,7 +771,7 @@ Included third-party components
 
 License
 -------
-Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2021, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
