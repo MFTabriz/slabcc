@@ -315,12 +315,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  auto local_param = model.data_packer();
-  std::vector<double> gradients = {};
-  model.potential_RMSE =
-      potential_error(std::get<0>(local_param), gradients, &model);
-  model.check_V_error();
-
   log->debug("Cell dimensions (bohr): " +
              to_string(model.cell_vectors_lengths));
   log->debug("Volume (bohr^3): {}", model.cell_volume);
@@ -353,6 +347,17 @@ int main(int argc, char *argv[]) {
                      arma::real(model.CHG) * model.voxel_vol, "M",
                      model.cell_vectors_lengths, model.normal_direction);
   }
+
+  // making sure all the files are written in case of a failure
+  for (auto &promise : future_files) {
+    promise.get();
+  }
+
+  auto local_param = model.data_packer();
+  std::vector<double> gradients = {};
+  model.potential_RMSE =
+      potential_error(std::get<0>(local_param), gradients, &model);
+  model.check_V_error();
 
   model.verify_CHG(Defect_supercell.charge);
 
