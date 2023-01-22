@@ -1,0 +1,31 @@
+pipeline:
+
+  clang_format:
+    image: ubuntu:22.04
+    group: nodep
+    environment:
+      - CLANG_FORMAT_EXEC=clang-format-14
+    commands:
+      - apt update && apt install -y "$CLANG_FORMAT_EXEC"
+      - ./utils/format_check.sh
+    when:
+      path:
+        include: [ '*.cpp', '*.hpp', 'utils/format_check.sh' ]
+
+  shellcheck:
+    image: archlinux:latest
+    group: nodep    
+    commands:
+      - pacman -Syv
+      - pacman --noconfirm -S shellcheck
+      - shellcheck --version
+      - ls -la utils/*.sh && shellcheck utils/*.sh
+    when:
+      path:
+        include: [ 'utils/*.sh' ]
+
+  gitcheck:
+    image: quay.io/meisam/charliecloud:latest  ## todo: replace with ci tools container
+    group: nodep    
+    commands:
+      - ./utils/git_check.sh

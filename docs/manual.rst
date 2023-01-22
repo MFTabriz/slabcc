@@ -1,6 +1,5 @@
-**Note**: github `does not support <https://github.com/github/markup/issues/274#issuecomment-77102262>`_ math equations the in reStructuredText format. Please check the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for the proper rendering!
+**Note**: Gitea does not support math equations in reStructuredText format. You can see the rendered html page `here <https://meisam.codeberg.page/slabcc>`_.
 
-:Last updated: 10 Nov. 2020
 :version: 0.8.4
 
 .. sectnum::
@@ -60,11 +59,11 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 
 .. math::
  \epsilon = 
- \left| \begin{bmatrix}
+  \left | \begin{matrix}
     \epsilon_{11} & 0 & 0 \\
     0 & \epsilon_{22} & 0 \\
     0 & 0&  \epsilon_{33}
- \end{bmatrix}\right|
+ \end{matrix}  \right |
 
 * The potential due to the charge distribution ρ under 3D PBC embedded in the dielectric medium ε(k) is calculated by solving the Poisson equation in Fourier space:
 
@@ -83,12 +82,12 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 .. math::
 	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
 
- where c\ :sub:`i` are the fitting parameters and 
+where c\ :sub:`i` are the fitting parameters and 
 
 .. math::
 	d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
 
- guarantees the correct energy gradient at x(=1/α)→0. E\ :sub:`M` being the Madelung energy.
+guarantees the correct energy gradient at x(=1/α)→0. E\ :sub:`M` being the Madelung energy.
 
 * ΔV is calculated at the position least affected by the model charge.
 
@@ -185,7 +184,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_! Bitwise reproducibility of the results is not guaranteed across the different versions.
+You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__! Bitwise reproducibility of the results is not guaranteed across the different versions or build configuration.
 
 ============
 Installation
@@ -193,28 +192,48 @@ Installation
 1. **Prerequisites:**
 
  #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/blob/9.100.x/README.md>`_ for linking to the other BLAS replacements.
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
-2. **Configuration:** You must edit the `bin/makefile` to choose your compiler and add the paths to FFTW and BLAS libraries.
-3. **Compilation:** Run the command `make` in the `bin/` to compile the slabcc.
-4. **Cleanup:** You can run `make clean` to remove the compiled objects, and static library files. `make distclean` additionally removes all the compiled objects in the external libraries.
+2. **Configuration:** Set compilation parameters through environment variables.
 
-**Note**: By default, the code will be compiled for the specific microarchitecture of your compilation machine. If you are compiling and running the slabcc on different machines, you must edit the makefile and change the ``-march`` flag.
+ #. **$CC:** C compiler (default: gcc)
+ #. **$CXX:** C++ compiler (default: g++)
+ #. **$FFTW_HOME:** path to FFTW library home
+ #. **$FFTW_LIB:** FFTW library flag (default: -lfftw3)
+ #. **$BLAS_HOME:** path to BLAS library home
+ #. **$BLAS_LIB:** BLAS library flags (default: -lblas -llapack -lpthread)
+ #. **$EXTRA_FLAGS:** extra compiler flags for CC and CXX
+ #. **$LD_EXTRA_FLAGS:** extra linker flags
+
+3. **Compilation:** Run the command `make` in the `bin/` to compile the slabcc.
+4. **Cleanup:** You can run `make clean` to remove the compiled objects. `make distclean` additionally removes all the compiled objects of the bundled external libraries.
 
 ==========
 Validation
 ==========
 We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
-The current version of the slabcc has been built/validated on:
+The current version of the slabcc has been `build/validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
-- CentOS Linux release 7.6.1810
- - with Intel C/C++ compilers 18.0.3, MKL 18.0.3, FFTW (from MKL)
-- Ubuntu Linux release 16.04.6 (`Travis <https://travis-ci.org/MFTabriz/slabcc>`_)
- - with GNU C/C++ compilers (5.5.0/6.5.0/8.1.0/9.1.0), OpenBLAS 0.2.18, FFTW 3.3.4
-- Microsoft Windows version 10.0.17134
- - with Intel C/C++ compilers 19.0.4, MKL 19.0.4, FFTW 3.3.5
- - with Microsoft C/C++ compilers 19.20.27508, MKL 19.0.4, FFTW 3.3.5
+- Ubuntu Linux 16.04
+
+ - with GNU C/C++ compilers (5), OpenBLAS, FFTW
+
+- Ubuntu Linux 18.04
+
+ - with GNU C/C++ compilers (8), OpenBLAS, FFTW
+
+- Ubuntu Linux 22.04
+
+ - with GNU C/C++ compilers (9,11), OpenBLAS, FFTW
+
+- AlmaLinux 8.7
+
+ - with GNU C/C++ compilers (8), BLAS, FFTW
+
+- openSUSE Leap 15.4
+
+ - with GNU C/C++ compilers (10), BLAS, FFTW
  
 =======================
 Command-line parameters
@@ -699,7 +718,7 @@ __ check_
 13. **Something is not working! What should I do?**
 
 	* If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
-	* If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`_.
+	* If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`__.
 
 ==================================
 Known issues and limitations
@@ -721,7 +740,7 @@ Release history highlights
 ===========================
 Copyright and attributions
 ===========================
-Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
 The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
 
@@ -771,7 +790,7 @@ Included third-party components
 
 License
 -------
-Copyright (c) 2018-2020, University of Bremen, M. Farzalipour Tabriz
+Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

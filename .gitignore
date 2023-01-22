@@ -1,0 +1,14 @@
+# build artifacts
+bin/slabcc
+bin/slabcc_obj
+bin/nlopt
+
+# ci artifacts
+utils/.env
+
+# slabcc output
+slabcc.log
+slabcc.out
+
+# dev tools
+.vscode

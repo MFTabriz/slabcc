@@ -1,0 +1,22 @@
+pipeline:
+
+  build:
+    image: python:3
+    environment:
+      - STAGE_PATH=docs/deploy
+    commands:
+      - pip3 install --no-cache-dir --requirement=docs/requirements.txt
+      - ./utils/build_pages.sh
+
+  deploy:
+    image: quay.io/meisam/charliecloud:latest  ## todo: replace with ci tools container
+    environment:
+      - STAGE_PATH=docs/deploy
+    commands:
+      - ./utils/deploy_pages.sh #--verbose
+    secrets: [ pages_pass ]
+
+when:
+  path:
+    include: [ 'docs/*', 'utils/deploy_pages.sh', '.woodpecker/.update_docs.yml' ]
+  branch: master

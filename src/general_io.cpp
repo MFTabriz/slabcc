@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019, University of Bremen, M. Farzalipour Tabriz
+// Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
@@ -46,7 +46,6 @@ void cli_params::parse(int argc, char *argv[]) {
               << '\n';
     std::cout << "SPDLOG library: version " << SPDLOG_VER_MAJOR << "."
               << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << '\n';
-    std::cout << "Compilation: " << __DATE__ << " " << __TIME__ << '\n';
     exit(0);
   }
 
@@ -71,7 +70,7 @@ void cli_params::parse(int argc, char *argv[]) {
 
   if (showAttr) {
     std::cout
-        << "Copyright (c) 2018-2019, Bremen Center for Computational Materials "
+        << "Copyright (c) 2018-2023, Bremen Center for Computational Materials "
            "Science (BCCMS), M. Farzalipour Tabriz\n"
            "The source code and all the documentations are available under The "
            "2-Clause BSD License. For more information see LICENSE.TXT.\n\n"

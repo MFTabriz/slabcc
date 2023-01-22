@@ -1,110 +1,149 @@
-# Copyright (c) 2018, Bremen Center for Computational Materials Science (BCCMS), M. Farzalipour Tabriz
+# Copyright (c) 2018-2023, Bremen Center for Computational Materials Science (BCCMS), M. Farzalipour Tabriz
 # Copyrights licensed under the 2-Clause BSD License.
 # See the accompanying LICENSE.txt file for terms.
 
+# todo: debug option
+# test mkl
 
-CXX =icpc
-#CXX =g++
+# these variable are read from the environment:
+# $CC: C compiler (default: gcc)
+# $CXX: C++ compiler (default: g++)
+# $FFTW_HOME: path to FFTW library home
+# $FFTW_LIB: FFTW library flag (default: -lfftw3)
+# $BLAS_HOME path to BLAS library home
+# $BLAS_LIB: BLAS library flags (default: -lblas -llapack -lpthread)
+# $EXTRA_FLAGS: extra compiler flags for CC and CXX
+# $LD_EXTRA_FLAGS: extra linker flags
 
-# Please edit/choose the path to one of the available
-# libraries on your system. 
 # Please read the “Validation” section in the manual/readme file for more information 
-# about the compiler/libraries in our test environment.
-##===========EXTERNAL LIBRARIES============##
+# on the compiler/libraries in our test environment.
 
-#FFTW_INC_PATH = -I${FFTW3_HOME}/include/
-#FFTW_LIB_PATH = -L${FFTW3_HOME}/lib/
+##============ DEFAULT PARAMETERS =============##
+## 
+## COMPILER
+## 
 
-#FFTW_INC_PATH = -I/cluster/fftw/3.3.6p2/intel2016/include/
-#FFTW_LIB_PATH = -L/cluster/fftw/3.3.6p2/intel2016/lib/
+CC ?= gcc
+CXX ?= g++
 
-#FFTW_LIB = -lfftw3
+OPT := -O2
+CPP_STD := c++14
 
-#BLAS_INC_PATH = -I/cluster/OpenBLAS/0.2.19/gcc62/include/
-#BLAS_LIB_PATH = -L/cluster/OpenBLAS/0.2.19/gcc62/lib/
+# compilation objects are put here
+OBJ_PATH := slabcc_obj
+## 
+## EXTERNAL LIBRARIES
+## 
+NLOPT_PREFIX := nlopt
 
-#BLAS_INC_PATH = -I/cluster/OpenBLAS/1f217/intel2016/include/
-#BLAS_LIB_PATH = -L/cluster/OpenBLAS/1f217/intel2016/lib/
 
-FFTW_INC_PATH = -I${MKLROOT}/include/fftw
-BLAS_INC_PATH = -I${MKLROOT}/include
-BLAS_LIB_PATH = -L${MKLROOT}/lib/intel64
+ifeq ($(VERBOSE),1)
+  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -Wl,--verbose
+endif
 
-#BLAS_LIB = -lblas -llapack #OpenBLAS
-BLAS_LIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
-#BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
+ifdef $(MKL)
+  DMKL := -DMKL
+  ##### TODO: add MKL build to CI and fix this part
+  FFTW_INC_PATH := ${MKLROOT}/include/fftw
+  BLAS_INC_PATH := ${MKLROOT}/include
+  BLAS_LIB_PATH := ${MKLROOT}/lib/intel64
 
-##============COMPILER FLAGS=============##
-OPT      = -O2
-MARCH    = -march=native #change this if the architecture of the machine compiling and running the program is not the same
-EXTRAOPT = #add yours own compiler optimization flags here!
-OPTFLAGS = $(OPT) $(MARCH) $(EXTRAOPT)
 
+  BLAS_LIB := -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
+  #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
+
+else
+
+  #OpenBLAS
+  BLAS_LIB ?= -lblas -llapack -lpthread
+
+
+  ifdef $(BLAS_HOME)
+    BLAS_INC_PATH := ${BLAS_HOME}/include/
+    BLAS_LIB_PATH := ${BLAS_HOME}/lib/
+  endif
+
+  # FFTW library
+  FFTW_LIB ?= -lfftw3
+
+
+  ifdef $(FFTW_HOME)
+    FFTW_INC_PATH := ${FFTW_HOME}/include/
+    FFTW_LIB_PATH := ${FFTW_HOME}/lib/
+  endif
+
+endif
+
+##================================================##
+# these flags are also used by the NLOPT configure/makefile
+COMMON_FLAGS = $(OMP) $(OPT) $(EXTRA_FLAGS) 
 
 ifeq ($(CXX),icpc)
-  OMP = -qopenmp
-  CC = icc
-  EXTRA_LIBS = -lifcore $(OMP)
+  OMP := -qopenmp
+  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -lifcore $(OMP)
 endif
 
 ifeq ($(CXX),g++)
-  OMP = -fopenmp
-  CC  = gcc
-  EXTRA_LIBS = -lgfortran -lquadmath $(OMP)
+  OMP := -fopenmp
+  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -lgfortran -lquadmath $(OMP)
 endif
 
-ALLFLAGS = $(OMP) $(OPTFLAGS) # these flags and the compiler are also used by the NLOPT configure/makefile
-
-CFLAGS   = $(ALLFLAGS) 
-CXXFLAGS = $(ALLFLAGS) -std=c++14 #-Wall
+CFLAGS   = $(COMMON_FLAGS) 
+CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD)# -Wall
 
 ##included libraries
-NLOPT_PATH = ../src/nlopt
-NLOPT_INC_PATH = -I$(NLOPT_PATH)/include/
-NLOPT_LIB_PATH = -L$(NLOPT_PATH)/lib/
-NLOPT_LIB_FILE = $(NLOPT_PATH)/libnlopt.a
-NLOPT_LIB = -lnlopt
+NLOPT_SRC_PATH := $(shell realpath ../src/nlopt/nlopt-2.4.2)
 
-#Add the -DMKL if you are linking against it!
-CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER #-DMKL 
+NLOPT_PATH = $(shell realpath $(NLOPT_PREFIX))
+NLOPT_INC_PATH = $(NLOPT_PREFIX)/include
+NLOPT_LIB_PATH = $(NLOPT_PREFIX)/lib
+NLOPT_LIB_FILE = $(NLOPT_LIB_PATH)/libnlopt.a
+NLOPT_LIB := -lnlopt
 
-LDLIBS = $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
-LIB_PATHS = $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)
-#LD_EXTRA_FLAGS = -Wl,--verbose
+CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER $(DMKL)
 
-SOURCE_INC_PATHS = -I../src/ -I../src/armadillo/include/ -I../src/inih/cpp/ -I../src/clara/single_include/ -I../src/spline/ -I../src/spdlog/
-CPPFLAGS = $(CPP_DEFS) $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)
+LIB_PATH_FLAGS = $(addprefix -L,$(strip $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)))
+LD_LIBS := $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
 
-SOURCES = general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
-OBJECTS = $(patsubst %.c,%.o,$(SOURCES:.cpp=.o))
-EXECUTABLE = slabcc
+SOURCE_INC_PATHS := $(addprefix ../src/,$(strip . armadillo/include inih/cpp clara/single_include spline spdlog))
+INC_FLAGS = $(addprefix -I,$(strip $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)))
 
+CPPFLAGS = $(CPP_DEFS) $(INC_FLAGS)
+
+# generate source file paths from these directories
 vpath %.cpp ../src:../src/inih/cpp
 vpath %.c ../src/inih
 
-all: $(SOURCES) $(NLOPT_LIB_FILE) $(EXECUTABLE)
+SOURCES := general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
+OBJECTS := $(addprefix $(OBJ_PATH)/,$(patsubst %.c,%.o,$(SOURCES:.cpp=.o)))
+LIBRARIES = $(NLOPT_LIB_FILE)
+EXECUTABLE := slabcc
+
+
+all: $(SOURCES) $(LIBRARIES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CXX) $(LIB_PATHS) $(LD_EXTRA_FLAGS) $(OBJECTS) $(LDLIBS) -o $@
-	rm -f $(OBJECTS)
+	$(CXX) $(OBJECTS) $(LIB_PATH_FLAGS) $(LD_LIBS) $(LD_EXTRA_FLAGS) -o $@
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< -c
+$(OBJ_PATH)/%.o: %.cpp
+	@mkdir -p $(shell dirname $@)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-##compile the nlopt
-#.ONESHELL: #not supported in GNU Make 3.81 and earlier!
+$(OBJ_PATH)/%.o: %.c
+	@mkdir -p $(shell dirname $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+##compile nlopt
 $(NLOPT_LIB_FILE):
-	cd ../src/nlopt/nlopt-2.4.2;\
-	chmod +x configure;\
-	./configure CC=$(CC) CXX=$(CXX) CFLAGS='$(ALLFLAGS)' CXXFLAGS='$(ALLFLAGS)' --prefix=$$(cd ../ && pwd);\
-	make;\
-	make install
+	mkdir -p $(NLOPT_PREFIX)
+	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat $(NLOPT_PREFIX)/config.log;
+	make --directory=$(NLOPT_PATH)
+	make --directory=$(NLOPT_PATH) install
 
-.PHONY : clean distclean
+.PHONY: clean distclean
 
-clean :
-	rm -f $(OBJECTS) $(NLOPT_LIB_FILE)
+clean:
+	rm -fr $(OBJECTS) $(EXECUTABLE)
 
 distclean: clean
-	rm -fr $(NLOPT_PATH)/include $(NLOPT_PATH)/lib $(NLOPT_PATH)/share
-	make distclean -C ../src/nlopt/nlopt-2.4.2/
+	rm -fr $(NLOPT_PREFIX)

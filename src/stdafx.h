@@ -4,10 +4,6 @@ constexpr auto SLABCC_VERSION_MAJOR = 0;
 constexpr auto SLABCC_VERSION_MINOR = 8;
 constexpr auto SLABCC_VERSION_PATCH = 4;
 
-// comment the next line while developing the code! Uncommenting will disable
-// the range checks in Armadillo. Makefile may override this! 
-
-//#define ARMA_NO_DEBUG
 
 #include "targetver.h"
 
