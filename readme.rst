@@ -73,7 +73,7 @@ Input parameters file for a slab should minimally include (all in relative scale
 
 Example
 --------
-The following examples list the input parameters to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory. Please read the `manual.html <http://htmlpreview.github.io/?https://github.com/MFTabriz/slabcc/blob/master/manual.html>`_ for complete list of the input parameters.
+The following examples list the input parameters to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory. Please read the `manual`_ for complete list of the input parameters.
 
 1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside of the slab is assumed to be isotropic (``diel_in = 4.8``)::
 
@@ -173,14 +173,23 @@ We are trying to keep the slabcc compatible with as many compilers as possible b
 The current version of the slabcc has been `build/validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
+
  - with GNU C/C++ compilers (5), OpenBLAS, FFTW
+
 - Ubuntu Linux 18.04
+
  - with GNU C/C++ compilers (8), OpenBLAS, FFTW
+
 - Ubuntu Linux 22.04
+
  - with GNU C/C++ compilers (9,11), OpenBLAS, FFTW
+
 - AlmaLinux 8.7
+
  - with GNU C/C++ compilers (8), BLAS, FFTW
+
 - openSUSE Leap 15.4
+
  - with GNU C/C++ compilers (10), BLAS, FFTW
 
 ==================================

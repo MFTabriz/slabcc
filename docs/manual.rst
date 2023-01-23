@@ -717,8 +717,8 @@ __ check_
  
 13. **Something is not working! What should I do?**
 
-	* If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
-	* If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`__.
+ * If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
+ * If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`__.
 
 ==================================
 Known issues and limitations
