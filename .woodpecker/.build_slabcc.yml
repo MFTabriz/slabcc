@@ -16,7 +16,10 @@ pipeline:
       - ./utils/install_pkgs.sh && . ./.env
       - cd ./bin/ && make --trace
       - ldd ./slabcc
+      - ./slabcc --help
       - ./slabcc -v
+      - ./slabcc --copyright
+      - ./slabcc --man
 
 when:
   path:
