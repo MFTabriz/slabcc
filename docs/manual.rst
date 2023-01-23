@@ -245,7 +245,7 @@ You can run slabcc without any additional options. Alternatively, you can use th
 -o, --output <input_file>			slabcc output file name
 -l, --log <log_file>			slabcc log file name
 -d, --diff						Calculate the charge and the potential differences only
--m, --manual					Show the quick start guide
+-m, --man                       Show the quick start guide
 -v, --version					Show the slabcc version and its compilation date
 -c, --copyright					Show the copyright information and the attributions
 
