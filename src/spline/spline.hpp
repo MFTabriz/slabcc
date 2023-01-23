@@ -6,7 +6,7 @@
 * beer in return. https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/
 
 The code has been converted to use Armadillo data type for slabcc by
-https://github.com/MFTabriz
+https://codeberg.org/meisam
 
 */
 #include <armadillo>

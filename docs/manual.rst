@@ -1,6 +1,6 @@
 **Note**: Gitea does not support math equations in reStructuredText format. You can see the rendered html page `here <https://meisam.codeberg.page/slabcc>`_.
 
-:version: 0.8.4
+.. rubric:: SLABCC 0.8.4
 
 .. sectnum::
 
@@ -718,7 +718,7 @@ __ check_
 13. **Something is not working! What should I do?**
 
  * If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
- * If you have found a bug in the code, please report it `here <https://github.com/MFTabriz/slabcc/issues/new>`__.
+ * If you have found a bug in the code, please report it `here <https://codeberg.org/meisam/slabcc/issues/new>`__.
 
 ==================================
 Known issues and limitations

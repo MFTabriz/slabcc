@@ -2,7 +2,7 @@
 // Copyright(c) 2015 Gabi Melman.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 //
-// K_formatter has been added by https://github.com/MFTabriz/ as a simple timing functionality
+// K_formatter has been added by https://codeberg.org/meisam as a simple timing functionality
 
 #pragma once
 
