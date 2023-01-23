@@ -9,7 +9,7 @@
    :target: https://llvm.org/docs/CodingStandards.html
 .. |Woodpecker| image:: https://ci.codeberg.org/api/badges/meisam/slabcc/status.svg
    :alt: Build Status
-   :target: https://ci.codeberg.org/meisam/slabcc
+   :target: https://ci.codeberg.org/meisam/slabcc/branches/master
 .. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1323558.svg
    :alt: Test Set
    :target: https://doi.org/10.5281/zenodo.1323558
