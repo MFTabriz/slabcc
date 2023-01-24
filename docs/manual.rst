@@ -31,7 +31,7 @@ And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
  Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
 
-| SLABCC have been initially developed for the `Bremen Center for Computational Materials Science (BCCMS) <http://www.bccms.uni-bremen.de>`_
+| SLABCC have been initially developed for the `Bremen Center for Computational Materials Science (BCCMS) <https://www.uni-bremen.de/bccms>`_
 
 Algorithm
 ----------
@@ -42,7 +42,7 @@ Algorithm
 
  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right ) 
   
-or `trivariate Gaussian <http://mathworld.wolfram.com/TrivariateNormalDistribution.html>`_ charge distributions as:
+or `trivariate Gaussian <https://mathworld.wolfram.com/TrivariateNormalDistribution.html>`_ charge distributions as:
 
 .. math::
  
@@ -192,8 +192,8 @@ Installation
 1. **Prerequisites:**
 
  #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
- #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <https://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
+ #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <https://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
 2. **Configuration:** Set compilation parameters through environment variables.
 
@@ -505,9 +505,9 @@ The input file is processed as follows:
 |                              |calculation step (trace mode)                          |               |
 +------------------------------+-------------------------------------------------------+---------------+
 
-.. [#] M.J.D. Powell, `The BOBYQA algorithm for bound constrained optimization without derivatives <http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf>`_, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).
+.. [#] M.J.D. Powell, `The BOBYQA algorithm for bound constrained optimization without derivatives <https://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf>`_, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).
 .. [#] M.J.D. Powell, `Direct search algorithms for optimization calculations <https://doi.org/10.1017/S0962492900002841>`_, Acta Numerica, Vol. 7(1998) pp. 287-336
-.. [#] T.H. Rowan, `Functional Stability Analysis of Numerical Algorithms <https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.5708>`_, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.
+.. [#] T.H. Rowan, `Functional Stability Analysis of Numerical Algorithms <https://dl.acm.org/doi/book/10.5555/100816>`_, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.
 .. [#] Each verbosity level includes all the outputs from the lower verbosity options. Check `the files table`_ for complete list of the output files.
 
 ===============================
@@ -750,7 +750,7 @@ The source codes and all the documentations are available under The 2-Clause BSD
 Included third-party components
 -------------------------------
 
-- `Armadillo C++ Linear Algebra Library <http://arma.sourceforge.net>`_ licensed under the Apache License 2.0
+- `Armadillo C++ Linear Algebra Library <https://arma.sourceforge.net>`_ licensed under the Apache License 2.0
  
  - Copyright 2008-2018, Conrad Sanderson
  - Copyright 2008-2016, National ICT Australia (NICTA)

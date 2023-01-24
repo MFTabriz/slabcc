@@ -8,6 +8,15 @@ pipeline:
       - pip3 install --no-cache-dir --requirement=docs/requirements.txt
       - ./utils/build_pages.sh
 
+  check-links:
+    image: quay.io/meisam/links_medics:latest
+    environment:
+      - STAGE_PATH=docs/deploy
+    pull: true
+    commands:
+      - diagnose.py --version
+      - diagnose.py -v --root="$STAGE_PATH" --check-external --warn-http --domain=meisam.codeberg.page
+
   deploy:
     image: quay.io/meisam/charliecloud:latest  ## todo: replace with ci tools container
     environment:
