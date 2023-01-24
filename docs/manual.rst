@@ -1,4 +1,4 @@
-**Note**: Gitea does not support math equations in reStructuredText format. You can see the rendered html page `here <https://meisam.codeberg.page/slabcc>`_.
+**Note**: Gitea does not fully support math equations and citations in reStructuredText format. You can see the rendered html page `here <https://meisam.codeberg.page/slabcc>`_.
 
 .. rubric:: SLABCC 0.8.4
 
