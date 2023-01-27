@@ -1,6 +1,9 @@
 .. |Version| image:: https://img.shields.io/badge/version-0.8.4-blue.svg
    :alt: Version 0.8.4
    :target: https://codeberg.org/meisam/slabcc/releases
+.. |Manual| image:: https://img.shields.io/badge/Manual-HTML-informational
+   :alt: HTML Manual
+   :target: https://meisam.codeberg.page/slabcc
 .. |Standard| image:: https://img.shields.io/badge/c%2B%2B-%3E%3D14-informational
    :alt: C++ Standard
    :target: https://en.cppreference.com/w/cpp/compiler_support#cpp14
@@ -17,7 +20,7 @@
    :alt: License: BSD-2-Clause
    :target: https://opensource.org/licenses/BSD-2-Clause
 
-|Version| |Standard| |Style| |Woodpecker| |Zenodo| |License|
+|Version| |Manual| |Standard| |Style| |Woodpecker| |Zenodo| |License|
 
 .. sectnum::
 
