@@ -94,14 +94,12 @@ arma::cx_cube poisson_solver_3D(const arma::cx_cube &rho, arma::mat diel,
                                 arma::rowvec3 lengths,
                                 arma::uword normal_direction);
 
-// generate a copy of the cube with the elements shifted by N positions along:
-// dim=0: each row
-// dim=1: each column
-// dim=2: each slice
+// generate a copy of the cube with the elements cyclic-shifted by N positions
+// along: dim=0: each row dim=1: each column dim=2: each slice
 template <typename T>
 arma::Cube<T> shift(const arma::Cube<T> &A, const arma::sword &N,
                     const arma::uword &dim) {
-  arma::Cube<T> B(arma::size(A));
+  arma::Cube<T> Shifted_A(arma::size(A));
   const auto index_init = arma::regspace<arma::uvec>(0, A.n_elem - 1);
   arma::imat sub_shift =
       arma::conv_to<arma::imat>::from(arma::ind2sub(arma::size(A), index_init));
@@ -113,10 +111,11 @@ arma::Cube<T> shift(const arma::Cube<T> &A, const arma::sword &N,
     i = i % size;
   });
 
-  B(arma::sub2ind(arma::size(A), arma::conv_to<arma::umat>::from(sub_shift))) =
+  Shifted_A(arma::sub2ind(arma::size(A),
+                          arma::conv_to<arma::umat>::from(sub_shift))) =
       A(index_init);
 
-  return B;
+  return Shifted_A;
 }
 
 // Undo a fftshift

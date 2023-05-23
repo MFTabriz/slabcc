@@ -10,7 +10,7 @@ pipeline:
       - ./utils/format_check.sh
     when:
       path:
-        include: [ '*.cpp', '*.hpp', 'utils/format_check.sh' ]
+        include: [ 'src/**/*.cpp', 'src/**/*.hpp', 'utils/format_check.sh' ]
 
   shellcheck:
     image: archlinux:latest
