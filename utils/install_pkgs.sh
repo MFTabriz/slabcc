@@ -1,17 +1,19 @@
 #! /bin/bash
 
 # reads $TOOLCHAIN from environment, installs packages and exports following variables to .env file:
-# CC
-# CXX
-# $TOOLCHAIN string syntax:
-## "CONTAINER:tag C_compiler_package[:C_compiler_exec] C++_compiler_package[:C++_compiler_exec] [other packages]"
-## (defining 'C/C++_compiler_exec' can be omitted if compiler package name is same as the compiler executable) 
+## CC
+## CXX
 
 set -e
 
 
 if [[ -z $TOOLCHAIN ]]; then 
-    echo "ERROR: \$TOOLCHAIN is not set!"
+    echo ""'
+ERROR: $TOOLCHAIN is not set!
+
+$TOOLCHAIN string syntax:
+    "CONTAINER:tag C_compiler_package[:C_compiler_exec] C++_compiler_package[:C++_compiler_exec] [other packages]"
+    (defining "C/C++_compiler_exec" can be omitted if compiler package name is same as the compiler executable) '
     exit 1
 fi
 
