@@ -3,12 +3,14 @@
 # reads $TOOLCHAIN from environment, installs packages and exports following variables to .env file:
 ## CC
 ## CXX
+## MKL
 
 set -e
 
 
-if [[ -z $TOOLCHAIN ]]; then 
-    echo ""'
+if [[ -z $TOOLCHAIN ]]; then
+    # shellcheck disable=SC2016
+    echo '
 ERROR: $TOOLCHAIN is not set!
 
 $TOOLCHAIN string syntax:
@@ -23,6 +25,11 @@ read -ra _pkgs_compilers_array <<< "$_pkgs_compilers_list"
 
 _c_pkg_compiler=${_pkgs_compilers_array[0]}
 _cxx_pkg_compiler=${_pkgs_compilers_array[1]}
+
+_mkl=0
+if [[ "${_pkgs_compilers_array[2]}" == "intel-oneapi-mkl-devel" ]]; then
+    _mkl=1
+fi
 
 for pkg in "${_pkgs_compilers_array[@]}"; do
     _pkg_name=${pkg%%:*}
@@ -41,8 +48,9 @@ echo "C compiler package   : $_c_pkg"
 echo "C++ compiler package : $_cxx_pkg"
 echo "CC                   : $_CC"
 echo "CXX                  : $_CXX"
+echo "MKL                  : $_mkl"
 
-echo "export CC=$_CC && export CXX=$_CXX" > .env && chmod +x .env
+echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl" > .env && chmod +x .env
 
 _distro=${_container%:*}
 
@@ -58,6 +66,8 @@ elif [[ "$_distro" == 'opensuse/leap' ]]; then
     zypper ref
     # shellcheck disable=SC2068
     zypper install -y make ${_pkgs_array[@]}
+elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
+    echo "Using MKL from OneAPI basekit..."
 else
     echo "ERROR: unsupported environment: $_distro"
     exit 1

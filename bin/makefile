@@ -41,7 +41,7 @@ ifeq ($(VERBOSE),1)
   LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -Wl,--verbose
 endif
 
-ifdef $(MKL)
+ifeq ($(MKL),1)
   DMKL := -DMKL
   ##### TODO: add MKL build to CI and fix this part
   FFTW_INC_PATH := ${MKLROOT}/include/fftw
