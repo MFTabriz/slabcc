@@ -313,6 +313,13 @@ int main(int argc, char *argv[]) {
       model.change_grid(cell_grid0);
       model.update_V_target();
     }
+  } else {
+    model.gaussian_charges_gen();
+    model.dielectric_profiles_gen();
+    auto local_param = model.data_packer();
+    std::vector<double> gradients = {};
+    model.potential_RMSE =
+        potential_error(std::get<0>(local_param), gradients, &model);
   }
 
   log->debug("Cell dimensions (bohr): " +
@@ -352,11 +359,7 @@ int main(int argc, char *argv[]) {
   for (auto &promise : future_files) {
     promise.get();
   }
-
-  auto local_param = model.data_packer();
-  std::vector<double> gradients = {};
-  model.potential_RMSE =
-      potential_error(std::get<0>(local_param), gradients, &model);
+  
   model.check_V_error();
 
   model.verify_CHG(Defect_supercell.charge);
