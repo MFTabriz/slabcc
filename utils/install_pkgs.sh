@@ -46,8 +46,8 @@ echo "Container            : $_container"
 echo "Packages             : ${_pkgs_array[*]}"
 echo "C compiler package   : $_c_pkg"
 echo "C++ compiler package : $_cxx_pkg"
-echo "CC                   : $_CC"
-echo "CXX                  : $_CXX"
+echo "CC                   : $_CC ($(command "$_CC" --version | head -n 1))"
+echo "CXX                  : $_CXX ($(command "$_CXX" --version | head -n 1))"
 echo "MKL                  : $_mkl"
 
 echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl" > .env && chmod +x .env
@@ -57,21 +57,21 @@ _distro=${_container%:*}
 if [[ "$_distro" == 'ubuntu' ]]; then 
     apt update
     # shellcheck disable=SC2068
-    apt install -y make ${_pkgs_array[@]}
+    apt install -y make numdiff ${_pkgs_array[@]}
+    set -o errexit
 elif [[ "$_distro" == 'almalinux' ]]; then
     yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
     # shellcheck disable=SC2068
-    dnf install -y make ${_pkgs_array[@]}
+    dnf install -y diffutils make ${_pkgs_array[@]}
+    alias numdiff='diff'
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
     zypper ref
     # shellcheck disable=SC2068
     zypper install -y make ${_pkgs_array[@]}
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
+    set -o errexit
 else
     echo "ERROR: unsupported environment: $_distro"
     exit 1
 fi
-
-command "$_CC" --version
-command "$_CXX" --version

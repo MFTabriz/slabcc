@@ -8,7 +8,6 @@ utils/.env
 
 # slabcc output
 slabcc.log
-slabcc.out
 
 # dev tools
 .vscode

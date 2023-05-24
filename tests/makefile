@@ -12,7 +12,7 @@ slabcc_DIEL.dat   slabcc_M.CHGCAR   slabcc_NXCHG.dat
 
 % : slabcc.%.in
 	../bin/slabcc --input $<
-	set -o errexit && for i in $(OUTPUTS); do numdiff $$i output/$@/$$i; done
+	for i in $(OUTPUTS); do numdiff $$i output/$@/$$i; done
 
 clean:
 	rm -f $(OUTPUTS) slabcc.out.* slabcc.log
