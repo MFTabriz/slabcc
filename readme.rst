@@ -29,19 +29,19 @@
 =============
 Introduction
 =============
-SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary condition (PBC) based on the method proposed in:
+SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:
 
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
  
 This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using Gaussian models.
-The model charge is assumed to be embedded in a medium with dielectric-tensor profile depending only on one Cartesian space axis orthogonal to the slab.
+The model charge is assumed to be embedded in a medium with a dielectric-tensor profile depending only on one Cartesian space axis orthogonal to the slab.
 The energy correction is calculated as:
 
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
 
-where, E\ :sub:`corr` \ is the total energy correction for the model, 
+where E\ :sub:`corr` \ is the total energy correction for the model;
 E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
-q is the total extra charge and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
+q is the total extra charge, and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
 
 The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:
 
@@ -76,9 +76,9 @@ Input parameters file for a slab should minimally include (all in relative scale
 
 Example
 --------
-The following examples list the input parameters to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory. Please read the `manual`_ for complete list of the input parameters.
+The following examples list the input parameters to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) are in the same directory. Please read the `manual`_ for a complete list of the input parameters.
 
-1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside of the slab is assumed to be isotropic (``diel_in = 4.8``)::
+1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with a normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside the slab is assumed to be isotropic (``diel_in = 4.8``)::
 
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
@@ -92,9 +92,9 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
  - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
  - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
  - Calculate the total energy correction for the charged system.
- - Write all the input parameters used for calculation, optimized parameters and the results to output file.
+ - Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.
 
-2. **Correction with multiple localized Gaussian charges:** If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge as shown in example below::
+2. **Correction with multiple localized Gaussian charges:** If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge, as shown in the example below::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -105,7 +105,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     normal_direction = a
     interfaces = 0.25 0.75
 
-3. **Correction for the uniform dielectric medium e.g. bulk models:** You must have the same dielectric tensor inside and outside::
+3. **Correction for the uniform dielectric medium, e.g., bulk models:** You must have the same dielectric tensor inside and outside::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -115,7 +115,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 4.8
     diel_out = 4.8
 
-4. **Correction for the monolayers i.e. 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, in-plane dielectric constants must be equal and the model must be surrounded by the vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
+4. **Correction for the monolayers, i.e., 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, the in-plane dielectric constants must be equal and the model must be surrounded by a vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -128,7 +128,7 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
-5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
+5. **Correction for the monolayers, i.e., 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α < 0.2) is necessary. To avoid large discretization errors, the size of the extrapolation grid will be automatically increased::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -144,16 +144,17 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`_. Bitwise reproducibility of the results is not guaranteed across the different versions.
+You can download a complete test set, including input files, input parameters, and expected output, `here <https://doi.org/10.5281/zenodo.1323558>`_. The bitwise reproducibility of the results is not guaranteed across the different versions.
 
 ============
 Installation 
 ============
 1. **Prerequisites:**
 
- #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
- #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
+
+ #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g., `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc, but it is highly recommended to use one of the high performance replacements, e.g., the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <http://www.openblas.net>`_. Please refer to the `Armadillo documentation <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
+ #. **FFTW:** If you don't have FFTW installed on your system, follow the guide on the `FFTW website <http://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
 2. **Configuration:** Set compilation parameters through environment variables.
 
@@ -166,13 +167,13 @@ Installation
  #. **$EXTRA_FLAGS:** extra compiler flags for CC and CXX
  #. **$LD_EXTRA_FLAGS:** extra linker flags
 
-3. **Compilation:** Run the command `make` in the `bin/` to compile the slabcc.
+3. **Compilation:** Run the command `make` in `bin/` to compile the slabcc.
 4. **Cleanup:** You can run `make clean` to remove the compiled objects. `make distclean` additionally removes all the compiled objects of the bundled external libraries.
 
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components. 
 The current version of the slabcc has been `build/validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
@@ -198,9 +199,9 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 ==================================
 Known issues and limitations
 ==================================
-- Shape of the VASP files cell is limited to orthogonal cells.
+- Only orthogonal cells are supported.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
+- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models that are not surrounded by the vacuum (diel_out > 1). The extrapolation method must be used in these cases.
 
 ==========================
 Release history highlights
@@ -217,9 +218,9 @@ Copyright and attributions
 ===========================
 Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
-The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
+The source code and all the documentation are available under the 2-Clause BSD License. For more information, see license_.
 
-| This code uses several open source components each of which are located under a separate sub-directory in the `src/`. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.
+| This code uses several open-source components, each of which is located under a separate sub-directory of `src/`. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.
 | The attributions are also present in the binary file and can be accessed by using `--copyright` flag.
 
 Included third-party components
