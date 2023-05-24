@@ -147,10 +147,14 @@ $(NLOPT_LIB_FILE):
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
 
-.PHONY: clean distclean
+.PHONY: clean distclean test
+
+test: $(EXECUTABLE)
+	$(MAKE) -C ../tests
 
 clean:
 	rm -fr $(OBJECTS) $(EXECUTABLE)
+	$(MAKE) -C ../tests clean
 
 distclean: clean
 	rm -fr $(NLOPT_PREFIX)
