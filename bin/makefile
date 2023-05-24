@@ -49,8 +49,15 @@ ifeq ($(MKL),1)
   BLAS_LIB_PATH := ${MKLROOT}/lib/intel64
 
 
-  BLAS_LIB := -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
-  #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
+  ifneq (,$(findstring icpc,$(CXX)))
+    BLAS_LIB ?= -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
+  endif
+  ifneq (,$(findstring icpx,$(CXX)))
+    BLAS_LIB ?= -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
+  endif
+  ifneq (,$(findstring g++,$(CXX)))
+    BLAS_LIB ?=  -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
+  endif
 
 else
 
