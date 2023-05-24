@@ -43,7 +43,7 @@ endif
 
 ifeq ($(MKL),1)
   DMKL := -DMKL
-  ##### TODO: add MKL build to CI and fix this part
+
   FFTW_INC_PATH := ${MKLROOT}/include/fftw
   BLAS_INC_PATH := ${MKLROOT}/include
   BLAS_LIB_PATH := ${MKLROOT}/lib/intel64
