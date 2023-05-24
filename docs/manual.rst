@@ -9,19 +9,19 @@
 =============
 Introduction
 =============
-SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary condition (PBC) based on the method proposed in:
+SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:
 
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
  
-This method estimates the error in the total energy of the charged models under 3D PBC, due to the excess charge in the real system using Gaussian models.
-The model charge is assumed to be embedded in a medium with dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) which is orthogonal to the slab.
+This method estimates the error in the total energy of the charged models under 3D PBC due to the excess charge in the real system using Gaussian models.
+The model charge is assumed to be embedded in a medium with a dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) that is orthogonal to the slab.
 The energy correction is calculated as:
 
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
 
-where, E\ :sub:`corr` \ is the total energy correction for the model, 
+where E\ :sub:`corr` \ is the total energy correction for the model; 
 E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
-q is the total extra charge and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
+q is the total extra charge, and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
 
 The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:
 
@@ -36,7 +36,7 @@ And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 Algorithm
 ----------
 * slabcc reads the `VASP <https://www.vasp.at>`_ output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.
-* The extra charge is modeled by sum of Gaussian charge distributions as:
+* The extra charge is modeled by the sum of Gaussian charge distributions as follows:
 
 .. math::
 
@@ -48,14 +48,14 @@ or `trivariate Gaussian <https://mathworld.wolfram.com/TrivariateNormalDistribut
  
  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i,x}\sigma_{i,y}\sigma_{i,z}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i,x}^{2}}{2\sigma_{i,x}^{2}} - \frac{r_{i,y}^{2}}{2\sigma_{i,y}^{2}}- \frac{r_{i,z}^{2}}{2\sigma_{i,z}^{2}} } \right )
 
-which gives a charge distribution normalized to q\ :sub:`i` \ with standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
+which gives a charge distribution normalized to q\ :sub:`i`  with a standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
 
-* The generated Gaussian model charge will be embedded in a dielectric medium with profile of the form:
+* The generated Gaussian model charge will be embedded in a dielectric medium with a profile of the form:
 
 .. math::
   \epsilon (k) =  \frac{\epsilon_2-\epsilon_1}{2} \text{erf}\left(\frac{k-k_0 }{\beta}\right)+\frac{\epsilon_2+\epsilon_1}{2}
 
-where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub:`1` \ and ε\ :sub:`2` \ are dielectric tensors on either side of interface (``diel_in`` & ``diel_out``) and β (``diel_taper``) defines the smoothness of transition assuming anisotropic dielectric tensor as:
+where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub:`1` \ and ε\ :sub:`2` \ are dielectric tensors on either side of the interface (``diel_in`` & ``diel_out``) and β (``diel_taper``) defines the smoothness of transition assuming anisotropic dielectric tensor as:
 
 .. math::
  \epsilon = 
@@ -70,14 +70,14 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 .. math::
 	 \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
 
-* A non-linear optimization routine minimizes the difference of our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
+* A non-linear optimization routine minimizes the difference between our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
 
 * The E\ :sub:`periodic` is calculated as:
 
 .. math::
 	E = \frac{1}{2} \int V(r) \rho(r) \, dr
 
-* E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and the slab models, the extrapolation is done linearly. For the monolayer models (2D systems) the following equation is used for the extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
+* E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and slab models, the extrapolation is done linearly. For the monolayer models (2D systems), the following equation is used for the extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
 
 .. math::
 	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
@@ -94,7 +94,7 @@ guarantees the correct energy gradient at x(=1/α)→0. E\ :sub:`M` being the Ma
 More information about the algorithms and the implementation details can be found `here`__.
 
 __ cite_
-	 
+
 =================
 Quick start guide
 =================
@@ -116,9 +116,9 @@ Input parameters file for a slab should minimally include (all in relative scale
 
 Example
 --------
-The following examples list the `input parameters`_ to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) to be in the same directory.
+The following examples list the `input parameters`_ to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) are in the same directory.
 
-1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside of the slab is assumed to be isotropic (``diel_in = 4.8``)::
+1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with a normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside the slab is assumed to be isotropic (``diel_in = 4.8``)::
 
     charge_position = 0.24  0.56  0.65
     diel_in = 4.8
@@ -132,9 +132,9 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
  - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
  - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
  - Calculate the total energy correction for the charged system.
- - Write all the input parameters used for calculation, optimized parameters and the results to output file.
+ - Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.
 
-2. **Correction with multiple localized Gaussian charges:** If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge as shown in example below::
+2. **Correction with multiple localized Gaussian charges:** If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge, as shown in the example below::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -145,7 +145,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     normal_direction = a
     interfaces = 0.25 0.75
 
-3. **Correction for the uniform dielectric medium e.g. bulk models:** You must have the same dielectric tensor inside and outside::
+3. **Correction for the uniform dielectric medium, e.g., bulk models:** You must have the same dielectric tensor inside and outside::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -155,7 +155,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     diel_in = 4.8
     diel_out = 4.8
 
-4. **Correction for the monolayers i.e. 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, in-plane dielectric constants must be equal and the model must be surrounded by the vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
+4. **Correction for the monolayers, i.e., 2D models (without extrapolation):** To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, the in-plane dielectric constants must be equal and the model must be surrounded by a vacuum. Use the extrapolation method (``extrapolate=yes``) for more general cases::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -168,7 +168,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     diel_in = 6.28 6.28 1.83
     diel_out = 1
 
-5. **Correction for the monolayers i.e. 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α < 0.2) is necessary. To avoid the large discretization errors, the size of the extrapolation grid will be automatically increased::
+5. **Correction for the monolayers, i.e., 2D models (with extrapolation):** To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α < 0.2) is necessary. To avoid large discretization errors, the size of the extrapolation grid will be automatically increased::
 
     LOCPOT_charged = CHARGED_LOCPOT
     LOCPOT_neutral = UNCHARGED_LOCPOT
@@ -184,7 +184,7 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
 Test set
 --------
 
-You can download a complete test set including input files, input parameters and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__! Bitwise reproducibility of the results is not guaranteed across the different versions or build configuration.
+You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__! Bitwise reproducibility of the results is not guaranteed across the different versions or build configurations.
 
 ============
 Installation
@@ -192,8 +192,8 @@ Installation
 1. **Prerequisites:**
 
  #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
- #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements e.g. the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <https://www.openblas.net>`_. Please refer to the `Armadillo documentations <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
- #. **FFTW:** If you don't have FFTW installed on your system follow the guide on the `FFTW website <https://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
+ #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements, e.g., the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <https://www.openblas.net>`_. Please refer to the `Armadillo documentation <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
+ #. **FFTW:** If you don't have FFTW installed on your system, follow the guide on the `FFTW website <https://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
 2. **Configuration:** Set compilation parameters through environment variables.
 
@@ -212,7 +212,7 @@ Installation
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on the third-party components. 
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components. 
 The current version of the slabcc has been `build/validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
@@ -234,7 +234,7 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 - openSUSE Leap 15.4
 
  - with GNU C/C++ compilers (10), BLAS, FFTW
- 
+
 =======================
 Command-line parameters
 =======================
@@ -252,19 +252,19 @@ You can run slabcc without any additional options. Alternatively, you can use th
 ======================
 Input parameters
 ======================
-slabcc reads all its parameters from the input file (by default: `slabcc.in`) You can change the input file's name using the `command-line parameters`_.
+slabcc reads all its parameters from the input file (by default, `slabcc.in`). You can change the input file's name using the `command-line parameters`_.
 The input file is processed as follows:
 
-- Lines starting with # will be treated as comments. Inline comments are also allowed
-- Double quotation marks will be removed from the strings
-- A warning will be issued for any unidentified parameter
-- A warning will be issued for the use of the deprecated parameters
-- All the coordinates must be in fractional form [0-1]
-- Boolean (True/False) parameters can be also declared as 0/1, on/off, yes/no, .true./.false.
-- Parameter names can be written in the small or the CAPITAL letters
-- For vectors and matrices, columns are separated by a “ ”(space), while the rows are separated by a “;” (semicolon)
-- Lines starting with a space “ ” will be treated as the continuation of the last parameter's value
-- Subsequent definitions for any parameter will be concatenated to the existing definition
+- Lines starting with # will be treated as comments. Inline comments are also allowed.
+- Double quotation marks will be removed from the strings.
+- A warning will be issued for any unidentified parameter.
+- A warning will be issued for the use of the deprecated parameters.
+- All the coordinates must be in fractional form [0-1].
+- Boolean (True/False) parameters can also be declared as 0/1, on/off, yes/no, .true./.false.
+- Parameter names can be written in the small or capital letters.
+- For vectors and matrices, columns are separated by a " "(space), while the rows are separated by a ";" (semicolon).
+- Lines starting with a space " " will be treated as the continuation of the last parameter's value.
+- Subsequent definitions for any parameter will be concatenated with the existing definition.
 
  
 +------------------------------+-------------------------------------------------------+---------------+
@@ -671,7 +671,7 @@ All the possible output files and the minimum value of the verbosity parameter f
 FAQ
 ===
 
-1. **How to obtain the CHGCAR and LOCPOT files from VASP calculations?** You can add the following tags to your INCAR file to get the LOCPOT and CHGCAR files::
+1. **How do I obtain the CHGCAR and LOCPOT files from VASP calculations?** You can add the following tags to your INCAR file to get the LOCPOT and CHGCAR files::
 
     LVTOT = .TRUE.
     LVHAR = .TRUE.
@@ -679,27 +679,27 @@ FAQ
 
  After obtaining the files for your charged system, do the calculation again *without relaxing (changing) the geometry* to get the necessary files for the neutralized system.
 
-2. **Do I need to perform spin polarized calculation in VASP?**  Although, the slabcc only reads the sum of both spins, but for proper description of the charge distribution in your system you may need to perform spin polarized calculation.
+2. **Do I need to perform spin-polarized calculations in VASP?**  Although the slabcc only reads the sum of both spins, for a proper description of the charge distribution in your system, you may need to perform a spin-polarized calculation.
 
-3. **How can I speed-up the model parameters optimization process?** You can try using a different optimization algorithm or improve the initial guess for the model parameters to speed-up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (``optimize_grid_x < 1``), or increase the optimization convergence criteria (``optimize_tolerance``) to speed up the process but the accuracy of the obtained results in these cases must be always checked.
+3. **How can I speed up the model parameter optimization process?** You can try using a different optimization algorithm or improving the initial guess for the model parameters to speed up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (``optimize_grid_x < 1``), or increase the optimization convergence criteria (``optimize_tolerance``) to speed up the process, but the accuracy of the obtained results in these cases must always be checked.
 
-4. **Why do I need to provide an initial guess for the parameters which will be optimized?** The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.
+4. **Why do I need to provide an initial guess for the parameters that will be optimized?** The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.
 
-5. **How should I decide on the initial guess for the parameters which will be optimized?** As a rule of thumb, start by a single Gaussian charge as your model. Set its position to your expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the “-d” switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT file for the extra charge and their planar averages without shifting the input files to the `slab_center`. These files will guide you on how to provide the initial guess for the input parameters.
+5. **How should I decide on the initial guess for the parameters that will be optimized?** As a rule of thumb, start with a single Gaussian charge as your model. Set its position to the expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the "-d" switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT files for the extra charge and their planar averages without shifting the input files to the `slab_center`. These files will guide you on how to provide the initial guess for the input parameters.
 
-6. **Can I turn off the optimization for the input parameters?** Yes. But optimization ensures the model charge mimics the original localized charge in large distances as close as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely `check your results`__.
+6. **Can I turn off the optimization for the input parameters?** Yes. But optimization ensures the model charge mimics the original localized charge at large distances as closely as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely `check your results`__.
 
 __ check_
 
-7. **Can I run the slabcc on a computational cluster?** Yes. BUT… Although slabcc hugely benefits from the multicore architecture of the computation nodes using OpenMP, it has not yet been parallelized using MPI. Therefore, It won’t use more than one machine at a time.
+7. **Can I run the slabcc on a computational cluster?** Yes. BUT… Although slabcc hugely benefits from the multicore architecture of the computation nodes using OpenMP, it has not yet been parallelized using MPI. Therefore, it won’t use more than one machine at a time.
 
-8. **Is the slabcc free? Can I use its source code in my own software?** slabcc is released under the 2-Clause BSD license_ which permits this software to be modified, redistributed and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)
+8. **Is the slabcc free? Can I use its source code in my own software?** slabcc is released under the 2-Clause BSD license_ which permits this software to be modified, redistributed, and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)
 
-9. **How accurate are the slabcc results?** The accuracy of the final results depends on various factors including the accuracy/grid-size of the input files and provided input parameters. The optimization algorithm used for parameters estimation is a non-linear local optimizer which means that the result will highly depend on its initial conditions. Models with different number of Gaussian charges have different accuracy and may be compared with caution. In case of the models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few `known issues and limitations`_ to the slabcc code and its algorithm. Also keep in mind that this is a free software and as the license_ explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.
+9. **How accurate are the slabcc results?** The accuracy of the final results depends on various factors, including the accuracy/grid-size of the input files and the provided input parameters. The optimization algorithm used for parameter estimation is a non-linear local optimizer, which means that the result will highly depend on its initial conditions. Models with different numbers of Gaussian charges have different accuracy and may be compared with caution. In the case of models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few `known issues and limitations`_ to the slabcc code and its algorithm. Also keep in mind that this is free software, and as the license_ explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.
 
 .. _check:
 
-10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential specially in the direction normal to the surface and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table`_ for complete list of the output files.
+10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table`_ for a complete list of the output files.
 
  Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the (charge corrected) total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
 
@@ -709,11 +709,11 @@ __ check_
 
  Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
   
-12. **How can I extract the files in slabcc_data.tar.xz?** You can use the `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:  
+12. **How can I extract the files in slabcc_data.tar.xz?** You can use `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:  
 
     tar -xvf slabcc_data.tar.xz
 
- Alternatively, you can use the `WinRAR <https://www.rarlab.com>`_ or `7zip <https://www.7-zip.org>`_.
+ Alternatively, you can use `WinRAR <https://www.rarlab.com>`_ or `7zip <https://www.7-zip.org>`_.
  
 13. **Something is not working! What should I do?**
 
@@ -723,9 +723,9 @@ __ check_
 ==================================
 Known issues and limitations
 ==================================
-- Shape of the VASP files cell is limited to orthogonal cells.
+- Only orthogonal cells are supported.
 - Maximum line length of the input file (slabcc.in) is 4000 bytes.
-- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models which are not surrounded by the vacuum (diel_out > 1). Extrapolation method must be used in these cases.
+- Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models that are not surrounded by the vacuum (diel_out > 1). The extrapolation method must be used in these cases.
 
 ==========================
 Release history highlights
@@ -742,9 +742,9 @@ Copyright and attributions
 ===========================
 Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
-The source codes and all the documentations are available under The 2-Clause BSD License. For more information see license_.
+The source code and all the documentation are available under the 2-Clause BSD License. For more information, see license_.
 
-| This code uses several open source components each of which are located under a separate sub-directory in the `src/`. The copyright of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and more importantly to the free software society.
+| This code uses several open-source components, each of which is located under a separate sub-directory of `src/`. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.
 | The attributions are also present in the binary file and can be accessed by using `--copyright` flag.
 
 Included third-party components
@@ -766,13 +766,13 @@ Included third-party components
  - © 2009, Ben Hoyt, `et al. <https://github.com/benhoyt/inih/contributors>`__
 
 - `clara <https://github.com/catchorg/Clara>`_ licensed under the Boost Software License 1.0
- 
+
  - © 2014, Phil Nash, Martin Hořeňovský, `et al. <https://github.com/catchorg/Clara/contributors>`__
- 
+
 - `spline <https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/>`_ (Cubic Spline Interpolation) licensed under the Beer-Ware License 42
- 
+
  - © 2011, Devin Lane
- 
+
 - `NLOPT <https://nlopt.readthedocs.io>`_ licensed under the GNU LGPL
 
  - © 2007-2014, Massachusetts Institute of Technology
