@@ -22,6 +22,9 @@ pipeline:
       - ./slabcc -v
       - ./slabcc --copyright
       - ./slabcc --man
+      - cd ../tests
+      - ../bin/slabcc --input slabcc.gas.in
+      - ../bin/slabcc --input slabcc.gaussian.in
 
 when:
   path:

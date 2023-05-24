@@ -23,7 +23,7 @@ struct cli_params {
 
 // defines the minimum verbosity level for each type of action
 enum class verbosity : int {
-  info = 1,  // spdlog->info()
+  info = 1, // spdlog->info()
   write_normal_planarAvg = 1,
   debug = 2, // spdlog->debug()
   write_defect_file = 2,

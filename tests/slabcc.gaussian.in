@@ -1,0 +1,12 @@
+LOCPOT_charged = input/gaussian.LOCPOT
+LOCPOT_neutral = input/vacuum.CHGCAR
+CHGCAR_charged = input/gaussian.CHGCAR
+CHGCAR_neutral = input/vacuum.CHGCAR
+charge_position = 0.1 0.7 0.3
+charge_sigma = 2
+diel_in = 4
+diel_out = 4
+optimize = yes
+verbosity = 4
+
+

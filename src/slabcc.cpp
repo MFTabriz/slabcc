@@ -359,7 +359,7 @@ int main(int argc, char *argv[]) {
   for (auto &promise : future_files) {
     promise.get();
   }
-  
+
   model.check_V_error();
 
   model.verify_CHG(Defect_supercell.charge);
