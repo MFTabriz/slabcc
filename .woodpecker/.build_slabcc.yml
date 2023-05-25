@@ -25,7 +25,7 @@ pipeline:
 
 when:
   path:
-    include: [ 'bin/*', 'src/**', '.woodpecker/.build_slabcc.yml', 'utils/install_pkgs.sh' ]
+    include: [ 'bin/*', 'src/**', 'tests/**', '.woodpecker/.build_slabcc.yml', 'utils/install_pkgs.sh' ]
 
 depends_on:
   - validate
