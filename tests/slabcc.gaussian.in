@@ -7,6 +7,7 @@ charge_sigma = 2
 diel_in = 4
 diel_out = 4
 optimize = yes
+optimize_tolerance = 0.0001
 verbosity = 4
 
 
