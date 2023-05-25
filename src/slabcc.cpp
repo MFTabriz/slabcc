@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
                   "significantly different from the initial value. "
                   "Please make sure that the final position of the extra "
                   "charge have been estimated correctly!");
-        log->debug("Charge position changes: ",
+        log->debug("Charge position changes: {}",
                    to_string(charge_position_change));
       }
     }
