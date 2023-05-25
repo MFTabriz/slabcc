@@ -7,6 +7,15 @@
 
 set -e
 
+install_numdiff () {
+    curl -o numdiff-5.9.0.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-5.9.0.tar.gz
+    tar -xvf numdiff-5.9.0.tar.gz && cd numdiff-5.9.0
+    mkdir bin && cd bin
+    ../configure
+    make
+    cd ../..
+}
+
 
 if [[ -z $TOOLCHAIN ]]; then
     # shellcheck disable=SC2016
@@ -46,11 +55,9 @@ echo "Container            : $_container"
 echo "Packages             : ${_pkgs_array[*]}"
 echo "C compiler package   : $_c_pkg"
 echo "C++ compiler package : $_cxx_pkg"
-echo "CC                   : $_CC ($(command "$_CC" --version | head -n 1))"
-echo "CXX                  : $_CXX ($(command "$_CXX" --version | head -n 1))"
+echo "CC                   : $_CC"
+echo "CXX                  : $_CXX"
 echo "MKL                  : $_mkl"
-
-echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl" > .env && chmod +x .env
 
 _distro=${_container%:*}
 
@@ -61,11 +68,14 @@ if [[ "$_distro" == 'ubuntu' ]]; then
 elif [[ "$_distro" == 'almalinux' ]]; then
     yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
     # shellcheck disable=SC2068
-    dnf install -y diffutils make ${_pkgs_array[@]}
+    dnf install -y make ${_pkgs_array[@]}
+    install_numdiff
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
     zypper ref
     # shellcheck disable=SC2068
-    zypper install -y make ${_pkgs_array[@]}
+    zypper install -y make btar ${_pkgs_array[@]}
+    alias tar=btar
+    install_numdiff
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
     apt update && apt install -y numdiff
@@ -73,3 +83,5 @@ else
     echo "ERROR: unsupported environment: $_distro"
     exit 1
 fi
+
+echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl && export PATH=$(pwd)/numdiff-5.9.0/bin:$PATH" > .env && chmod +x .env
