@@ -3,13 +3,14 @@ matrix:
     - ubuntu:16.04 gcc-5 g++-5 libopenblas-dev fftw3-dev
     - ubuntu:22.04 gcc-9 g++-9 libopenblas-dev fftw3-dev
     - ubuntu:22.04 gcc-11 g++-11 libopenblas-dev fftw3-dev
+    - ubuntu:22.04 clang-14 clang-14:clang++-14 libopenblas-dev fftw3-dev
     - almalinux:8.7 gcc gcc-c++:g++ gcc-gfortran blas-devel lapack-devel fftw-devel
     - opensuse/leap:15.4 gcc10:gcc-10 gcc10-c++:g++-10 blas-devel lapack-devel fftw3-devel
     - intel/oneapi-basekit:2023.1.0-devel-ubuntu22.04 intel-basekit:icx intel-basekit:icpx intel-oneapi-mkl-devel
     - intel/oneapi-basekit:2023.1.0-devel-ubuntu22.04 gcc-11 g++-11 intel-oneapi-mkl-devel
 
 pipeline:
-  build_minimal:
+  build:
     image: ${TOOLCHAIN%% *}
     environment:
       - VERBOSE=1
@@ -21,7 +22,14 @@ pipeline:
       - ./slabcc -v
       - ./slabcc --copyright
       - ./slabcc --man
-      - make test
+
+  test:
+    image: ${TOOLCHAIN%% *}
+    environment:
+      - VERBOSE=1
+    commands:
+      - ./utils/install_pkgs.sh && . ./.env
+      - cd ./bin/ && ( make test || make test --trace )
 
 when:
   path:

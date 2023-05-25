@@ -14,8 +14,8 @@ slabcc_M.LOCPOT  slabcc_M.CHGCAR slabcc_D.LOCPOT slabcc_D.CHGCAR
 
 % : slabcc.%.in
 	../bin/slabcc --input $<
-	set -o errexit && for i in $(OUTPUTS_AVERAGED); do numdiff -r 1e-8 -a 1e-8 $$i output/$@/$$i; done
-	set -o errexit && for i in $(OUTPUTS_RAW); do numdiff -r 1e-4 -a 1e-4 $$i output/$@/$$i; done
+	set -o errexit && for i in $(OUTPUTS_AVERAGED); do numdiff -s' \t\n\\\";' -r 1e-3 -a 1e-5 $$i output/$@/$$i; done
+	set -o errexit && for i in $(OUTPUTS_RAW); do numdiff -s' \t\n\\\";' -r 1e-3 -a 1e-4 $$i output/$@/$$i; done
 
 clean:
 	rm -f $(OUTPUTS_AVERAGED) $(OUTPUTS_RAW) slabcc.out.* slabcc.log

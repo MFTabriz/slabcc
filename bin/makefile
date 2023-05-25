@@ -48,7 +48,7 @@ ifeq ($(MKL),1)
   BLAS_INC_PATH := ${MKLROOT}/include
   BLAS_LIB_PATH := ${MKLROOT}/lib/intel64
 
-
+  # Note: compiler executables may have names such as gcc-5
   ifneq (,$(findstring icpc,$(CXX)))
     BLAS_LIB ?= -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
   endif
@@ -143,7 +143,7 @@ $(OBJ_PATH)/%.o: %.c
 ##compile nlopt
 $(NLOPT_LIB_FILE):
 	mkdir -p $(NLOPT_PREFIX)
-	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat $(NLOPT_PREFIX)/config.log;
+	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat config.log;
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
 

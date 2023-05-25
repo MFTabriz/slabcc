@@ -7,15 +7,6 @@
 
 set -e
 
-install_numdiff () {
-    curl -o numdiff-5.9.0.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-5.9.0.tar.gz
-    tar -xvf numdiff-5.9.0.tar.gz && cd numdiff-5.9.0
-    mkdir bin && cd bin
-    ../configure
-    make
-    cd ../..
-}
-
 
 if [[ -z $TOOLCHAIN ]]; then
     # shellcheck disable=SC2016
@@ -28,6 +19,15 @@ $TOOLCHAIN string syntax:
     exit 1
 fi
 
+install_numdiff () {
+    curl -o numdiff-5.9.0.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-5.9.0.tar.gz
+    tar -xvf numdiff-5.9.0.tar.gz
+    cd numdiff-5.9.0
+    mkdir bin && cd bin
+    ../configure
+    make
+    cd ../..
+}
 _container="${TOOLCHAIN%% *}"
 _pkgs_compilers_list="${TOOLCHAIN##"$_container" }"
 read -ra _pkgs_compilers_array <<< "$_pkgs_compilers_list"
@@ -60,21 +60,22 @@ echo "CXX                  : $_CXX"
 echo "MKL                  : $_mkl"
 
 _distro=${_container%:*}
-
 if [[ "$_distro" == 'ubuntu' ]]; then 
     apt update
     # shellcheck disable=SC2068
     apt install -y make numdiff ${_pkgs_array[@]}
+
 elif [[ "$_distro" == 'almalinux' ]]; then
     yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
     # shellcheck disable=SC2068
     dnf install -y make ${_pkgs_array[@]}
     install_numdiff
+    
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
-    zypper ref
+    zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
+    zypper --gpg-auto-import-keys ref
     # shellcheck disable=SC2068
-    zypper install -y make btar ${_pkgs_array[@]}
-    alias tar=btar
+    zypper --non-interactive install --best-effort -y tar make ${_pkgs_array[@]}
     install_numdiff
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
@@ -85,3 +86,6 @@ else
 fi
 
 echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl && export PATH=$(pwd)/numdiff-5.9.0/bin:$PATH" > .env && chmod +x .env
+
+$_CC --version | head -n 1
+$_CXX --version | head -n 1
