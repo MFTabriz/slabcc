@@ -58,19 +58,17 @@ if [[ "$_distro" == 'ubuntu' ]]; then
     apt update
     # shellcheck disable=SC2068
     apt install -y make numdiff ${_pkgs_array[@]}
-    set -o errexit
 elif [[ "$_distro" == 'almalinux' ]]; then
     yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
     # shellcheck disable=SC2068
     dnf install -y diffutils make ${_pkgs_array[@]}
-    alias numdiff='diff'
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
     zypper ref
     # shellcheck disable=SC2068
     zypper install -y make ${_pkgs_array[@]}
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
-    set -o errexit
+    apt update && apt install -y numdiff
 else
     echo "ERROR: unsupported environment: $_distro"
     exit 1

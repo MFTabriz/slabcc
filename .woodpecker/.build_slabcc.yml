@@ -1,7 +1,6 @@
 matrix:
   TOOLCHAIN:
     - ubuntu:16.04 gcc-5 g++-5 libopenblas-dev fftw3-dev
-    - ubuntu:18.04 gcc-8 g++-8 libopenblas-dev fftw3-dev
     - ubuntu:22.04 gcc-9 g++-9 libopenblas-dev fftw3-dev
     - ubuntu:22.04 gcc-11 g++-11 libopenblas-dev fftw3-dev
     - almalinux:8.7 gcc gcc-c++:g++ gcc-gfortran blas-devel lapack-devel fftw-devel
@@ -16,7 +15,7 @@ pipeline:
       - VERBOSE=1
     commands:
       - ./utils/install_pkgs.sh && . ./.env
-      - cd ./bin/ && make --trace
+      - cd ./bin/ && ( make || make --trace )
       - ldd ./slabcc
       - ./slabcc --help
       - ./slabcc -v
