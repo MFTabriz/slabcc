@@ -23,7 +23,7 @@ install_numdiff () {
     curl -o numdiff-5.9.0.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-5.9.0.tar.gz
     tar -xvf numdiff-5.9.0.tar.gz
     cd numdiff-5.9.0
-    mkdir bin && cd bin
+    mkdir -p bin && cd bin
     ../configure
     make
     cd ../..
@@ -69,14 +69,16 @@ elif [[ "$_distro" == 'almalinux' ]]; then
     yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
     # shellcheck disable=SC2068
     dnf install -y make ${_pkgs_array[@]}
-    install_numdiff
+    [[ -x "numdiff" ]] || install_numdiff
     
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
+
+    # shellcheck disable=SC2068
+    zypper install -y make ${_pkgs_array[@]}
     zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
     zypper --gpg-auto-import-keys ref
-    # shellcheck disable=SC2068
-    zypper --non-interactive install --best-effort -y tar make ${_pkgs_array[@]}
-    install_numdiff
+    zypper install -y tar 
+    [[ -x "numdiff" ]] || install_numdiff
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
     apt update && apt install -y numdiff
