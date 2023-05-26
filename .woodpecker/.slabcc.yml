@@ -12,11 +12,9 @@ matrix:
 pipeline:
   build:
     image: ${TOOLCHAIN%% *}
-    environment:
-      - VERBOSE=1
     commands:
       - ./utils/install_pkgs.sh && . ./.env
-      - cd ./bin/ && ( make || make --trace )
+      - cd ./bin/ && ( make || make --trace VERBOSE=1 )
       - ldd ./slabcc
       - ./slabcc --help
       - ./slabcc -v
@@ -25,11 +23,9 @@ pipeline:
 
   test:
     image: ${TOOLCHAIN%% *}
-    environment:
-      - VERBOSE=1
     commands:
       - ./utils/install_pkgs.sh && . ./.env
-      - cd ./bin/ && ( make test || make test --trace )
+      - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
 
 when:
   path:
