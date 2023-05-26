@@ -74,7 +74,7 @@ elif [[ "$_distro" == 'almalinux' ]]; then
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
 
     # shellcheck disable=SC2068
-    zypper install -y make ${_pkgs_array[@]}
+    zypper install -y make gzip ${_pkgs_array[@]}
     zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
     zypper --gpg-auto-import-keys ref
     zypper install -y tar 
