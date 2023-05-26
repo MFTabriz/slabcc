@@ -27,5 +27,5 @@ pipeline:
 
 when:
   path:
-    include: [ 'docs/*', 'utils/deploy_pages.sh', '.woodpecker/.update_docs.yml' ]
+    include: [ 'docs/*', 'utils/deploy_pages.sh', '.woodpecker/.documentation.yml' ]
   branch: master
