@@ -1,4 +1,4 @@
-**Note**: Gitea does not fully support math equations and citations in reStructuredText format. You can see the rendered html page `here <https://meisam.codeberg.page/slabcc>`_.
+**Note**: Gitea/Forgejo does not fully support math equations and citations in reStructuredText format. You can see the rendered html page `here <https://meisam.codeberg.page/slabcc>`_.
 
 .. rubric:: SLABCC 0.8.5
 
@@ -100,11 +100,11 @@ Quick start guide
 =================
 To calculate the charge correction slabcc needs the following files:
 
-- Input parameters file (default: `slabcc.in`)
-- CHGCAR of the neutral system from the VASP calculation (default: `CHGCAR.N`)
-- CHGCAR of the charged system from the VASP calculation (default: `CHGCAR.C`)
-- LOCPOT of the neutral system from the VASP calculation (default: `LOCPOT.N`)
-- LOCPOT of the charged system from the VASP calculation (default: `LOCPOT.C`)
+- Input parameters file (default: ``slabcc.in``)
+- CHGCAR of the neutral system from the VASP calculation (default: ``CHGCAR.N``)
+- CHGCAR of the charged system from the VASP calculation (default: ``CHGCAR.C``)
+- LOCPOT of the neutral system from the VASP calculation (default: ``LOCPOT.N``)
+- LOCPOT of the charged system from the VASP calculation (default: ``LOCPOT.C``)
 
 Input parameters file for a slab should minimally include (all in relative scale [0 1]):
 
@@ -116,7 +116,7 @@ Input parameters file for a slab should minimally include (all in relative scale
 
 Example
 --------
-The following examples list the `input parameters`_ to be defined in `slabcc.in` file, assuming the VASP outputs (LOCPOT and CHGCAR files) are in the same directory.
+The following examples list the `input parameters`_ to be defined in ``slabcc.in`` file, assuming the VASP outputs (LOCPOT and CHGCAR files) are in the same directory.
 
 1. **Minimum input**: The program models the extra charge with a Gaussian charge distribution localized around the position (``charge_position= 0.24  0.56  0.65``) in a slab model with a normal direction of (``normal_direction = y``) and surfaces at (``interfaces = 0.25  0.75``). The dielectric tensor inside the slab is assumed to be isotropic (``diel_in = 4.8``)::
 
@@ -186,7 +186,7 @@ Installation
 ============
 1. **Prerequisites:**
 
- #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later) 
+ #. **Compiler:** You need a C++ compiler with `C++14 standard support <https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features>`_ (e.g. `g++ <https://gcc.gnu.org/>`_ 5.0 or later)
  #. **BLAS/OpenBLAS/MKL:** You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements, e.g., the `OpenBLAS <https://github.com/xianyi/OpenBLAS/releases>`_/`MKL <https://software.intel.com/en-us/mkl>`_ instead. If you don't have OpenBLAS installed on your system, follow the guide on the `OpenBLAS website <https://www.openblas.net>`_. Please refer to the `Armadillo documentation <https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md>`_ for linking to other BLAS replacements.
  #. **FFTW:** If you don't have FFTW installed on your system, follow the guide on the `FFTW website <https://www.fftw.org/download.html>`_. Alternatively, you can use the FFTW interface of the MKL.
 
@@ -201,8 +201,8 @@ Installation
  #. **$EXTRA_FLAGS:** extra compiler flags for CC and CXX
  #. **$LD_EXTRA_FLAGS:** extra linker flags
 
-3. **Compilation:** Run the command `make` in the `bin/` to compile the slabcc.
-4. **Cleanup:** You can run `make clean` to remove the compiled objects. `make distclean` additionally removes all the compiled objects of the bundled external libraries.
+3. **Compilation:** Run the command ``make`` in the ``bin/`` to compile the slabcc.
+4. **Cleanup:** You can run ``make clean`` to remove the compiled objects. ``make distclean`` additionally removes all the compiled objects of the bundled external libraries.
 
 ==========
 Validation
@@ -233,7 +233,7 @@ Test set
 --------
 
 You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__!
-You can also run the regression tests and verify their results with `make test`.
+You can also run the regression tests and verify their results with ``make test``.
 
 =======================
 Command-line parameters
@@ -252,7 +252,7 @@ You can run slabcc without any additional options. Alternatively, you can use th
 ======================
 Input parameters
 ======================
-slabcc reads all its parameters from the input file (by default, `slabcc.in`). You can change the input file's name using the `command-line parameters`_.
+slabcc reads all its parameters from the input file (by default, ``slabcc.in``). You can change the input file's name using the `command-line parameters`_.
 The input file is processed as follows:
 
 - Lines starting with # will be treated as comments. Inline comments are also allowed.
@@ -699,7 +699,7 @@ __ check_
 
 .. _check:
 
-10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table`_ for a complete list of the output files.
+10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare ``slabcc_MZCHG.dat`` and ``slabcc_MZPOT.dat``, with ``slabcc_DZCHG.dat`` and ``slabcc_DZPOT.dat``, respectively. Check `the files table`_ for a complete list of the output files.
 
  Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the charge-corrected total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
 
@@ -744,8 +744,8 @@ Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
 The source code and all the documentation are available under the 2-Clause BSD License. For more information, see license_.
 
-| This code uses several open-source components, each of which is located under a separate sub-directory of `src/`. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.
-| The attributions are also present in the binary file and can be accessed by using `--copyright` flag.
+| This code uses several open-source components, each of which is located under a separate sub-directory of ``src/``. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.
+| The attributions are also present in the binary file and can be accessed by using ``--copyright`` flag.
 
 Included third-party components
 -------------------------------
