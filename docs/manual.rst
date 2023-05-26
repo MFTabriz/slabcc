@@ -48,7 +48,7 @@ or `trivariate Gaussian <https://mathworld.wolfram.com/TrivariateNormalDistribut
  
  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i,x}\sigma_{i,y}\sigma_{i,z}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i,x}^{2}}{2\sigma_{i,x}^{2}} - \frac{r_{i,y}^{2}}{2\sigma_{i,y}^{2}}- \frac{r_{i,z}^{2}}{2\sigma_{i,z}^{2}} } \right )
 
-which gives a charge distribution normalized to q\ :sub:`i`  with a standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
+which gives a charge distribution normalized to q\ :sub:`i` \ with a standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
 
 * The generated Gaussian model charge will be embedded in a dielectric medium with a profile of the form:
 
@@ -181,11 +181,6 @@ The following examples list the `input parameters`_ to be defined in `slabcc.in`
     normal_direction = z
     diel_in = 6.28 6.28 1.83
 
-Test set
---------
-
-You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__! Bitwise reproducibility of the results is not guaranteed across the different versions or build configurations.
-
 ============
 Installation
 ============
@@ -219,13 +214,12 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 
  - with GNU C/C++ compilers (5), OpenBLAS, FFTW
 
-- Ubuntu Linux 18.04
-
- - with GNU C/C++ compilers (8), OpenBLAS, FFTW
-
 - Ubuntu Linux 22.04
 
  - with GNU C/C++ compilers (9,11), OpenBLAS, FFTW
+ - with GNU C/C++ compilers (11), MKL (2023)
+ - with Intel oneAPI DPC++/C++ Compiler (2023), MKL (2023)
+ - with LLVM Clang (14), OpenBLAS, FFTW
 
 - AlmaLinux 8.7
 
@@ -234,6 +228,12 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 - openSUSE Leap 15.4
 
  - with GNU C/C++ compilers (10), BLAS, FFTW
+
+Test set
+--------
+
+You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__!
+You can also run the regression tests and verify their results with `make test`.
 
 =======================
 Command-line parameters
@@ -695,13 +695,13 @@ __ check_
 
 8. **Is the slabcc free? Can I use its source code in my own software?** slabcc is released under the 2-Clause BSD license_ which permits this software to be modified, redistributed, and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)
 
-9. **How accurate are the slabcc results?** The accuracy of the final results depends on various factors, including the accuracy/grid-size of the input files and the provided input parameters. The optimization algorithm used for parameter estimation is a non-linear local optimizer, which means that the result will highly depend on its initial conditions. Models with different numbers of Gaussian charges have different accuracy and may be compared with caution. In the case of models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few `known issues and limitations`_ to the slabcc code and its algorithm. Also keep in mind that this is free software, and as the license_ explicitly mentions: there is absolutely no warranty for its fitness for any particular purpose.
+9. **How accurate are the slabcc results?** The accuracy of the final results depends on various factors, including the accuracy and grid size of the input files and the provided input parameters. The optimization algorithm used for parameter estimation is a non-linear local optimizer, which means that the result will highly depend on its initial conditions. Models with different numbers of Gaussian charges have different accuracy and may be compared with caution. In the case of models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few `known issues and limitations`_ to the slabcc code and its algorithm. Also keep in mind that this is free software, and as the license_ explicitly mentions, there is absolutely no warranty for its fitness for any particular purpose.
 
 .. _check:
 
 10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table`_ for a complete list of the output files.
 
- Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the (charge corrected) total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
+ Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the charge-corrected total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
 
 .. _cite:
 

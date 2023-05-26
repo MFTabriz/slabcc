@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
                   "significantly different from the initial value. "
                   "Please make sure that the final position of the extra "
                   "charge have been estimated correctly!");
-        log->debug("Charge position changes: ",
+        log->debug("Charge position changes: {}",
                    to_string(charge_position_change));
       }
     }
@@ -314,6 +314,13 @@ int main(int argc, char *argv[]) {
       model.update_V_target();
     }
   }
+
+  model.gaussian_charges_gen();
+  model.dielectric_profiles_gen();
+  auto local_param = model.data_packer();
+  std::vector<double> gradients = {};
+  model.potential_RMSE =
+      potential_error(std::get<0>(local_param), gradients, &model);
 
   log->debug("Cell dimensions (bohr): " +
              to_string(model.cell_vectors_lengths));
@@ -353,10 +360,6 @@ int main(int argc, char *argv[]) {
     promise.get();
   }
 
-  auto local_param = model.data_packer();
-  std::vector<double> gradients = {};
-  model.potential_RMSE =
-      potential_error(std::get<0>(local_param), gradients, &model);
   model.check_V_error();
 
   model.verify_CHG(Defect_supercell.charge);

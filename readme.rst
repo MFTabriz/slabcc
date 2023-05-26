@@ -141,11 +141,6 @@ The following examples list the input parameters to be defined in `slabcc.in` fi
     normal_direction = z
     diel_in = 6.28 6.28 1.83
 
-Test set
---------
-
-You can download a complete test set, including input files, input parameters, and expected output, `here <https://doi.org/10.5281/zenodo.1323558>`_. The bitwise reproducibility of the results is not guaranteed across the different versions.
-
 ============
 Installation 
 ============
@@ -180,13 +175,12 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 
  - with GNU C/C++ compilers (5), OpenBLAS, FFTW
 
-- Ubuntu Linux 18.04
-
- - with GNU C/C++ compilers (8), OpenBLAS, FFTW
-
 - Ubuntu Linux 22.04
 
  - with GNU C/C++ compilers (9,11), OpenBLAS, FFTW
+ - with GNU C/C++ compilers (11), MKL (2023)
+ - with Intel oneAPI DPC++/C++ Compiler (2023), MKL (2023)
+ - with LLVM Clang (14), OpenBLAS, FFTW
 
 - AlmaLinux 8.7
 
@@ -195,6 +189,12 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 - openSUSE Leap 15.4
 
  - with GNU C/C++ compilers (10), BLAS, FFTW
+
+Test set
+--------
+
+You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__!
+You can also run the regression tests and verify their results with `make test`.
 
 ==================================
 Known issues and limitations

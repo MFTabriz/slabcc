@@ -64,8 +64,8 @@ void cli_params::parse(int argc, char *argv[]) {
            "center\n"
            " - diel_in : dielectric constant/tensor of the slab\n"
            " - normal_direction : direction normal to the surface\n"
-           " - interfaces : surface positions of the slab\n"
-           "visit https://meisam.codeberg.page/slabcc to read manual.";
+           " - interfaces : surface positions of the slab\n\n"
+           "Complete manual: https://meisam.codeberg.page/slabcc";
     exit(0);
   }
 

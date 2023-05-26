@@ -1,0 +1,39 @@
+# Parameters read from the file or their default values:
+2d_model = no
+charge_fraction = 1
+charge_position = 0.5 0.5 0.5; 
+charge_rotation = 0 0 0; 
+charge_sigma = 1; 
+charge_trivariate = no
+CHGCAR_charged = input/linear_gas.CHGCAR
+CHGCAR_neutral = input/linear.CHGCAR
+diel_in = 4
+diel_out = 4
+diel_taper = 1
+extrapolate = yes
+extrapolate_grid_x = 1
+extrapolate_steps_number = 4
+extrapolate_steps_size = 0.5
+interfaces = 0.25 0.75
+LOCPOT_charged = input/linear.CHGCAR
+LOCPOT_neutral = input/linear.CHGCAR
+normal_direction = z
+optimize = no
+optimize_algorithm = BOBYQA
+optimize_charge_fraction = yes
+optimize_charge_position = yes
+optimize_charge_rotation = no
+optimize_charge_sigma = yes
+optimize_grid_x = 0.8
+optimize_interfaces = yes
+optimize_maxsteps = 0
+optimize_maxtime = 0
+optimize_tolerance = 0.01
+slab_center = 0.5 0.5 0.5
+verbosity = 4
+
+[Results]
+dV = 0.282355899802227
+E_periodic of the model charge = 1.41469207477564
+E_isolated of the model charge = 1.91516086188343
+Energy correction for the model charge (E_iso-E_per-q*dV) = 0.782824552358081

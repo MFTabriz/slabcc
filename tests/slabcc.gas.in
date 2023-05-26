@@ -1,0 +1,12 @@
+LOCPOT_charged = input/linear.CHGCAR
+LOCPOT_neutral = input/linear.CHGCAR
+CHGCAR_charged = input/linear_gas.CHGCAR
+CHGCAR_neutral = input/linear.CHGCAR
+charge_position = 0.5 0.5 0.5
+charge_sigma = 1
+diel_in = 4
+diel_out = 4
+optimize = no
+verbosity = 4
+
+

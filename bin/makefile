@@ -41,16 +41,23 @@ ifeq ($(VERBOSE),1)
   LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -Wl,--verbose
 endif
 
-ifdef $(MKL)
+ifeq ($(MKL),1)
   DMKL := -DMKL
-  ##### TODO: add MKL build to CI and fix this part
+
   FFTW_INC_PATH := ${MKLROOT}/include/fftw
   BLAS_INC_PATH := ${MKLROOT}/include
   BLAS_LIB_PATH := ${MKLROOT}/lib/intel64
 
-
-  BLAS_LIB := -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl #MKL_INTEL
-  #BLAS_LIB =-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -ldl #MKL_GCC
+  # Note: compiler executables may have names such as gcc-5
+  ifneq (,$(findstring icpc,$(CXX)))
+    BLAS_LIB ?= -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
+  endif
+  ifneq (,$(findstring icpx,$(CXX)))
+    BLAS_LIB ?= -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
+  endif
+  ifneq (,$(findstring g++,$(CXX)))
+    BLAS_LIB ?=  -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -ldl
+  endif
 
 else
 
@@ -78,15 +85,15 @@ endif
 # these flags are also used by the NLOPT configure/makefile
 COMMON_FLAGS = $(OMP) $(OPT) $(EXTRA_FLAGS) 
 
-ifeq ($(CXX),icpc)
+ifneq (,$(findstring ic,$(CXX)))
   OMP := -qopenmp
-  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -lifcore $(OMP)
 endif
 
-ifeq ($(CXX),g++)
+ifneq (,$(findstring g++,$(CXX)))
   OMP := -fopenmp
-  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -lgfortran -lquadmath $(OMP)
 endif
+
+LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) $(OMP)
 
 CFLAGS   = $(COMMON_FLAGS) 
 CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD)# -Wall
@@ -136,14 +143,18 @@ $(OBJ_PATH)/%.o: %.c
 ##compile nlopt
 $(NLOPT_LIB_FILE):
 	mkdir -p $(NLOPT_PREFIX)
-	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat $(NLOPT_PREFIX)/config.log;
+	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat config.log;
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
 
-.PHONY: clean distclean
+.PHONY: clean distclean test
+
+test: $(EXECUTABLE)
+	$(MAKE) -C ../tests
 
 clean:
 	rm -fr $(OBJECTS) $(EXECUTABLE)
+	$(MAKE) -C ../tests clean
 
 distclean: clean
 	rm -fr $(NLOPT_PREFIX)
