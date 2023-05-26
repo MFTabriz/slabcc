@@ -27,4 +27,4 @@ Test set
 --------
 
 You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__!
-You can also run the regression tests and verify their results with ``make test``.
+You can also run the regression tests and verify their results with ``make test``. You'll need `numdiff <https://www.nongnu.org/numdiff/>`__ for these tests.

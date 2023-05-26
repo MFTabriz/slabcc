@@ -1,0 +1,5 @@
+# build_pages.sh
+docutils==0.19
+
+# generate_docs.sh
+rst-include>=2.1
