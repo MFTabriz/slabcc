@@ -25,6 +25,7 @@ std::string INIReader::Get(const std::string &name,
 void INIReader::dump_compilation_info() const {
   auto log = spdlog::get("loggers");
   log->debug("------------compilation machine------------");
+
 #if defined(BOOST_ARCH_X86_64_AVAILABLE)
   log->debug("Architecture: {}", BOOST_ARCH_X86_64_NAME);
 #endif
@@ -58,30 +59,12 @@ void INIReader::dump_compilation_info() const {
   log->debug("OS: {}", BOOST_OS_LINUX_NAME);
 #endif
 
-#if defined(BOOST_COMP_INTEL_AVAILABLE)
-  log->debug("Available compiler: {} version {}", BOOST_COMP_INTEL_NAME,
-             __INTEL_COMPILER);
-#endif
-#if defined(BOOST_COMP_GNUC_AVAILABLE)
-  log->debug("Available compiler: {} version {}", BOOST_COMP_GNUC_NAME,
-             __GNUC__);
-#endif
-#if defined(BOOST_COMP_CLANG_AVAILABLE)
-  log->debug("Available compiler: {} version {}", BOOST_COMP_CLANG_NAME,
-             __clang__);
-#endif
-#if defined(BOOST_COMP_MSVC_AVAILABLE)
-  log->debug("Available compiler: {} version {}", BOOST_COMP_MSVC_NAME,
-             _MSC_VER);
-#endif
-
-  log->debug("Compilation date: {} {}", __DATE__, __TIME__);
 }
 
 void INIReader::dump_env_info() const {
   auto log = spdlog::get("loggers");
-  log->debug("-----------enviroment variables------------");
-  const std::vector<std::string> env_variables{
+  log->debug("------------runtime enviroment-------------");
+  const std::vector<std::string> omp_vars{
       "OMP_DYNAMIC",  "OMP_SCHEDULE",  "OMP_NUM_THREADS", "MKL_NUM_THREADS",
       "KMP_AFFINITY", "OMP_PROC_BIND", "OMP_PLACES",      "GOMP_CPU_AFFINITY"};
   const std::vector<std::string> slurm_vars{
@@ -105,7 +88,7 @@ void INIReader::dump_env_info() const {
     }
   }
 
-  for (const auto &var : env_variables) {
+  for (const auto &var : omp_vars) {
     if (const char *env_p = std::getenv(var.c_str())) {
       log->debug(">> {}={}", var, env_p);
     }
