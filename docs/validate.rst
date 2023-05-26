@@ -1,7 +1,7 @@
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components. 
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
 The current version of the slabcc has been `build and validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04

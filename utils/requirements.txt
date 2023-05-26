@@ -3,3 +3,6 @@ docutils==0.19
 
 # generate_docs.sh
 rst-include>=2.1
+
+# for rst linting
+doc8>=0.11

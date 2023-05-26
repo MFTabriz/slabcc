@@ -88,24 +88,24 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 * The potential due to the charge distribution ρ under 3D PBC embedded in the dielectric medium ε(k) is calculated by solving the Poisson equation in Fourier space:
 
 .. math::
-	 \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
+  \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
 
 * A non-linear optimization routine minimizes the difference between our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
 
 * The E\ :sub:`periodic` is calculated as:
 
 .. math::
-	E = \frac{1}{2} \int V(r) \rho(r) \, dr
+  E = \frac{1}{2} \int V(r) \rho(r) \, dr
 
 * E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and slab models, the extrapolation is done linearly. For the monolayer models (2D systems), the following equation is used for the extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
 
 .. math::
-	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
+  E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
 
 where c\ :sub:`i` are the fitting parameters and
 
 .. math::
-	d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
+  d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
 
 guarantees the correct energy gradient at x(=1/α)→0. E\ :sub:`M` being the Madelung energy.
 

@@ -30,8 +30,8 @@ The following examples list the `input parameters`_ to be defined in ``slabcc.in
 
  The program will use the default values for the other parameters to:
 
- - Load the CHGCAR of charged and neutralized systems. 
- - Load the LOCPOT of charged and neutralized systems.  
+ - Load the CHGCAR of charged and neutralized systems.
+ - Load the LOCPOT of charged and neutralized systems.
  - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
  - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
  - Calculate the total energy correction for the charged system.

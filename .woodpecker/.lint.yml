@@ -29,3 +29,14 @@ pipeline:
     group: nodep    
     commands:
       - ./utils/git_check.sh
+
+  rst_lint:
+    image: python:3
+    commands:
+      - pip3 install --no-cache-dir --requirement=utils/requirements.txt
+      - ./utils/generate_docs.sh
+      - doc8 docs/manual.rst --max-line-length 8000
+    when:
+      path:
+        include: [ 'docs/*' ]
+
