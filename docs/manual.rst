@@ -219,13 +219,12 @@ The current version of the slabcc has been `build/validated <https://ci.codeberg
 
  - with GNU C/C++ compilers (5), OpenBLAS, FFTW
 
-- Ubuntu Linux 18.04
-
- - with GNU C/C++ compilers (8), OpenBLAS, FFTW
-
 - Ubuntu Linux 22.04
 
  - with GNU C/C++ compilers (9,11), OpenBLAS, FFTW
+ - with GNU C/C++ compilers (11), MKL (2023)
+ - with Intel oneAPI DPC++/C++ Compiler (2023), MKL
+ - with LLVM Clang (14), OpenBLAS, FFTW
 
 - AlmaLinux 8.7
 
