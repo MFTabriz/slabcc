@@ -313,14 +313,14 @@ int main(int argc, char *argv[]) {
       model.change_grid(cell_grid0);
       model.update_V_target();
     }
-  } else {
-    model.gaussian_charges_gen();
-    model.dielectric_profiles_gen();
-    auto local_param = model.data_packer();
-    std::vector<double> gradients = {};
-    model.potential_RMSE =
-        potential_error(std::get<0>(local_param), gradients, &model);
   }
+
+  model.gaussian_charges_gen();
+  model.dielectric_profiles_gen();
+  auto local_param = model.data_packer();
+  std::vector<double> gradients = {};
+  model.potential_RMSE =
+      potential_error(std::get<0>(local_param), gradients, &model);
 
   log->debug("Cell dimensions (bohr): " +
              to_string(model.cell_vectors_lengths));
