@@ -12,7 +12,7 @@ void cli_params::parse(int argc, char *argv[]) {
       clara::Opt(input_file,
                  "input_file")["-i"]["--input"]("slabcc input file name") |
       clara::Opt(output_file,
-                 "input_file")["-o"]["--output"]("slabcc output file name") |
+                 "output_file")["-o"]["--output"]("slabcc output file name") |
       clara::Opt(log_file, "log_file")["-l"]["--log"]("slabcc log file name") |
       clara::Opt(diff_only)["-d"]["--diff"](
           "calculate charge and the potential differences only") |
