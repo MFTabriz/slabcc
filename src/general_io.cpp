@@ -15,12 +15,10 @@ void cli_params::parse(int argc, char *argv[]) {
                  "input_file")["-o"]["--output"]("slabcc output file name") |
       clara::Opt(log_file, "log_file")["-l"]["--log"]("slabcc log file name") |
       clara::Opt(diff_only)["-d"]["--diff"](
-          "calculate the charge and the potential differences only") |
-      clara::Opt(showManual)["-m"]["--man"]("show the quick start guide") |
-      clara::Opt(showVer)["-v"]["--version"](
-          "show the slabcc version and its compilation date") |
-      clara::Opt(showAttr)["-c"]["--copyright"](
-          "show the copyright information and the attributions");
+          "calculate charge and the potential differences only") |
+      clara::Opt(showManual)["-m"]["--man"]("show quick start guide") |
+      clara::Opt(showVer)["-v"]["--version"]("show slabcc version") |
+      clara::Opt(showAttr)["-c"]["--copyright"]("show copyright information");
 
   auto cli_result = cli.parse(clara::Args(argc, argv));
   if (!cli_result) {
@@ -36,15 +34,16 @@ void cli_params::parse(int argc, char *argv[]) {
   }
 
   if (showVer) {
-    std::cout << "SLAB Charge Correction (slabcc)" << '\n';
-    std::cout << "Version: " << SLABCC_VERSION_MAJOR << "."
-              << SLABCC_VERSION_MINOR << "." << SLABCC_VERSION_PATCH << '\n';
-    std::cout << "Armadillo library: version " << ARMA_VERSION_MAJOR << "."
+    std::cout << "SLAB Charge Correction (slabcc) (version "
+              << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "."
+              << SLABCC_VERSION_PATCH << ')\n';
+    std::cout << "Linked libraries: " << '\n';
+    std::cout << "Armadillo: version " << ARMA_VERSION_MAJOR << "."
               << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << '\n';
-    std::cout << "NLOPT library: version " << nlopt::version_major() << "."
+    std::cout << "NLOPT: version " << nlopt::version_major() << "."
               << nlopt::version_minor() << "." << nlopt::version_bugfix()
               << '\n';
-    std::cout << "SPDLOG library: version " << SPDLOG_VER_MAJOR << "."
+    std::cout << "SPDLOG: version " << SPDLOG_VER_MAJOR << "."
               << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << '\n';
     exit(0);
   }
