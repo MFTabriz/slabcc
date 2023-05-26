@@ -24,7 +24,7 @@ install_numdiff () {
     tar -xvf numdiff-5.9.0.tar.gz
     cd numdiff-5.9.0
     mkdir -p bin && cd bin
-    ../configure
+    CC=$_CC ../configure
     make
     cd ../..
 }
@@ -77,7 +77,7 @@ elif [[ "$_distro" == 'opensuse/leap' ]]; then
     zypper install -y make gzip ${_pkgs_array[@]}
     zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
     zypper --gpg-auto-import-keys ref
-    zypper install -y tar 
+    zypper install -y tar
     [[ -x "numdiff" ]] || install_numdiff
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
