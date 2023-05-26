@@ -699,9 +699,9 @@ __ check_
 
 .. _check:
 
-10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table" for a complete list of the output files.
+10. **How can I check the slabcc results?** slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (``normal_direction = z``), then you should compare `slabcc_MZCHG.dat` and `slabcc_MZPOT.dat`, with `slabcc_DZCHG.dat` and `slabcc_DZPOT.dat`, respectively. Check `the files table`_ for a complete list of the output files.
 
- Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the charge-corrected total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
+ Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the charge-corrected total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.
 
 .. _cite:
 
