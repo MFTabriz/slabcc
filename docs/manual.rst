@@ -12,21 +12,21 @@ Introduction
 SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:
 
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
- 
+
 This method estimates the error in the total energy of the charged models under 3D PBC due to the excess charge in the real system using Gaussian models.
 The model charge is assumed to be embedded in a medium with a dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) that is orthogonal to the slab.
 The energy correction is calculated as:
 
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
 
-where E\ :sub:`corr` \ is the total energy correction for the model; 
+where E\ :sub:`corr` \ is the total energy correction for the model;
 E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
 q is the total extra charge, and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
 
 The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:
 
- Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: `10.1103/PhysRevX.4.031044 <https://doi.org/10.1103/PhysRevX.4.031044>`_ `(Erratum) <https://doi.org/10.1103/PhysRevX.8.039902>`_ 
- 
+ Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: `10.1103/PhysRevX.4.031044 <https://doi.org/10.1103/PhysRevX.4.031044>`_ `(Erratum) <https://doi.org/10.1103/PhysRevX.8.039902>`_
+
 And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
  Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
@@ -40,12 +40,12 @@ Algorithm
 
 .. math::
 
- \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right ) 
-  
+ \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right )
+
 or `trivariate Gaussian <https://mathworld.wolfram.com/TrivariateNormalDistribution.html>`_ charge distributions as:
 
 .. math::
- 
+
  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i,x}\sigma_{i,y}\sigma_{i,z}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i,x}^{2}}{2\sigma_{i,x}^{2}} - \frac{r_{i,y}^{2}}{2\sigma_{i,y}^{2}}- \frac{r_{i,z}^{2}}{2\sigma_{i,z}^{2}} } \right )
 
 which gives a charge distribution normalized to q\ :sub:`i` \ with a standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
@@ -58,7 +58,7 @@ which gives a charge distribution normalized to q\ :sub:`i` \ with a standard de
 where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub:`1` \ and ε\ :sub:`2` \ are dielectric tensors on either side of the interface (``diel_in`` & ``diel_out``) and β (``diel_taper``) defines the smoothness of transition assuming anisotropic dielectric tensor as:
 
 .. math::
- \epsilon = 
+ \epsilon =
   \left | \begin{matrix}
     \epsilon_{11} & 0 & 0 \\
     0 & \epsilon_{22} & 0 \\
@@ -82,7 +82,7 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 .. math::
 	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
 
-where c\ :sub:`i` are the fitting parameters and 
+where c\ :sub:`i` are the fitting parameters and
 
 .. math::
 	d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
@@ -127,8 +127,8 @@ The following examples list the `input parameters`_ to be defined in ``slabcc.in
 
  The program will use the default values for the other parameters to:
 
- - Load the CHGCAR of charged and neutralized systems. 
- - Load the LOCPOT of charged and neutralized systems.  
+ - Load the CHGCAR of charged and neutralized systems.
+ - Load the LOCPOT of charged and neutralized systems.
  - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
  - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
  - Calculate the total energy correction for the charged system.
@@ -207,8 +207,8 @@ Installation
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components. 
-The current version of the slabcc has been `build/validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
+The current version of the slabcc has been `build and validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
 
@@ -266,7 +266,7 @@ The input file is processed as follows:
 - Lines starting with a space " " will be treated as the continuation of the last parameter's value.
 - Subsequent definitions for any parameter will be concatenated with the existing definition.
 
- 
+
 +------------------------------+-------------------------------------------------------+---------------+
 | Parameter                    | Description and the options / ``example``             | Default value |
 +==============================+=======================================================+===============+
@@ -515,7 +515,7 @@ Results and the generated files
 ===============================
 slabcc writes its calculated energy correction values to the standard output as well as the output file. All reported energy values are in eV.
 
-Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files. 
+Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files.
 
 
 Output files
@@ -525,7 +525,7 @@ The parsed input variables or their default values and the calculation results w
 	# Parameters read from the file or their default values:
 	2d_model = no
 	charge_fraction = 1
-	charge_position = 0.5 0.5 0.37; 
+	charge_position = 0.5 0.5 0.37;
 	charge_rotation = 0 0 0;
 	charge_sigma = 1;
 	charge_trivariate = no
@@ -708,13 +708,13 @@ __ check_
 11. **How should I cite the slabcc?** Please cite the slabcc as: (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
 
  Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
-  
-12. **How can I extract the files in slabcc_data.tar.xz?** You can use `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:  
+
+12. **How can I extract the files in slabcc_data.tar.xz?** You can use `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:
 
     tar -xvf slabcc_data.tar.xz
 
  Alternatively, you can use `WinRAR <https://www.rarlab.com>`_ or `7zip <https://www.7-zip.org>`_.
- 
+
 13. **Something is not working! What should I do?**
 
  * If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
@@ -751,7 +751,7 @@ Included third-party components
 -------------------------------
 
 - `Armadillo C++ Linear Algebra Library <https://arma.sourceforge.net>`_ licensed under the Apache License 2.0
- 
+
  - Copyright 2008-2018, Conrad Sanderson
  - Copyright 2008-2016, National ICT Australia (NICTA)
  - Copyright 2017-2018, Arroyo Consortium
@@ -761,7 +761,7 @@ Included third-party components
  - This product includes software developed at Arroyo Consortium
  - This product includes software developed at Data61, CSIRO
 
-- `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license 
+- `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license
 
  - © 2009, Ben Hoyt, `et al. <https://github.com/benhoyt/inih/contributors>`__
 
@@ -794,7 +794,8 @@ Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
