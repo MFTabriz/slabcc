@@ -14,7 +14,7 @@ pipeline:
 
   shellcheck:
     image: archlinux:latest
-    group: nodep    
+    group: nodep
     commands:
       - pacman -Syv
       - pacman --noconfirm -S shellcheck
@@ -26,12 +26,13 @@ pipeline:
 
   gitcheck:
     image: quay.io/meisam/charliecloud:latest  ## todo: replace with ci tools container
-    group: nodep    
+    group: nodep
     commands:
       - ./utils/git_check.sh
 
   rst_lint:
     image: python:3
+    group: nodep
     commands:
       - pip3 install --no-cache-dir --requirement=utils/requirements.txt
       - ./utils/generate_docs.sh
