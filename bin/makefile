@@ -85,15 +85,15 @@ endif
 # these flags are also used by the NLOPT configure/makefile
 COMMON_FLAGS = $(OMP) $(OPT) $(EXTRA_FLAGS) 
 
-ifeq ($(CXX),icpc)
+ifneq (,$(findstring ic,$(CXX)))
   OMP := -qopenmp
-  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -lifcore $(OMP)
 endif
 
-ifeq ($(CXX),g++)
+ifneq (,$(findstring g++,$(CXX)))
   OMP := -fopenmp
-  LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) -lgfortran -lquadmath $(OMP)
 endif
+
+LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) $(OMP)
 
 CFLAGS   = $(COMMON_FLAGS) 
 CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD)# -Wall
