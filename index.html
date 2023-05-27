@@ -1,0 +1,1787 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>SLABCC</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 8954 2022-01-20 10:10:25Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<style type="text/css">
+
+/*
+*   math2html: convert LaTeX equations to HTML output.
+*
+*   Copyright (C) 2009,2010 Alex Fernández
+*                 2021      Günter Milde
+*
+*   Released under the terms of the `2-Clause BSD license'_, in short:
+*   Copying and distribution of this file, with or without modification,
+*   are permitted in any medium without royalty provided the copyright
+*   notice and this notice are preserved.
+*   This file is offered as-is, without any warranty.
+*
+* .. _2-Clause BSD license: http://www.spdx.org/licenses/BSD-2-Clause
+*
+*   Based on eLyXer: convert LyX source files to HTML output.
+*   http://elyxer.nongnu.org/
+*
+*
+* CSS file for LaTeX formulas.
+*
+* References: http://www.zipcon.net/~swhite/docs/math/math.html
+*             http://www.cs.tut.fi/~jkorpela/math/
+*/
+
+/* Formulas */
+.formula {
+	text-align: center;
+	margin: 1.2em 0;
+	line-height: 1.4;
+}
+span.formula {
+	white-space: nowrap;
+}
+div.formula {
+	padding: 0.5ex;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Basic features */
+a.eqnumber {
+	display: inline-block;
+	float: right;
+	clear: right;
+	font-weight: bold;
+}
+span.unknown {
+	color: #800000;
+}
+span.ignored, span.arraydef {
+	display: none;
+}
+.phantom {
+	visibility: hidden;
+}
+.formula i {
+	letter-spacing: 0.1ex;
+}
+
+/* Alignment */
+.align-left, .align-l {
+	text-align: left;
+}
+.align-right, .align-r {
+	text-align: right;
+}
+.align-center, .align-c {
+	text-align: center;
+}
+
+/* Structures */
+span.hspace {
+	display: inline-block;
+}
+span.overline, span.bar {
+	text-decoration: overline;
+}
+.fraction, .fullfraction, .textfraction {
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+}
+span.formula .fraction,
+.textfraction,
+span.smallmatrix {
+	font-size: 80%;
+	line-height: 1;
+}
+span.numerator {
+	display: block;
+	line-height: 1;
+}
+span.denominator {
+	display: block;
+	line-height: 1;
+	padding: 0ex;
+	border-top: thin solid;
+}
+.formula sub, .formula sup {
+	font-size: 80%;
+}
+sup.numerator, sup.unit {
+	vertical-align: 80%;
+}
+sub.denominator, sub.unit {
+	vertical-align: -20%;
+}
+span.smallsymbol {
+	font-size: 75%;
+	line-height: 75%;
+}
+span.boldsymbol {
+	font-weight: bold;
+}
+span.sqrt {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 0.1ex;
+}
+sup.root {
+	position: relative;
+	left: 1.4ex;
+}
+span.radical {
+	display: inline-block;
+	padding: 0ex;
+	/* font-size: 160%; for DejaVu, not required with STIX */
+	line-height: 100%;
+	vertical-align: top;
+	vertical-align: middle;
+}
+
+span.root {
+	display: inline-block;
+	border-top: thin solid;
+	padding: 0ex;
+	vertical-align: middle;
+}
+div.formula .bigoperator,
+.displaystyle .bigoperator,
+.displaystyle .bigoperator {
+	line-height: 120%;
+	font-size: 140%;
+	padding-right: 0.2ex;
+}
+span.fraction .bigoperator,
+span.scriptstyle .bigoperator {
+	line-height: inherit;
+	font-size: inherit;
+	padding-right: 0;
+}
+span.bigdelimiter {
+	display: inline-block;
+}
+span.bigdelimiter.size1 {
+	transform: scale(1, 1.2);
+	line-height: 1.2;
+}
+span.bigdelimiter.size2 {
+	transform: scale(1, 1.62);
+	line-height: 1.62%;
+
+}
+span.bigdelimiter.size3 {
+	transform: scale(1, 2.05);
+	line-height: 2.05%;
+}
+span.bigdelimiter.size4 {
+	transform: scale(1, 2.47);
+	line-height: 2.47%;
+}
+/* vertically stacked sub and superscript */
+span.scripts {
+	display: inline-table;
+	vertical-align: middle;
+	padding-right: 0.2ex;
+}
+.script {
+	display: table-row;
+	text-align: left;
+	line-height: 150%;
+}
+span.limits {
+	display: inline-table;
+	vertical-align: middle;
+}
+.limit {
+	display: table-row;
+	line-height: 99%;
+}
+sup.limit, sub.limit {
+	line-height: 100%;
+}
+span.embellished,
+span.embellished > .base {
+	display: inline-block;
+}
+span.embellished > sup,
+span.embellished > sub {
+	display: inline-block;
+	font-size: 100%;
+	position: relative;
+	bottom: 0.3em;
+	width: 0px;
+}
+span.embellished > sub {
+	top: 0.4em;
+}
+
+/* Environments */
+span.array, span.bracketcases, span.binomial, span.environment {
+	display: inline-table;
+	text-align: center;
+	vertical-align: middle;
+}
+span.arrayrow, span.binomrow {
+	display: table-row;
+	padding: 0;
+	border: 0;
+}
+span.arraycell, span.bracket, span.case, span.binomcell, span.environmentcell {
+	display: table-cell;
+	padding: 0ex 0.2ex;
+	line-height: 1; /* 99%; */
+	border: 0ex;
+}
+.environment.align > .arrayrow > .arraycell.align-l {
+	padding-right: 2em;
+}
+
+/* Inline binomials */
+span.binom {
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+	font-size: 80%;
+}
+span.binomstack {
+	display: block;
+	padding: 0em;
+}
+
+/* Over- and underbraces */
+span.overbrace {
+	border-top: 2pt solid;
+}
+span.underbrace {
+	border-bottom: 2pt solid;
+}
+
+/* Stackrel */
+span.stackrel {
+	display: inline-block;
+	text-align: center;
+}
+span.upstackrel {
+	display: block;
+	padding: 0em;
+	font-size: 80%;
+	line-height: 64%;
+	position: relative;
+	top: 0.15em;
+
+}
+span.downstackrel {
+	display: block;
+	vertical-align: bottom;
+	padding: 0em;
+}
+
+/* Fonts */
+.formula {
+	font-family: STIX, "DejaVu Serif", "DejaVu Math TeX Gyre", serif;
+}
+span.radical,   /* ensure correct size of square-root sign */
+span.integral { /* upright integral signs for better alignment of indices */
+	font-family: "STIXIntegralsUp", STIX;
+	/* font-size: 115%; match apparent size with DejaVu */
+}
+span.bracket {
+  /* some "STIX" and "DejaVu Math TeX Gyre" bracket pieces don't fit */
+	font-family: "DejaVu Serif", serif;
+}
+span.mathsf, span.textsf {
+	font-family: sans-serif;
+}
+span.mathrm, span.textrm {
+	font-family: STIX, "DejaVu Serif", "DejaVu Math TeX Gyre", serif;
+}
+span.mathtt, span.texttt {
+	font-family: monospace;
+}
+span.text, span.textnormal,
+span.mathsf, span.mathtt, span.mathrm {
+	font-style: normal;
+}
+span.fraktur {
+	font-family: "Lucida Blackletter", eufm10, blackletter;
+}
+span.blackboard {
+	font-family: Blackboard, msbm10, serif;
+}
+span.scriptfont {
+	font-family: "Monotype Corsiva", "Apple Chancery", "URW Chancery L", cursive;
+	font-style: italic;
+}
+span.mathscr {
+  font-family: MathJax_Script, rsfs10,  cursive;
+  font-style: italic;
+}
+span.textsc {
+	font-variant: small-caps;
+}
+span.textsl {
+	font-style: oblique;
+}
+
+/* Colors */
+span.colorbox {
+	display: inline-block;
+	padding: 5px;
+}
+span.fbox {
+	display: inline-block;
+	border: thin solid black;
+	padding: 2px;
+}
+span.boxed, span.framebox {
+	display: inline-block;
+	border: thin solid black;
+	padding: 5px;
+}
+
+</style>
+</head>
+<body>
+<div class="document">
+
+
+<p class="rubric">SLABCC 0.8.5</p>
+<div class="contents topic" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="auto-toc simple">
+<li><a class="reference internal" href="#introduction" id="toc-entry-1">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
+<li><a class="reference internal" href="#algorithm" id="toc-entry-2">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#quick-start-guide" id="toc-entry-3">2&nbsp;&nbsp;&nbsp;Quick start guide</a><ul class="auto-toc">
+<li><a class="reference internal" href="#example" id="toc-entry-4">2.1&nbsp;&nbsp;&nbsp;Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation" id="toc-entry-5">3&nbsp;&nbsp;&nbsp;Installation</a></li>
+<li><a class="reference internal" href="#validation" id="toc-entry-6">4&nbsp;&nbsp;&nbsp;Validation</a><ul class="auto-toc">
+<li><a class="reference internal" href="#test-set" id="toc-entry-7">4.1&nbsp;&nbsp;&nbsp;Test set</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#command-line-parameters" id="toc-entry-8">5&nbsp;&nbsp;&nbsp;Command-line parameters</a></li>
+<li><a class="reference internal" href="#input-parameters" id="toc-entry-9">6&nbsp;&nbsp;&nbsp;Input parameters</a></li>
+<li><a class="reference internal" href="#results-and-the-generated-files" id="toc-entry-10">7&nbsp;&nbsp;&nbsp;Results and the generated files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#output-files" id="toc-entry-11">7.1&nbsp;&nbsp;&nbsp;Output files</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#faq" id="toc-entry-12">8&nbsp;&nbsp;&nbsp;FAQ</a></li>
+<li><a class="reference internal" href="#known-issues-and-limitations" id="toc-entry-13">9&nbsp;&nbsp;&nbsp;Known issues and limitations</a></li>
+<li><a class="reference internal" href="#release-history-highlights" id="toc-entry-14">10&nbsp;&nbsp;&nbsp;Release history highlights</a></li>
+<li><a class="reference internal" href="#copyright-and-attributions" id="toc-entry-15">11&nbsp;&nbsp;&nbsp;Copyright and attributions</a><ul class="auto-toc">
+<li><a class="reference internal" href="#included-third-party-components" id="toc-entry-16">11.1&nbsp;&nbsp;&nbsp;Included third-party components</a></li>
+<li><a class="reference internal" href="#license" id="toc-entry-17">11.2&nbsp;&nbsp;&nbsp;License</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h1><a class="toc-backref" href="#toc-entry-1">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
+<p>SLABCC calculates an <em>a posteriori</em> energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:</p>
+<blockquote>
+Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: <a class="reference external" href="https://doi.org/10.1103/PhysRevLett.110.095505">10.1103/PhysRevLett.110.095505</a> <a class="reference external" href="https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf">(Supplements)</a></blockquote>
+<p>This method estimates the error in the total energy of the charged models under 3D PBC due to the excess charge in the real system using Gaussian models.
+The model charge is assumed to be embedded in a medium with a dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) that is orthogonal to the slab.
+The energy correction is calculated as:</p>
+<blockquote>
+E<sub>corr</sub>  = E<sub>isolated</sub> - E<sub>periodic</sub> - qΔV</blockquote>
+<p>where E<sub>corr</sub> is the total energy correction for the model;
+E<sub>periodic</sub> is the energy of the model charge, calculated by solving the periodic Poisson equation. E<sub>isolated</sub> is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
+q is the total extra charge, and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.</p>
+<p>The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:</p>
+<blockquote>
+Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: <a class="reference external" href="https://doi.org/10.1103/PhysRevX.4.031044">10.1103/PhysRevX.4.031044</a> <a class="reference external" href="https://doi.org/10.1103/PhysRevX.8.039902">(Erratum)</a></blockquote>
+<p>And by the cylindrical Bessel expansion of the Poisson equation as proposed in:</p>
+<blockquote>
+Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: <a class="reference external" href="https://doi.org/10.1063/1.4978238">10.1063/1.4978238</a></blockquote>
+<div class="line-block">
+<div class="line">SLABCC have been initially developed for the <a class="reference external" href="https://www.uni-bremen.de/bccms">Bremen Center for Computational Materials Science (BCCMS)</a></div>
+</div>
+<div class="section" id="algorithm">
+<h2><a class="toc-backref" href="#toc-entry-2">1.1&nbsp;&nbsp;&nbsp;Algorithm</a></h2>
+<ul class="simple">
+<li>slabcc reads the <a class="reference external" href="https://www.vasp.at">VASP</a> output files (CHGCAR and LOCPOT), and calculates the extra charge distribution and the potential due to the extra charge. All the input files should correspond to the same geometry.</li>
+<li>The extra charge is modeled by the sum of Gaussian charge distributions as follows:</li>
+</ul>
+<div class="formula">
+<i>ρ</i>(<i>r</i>) = <span class="limits"><sup class="limit"> </sup><span class="limit"><span class="bigoperator">∑</span></span><sub class="limit"><i>i</i></sub></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i><sub><i>i</i></sub></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><span class="scripts"><sup class="script">3</sup><sub class="script"><i>i</i></sub></span>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i></sub></span></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
+</div>
+<p>or <a class="reference external" href="https://mathworld.wolfram.com/TrivariateNormalDistribution.html">trivariate Gaussian</a> charge distributions as:</p>
+<div class="formula">
+<i>ρ</i>(<i>r</i>) = <span class="limits"><sup class="limit"> </sup><span class="limit"><span class="bigoperator">∑</span></span><sub class="limit"><i>i</i></sub></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>q</i><sub><i>i</i></sub></span><span class="ignored">)/(</span><span class="denominator"><i>σ</i><sub><i>i</i>, <i>x</i></sub><i>σ</i><sub><i>i</i>, <i>y</i></sub><i>σ</i><sub><i>i</i>, <i>z</i></sub>(2<i>π</i>)<sup>3 ⁄ 2</sup></span><span class="ignored">)</span></span>exp<span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i>, <i>x</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i>, <i>x</i></sub></span></span><span class="ignored">)</span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i>, <i>y</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i>, <i>y</i></sub></span></span><span class="ignored">)</span></span> − <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>r</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i>, <i>z</i></sub></span></span><span class="ignored">)/(</span><span class="denominator">2<i>σ</i><span class="scripts"><sup class="script">2</sup><sub class="script"><i>i</i>, <i>z</i></sub></span></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
+</div>
+<p>which gives a charge distribution normalized to q<sub>i</sub> with a standard deviation of σ<sub>i</sub> (<tt class="docutils literal">charge_sigma</tt>) for each Gaussian distribution i centered at r<sub>i</sub> (<tt class="docutils literal">charge_position</tt>).</p>
+<ul class="simple">
+<li>The generated Gaussian model charge will be embedded in a dielectric medium with a profile of the form:</li>
+</ul>
+<div class="formula">
+<i>ϵ</i>(<i>k</i>) = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> − <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="text"> erf</span><span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>k</i> − <i>k</i><sub>0</sub></span><span class="ignored">)/(</span><span class="denominator"><i>β</i></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span> + <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>ϵ</i><sub>2</sub> + <i>ϵ</i><sub>1</sub></span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span>
+</div>
+<p>where k<sub>0</sub> is the interface position in Cartesian k-direction, ε<sub>1</sub> and ε<sub>2</sub> are dielectric tensors on either side of the interface (<tt class="docutils literal">diel_in</tt> &amp; <tt class="docutils literal">diel_out</tt>) and β (<tt class="docutils literal">diel_taper</tt>) defines the smoothness of transition assuming anisotropic dielectric tensor as:</p>
+<div class="formula">
+<i>ϵ</i> = <span class="array"><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span><span class="arrayrow"><span class="bracket align-left">|</span></span></span><span class="array"><span class="arrayrow">
+<span class="arraycell align-c">
+<i>ϵ</i><sub>11</sub>
+</span>
+<span class="arraycell align-c">
+0
+</span>
+<span class="arraycell align-c">
+0
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-c">
+0
+</span>
+<span class="arraycell align-c">
+<i>ϵ</i><sub>22</sub>
+</span>
+<span class="arraycell align-c">
+0
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+<span class="arraycell align-c">
+ 
+</span>
+
+</span>
+<span class="arrayrow">
+<span class="arraycell align-c">
+0
+</span>
+<span class="arraycell align-c">
+0
+</span>
+<span class="arraycell align-c">
+<i>ϵ</i><sub>33</sub>
+</span>
+
+</span>
+</span><span class="array"><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span><span class="arrayrow"><span class="bracket align-right">|</span></span></span>
+</div>
+<ul class="simple">
+<li>The potential due to the charge distribution ρ under 3D PBC embedded in the dielectric medium ε(k) is calculated by solving the Poisson equation in Fourier space:</li>
+</ul>
+<div class="formula">
+<i>ϵ</i>(<i>k</i>)∇<sup>2</sup><i>V</i>(<i>r</i>) + <span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>ϵ</i>(<i>k</i>)<span class="fraction"><span class="ignored">(</span><span class="numerator">∂</span><span class="ignored">)/(</span><span class="denominator">∂<i>k</i></span><span class="ignored">)</span></span><i>V</i>(<i>r</i>) =  − <i>ρ</i>(<i>r</i>)
+</div>
+<ul class="simple">
+<li>A non-linear optimization routine minimizes the difference between our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.</li>
+<li>The E<sub>periodic</sub> is calculated as:</li>
+</ul>
+<div class="formula">
+<i>E</i> = <span class="fraction"><span class="ignored">(</span><span class="numerator">1</span><span class="ignored">)/(</span><span class="denominator">2</span><span class="ignored">)</span></span><span class="limits"><span class="limit"><span class="bigoperator integral">∫</span></span></span><i>V</i>(<i>r</i>)<i>ρ</i>(<i>r</i>) <i>dr</i>
+</div>
+<ul class="simple">
+<li>E<sub>isolated</sub> is calculated the same way as E<sub>periodic</sub> but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and slab models, the extrapolation is done linearly. For the monolayer models (2D systems), the following equation is used for the extrapolation [<a class="reference external" href="https://doi.org/10.1103/PhysRevX.8.039902">10.1103/PhysRevX.8.039902</a>]:</li>
+</ul>
+<div class="formula">
+<i>E</i> = <i>c</i><sub>0</sub> + <i>c</i><sub>1</sub><i>x</i> + <i>c</i><sub>2</sub><i>x</i><sup>2</sup> + <i>d</i><i>e</i><sup> − <i>c</i><sub>3</sub><i>x</i></sup>
+</div>
+<p>where c<sub>i</sub> are the fitting parameters and</p>
+<div class="formula">
+<i>d</i> = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>c</i><sub>1</sub> − <span class="fraction"><span class="ignored">(</span><span class="numerator">∂<i>E</i><sub><i>M</i></sub></span><span class="ignored">)/(</span><span class="denominator">∂<i>x</i></span><span class="ignored">)</span></span></span><span class="ignored">)/(</span><span class="denominator"><i>c</i><sub>3</sub></span><span class="ignored">)</span></span>
+</div>
+<p>guarantees the correct energy gradient at x(=1/α)→0. E<sub>M</sub> being the Madelung energy.</p>
+<ul class="simple">
+<li>ΔV is calculated at the position least affected by the model charge.</li>
+</ul>
+<p>More information about the algorithms and the implementation details can be found <a class="reference internal" href="#cite">here</a>.</p>
+</div>
+</div>
+<div class="section" id="quick-start-guide">
+<h1><a class="toc-backref" href="#toc-entry-3">2&nbsp;&nbsp;&nbsp;Quick start guide</a></h1>
+<p>To calculate the charge correction slabcc needs the following files:</p>
+<ul class="simple">
+<li>Input parameters file (default: <tt class="docutils literal">slabcc.in</tt>)</li>
+<li>CHGCAR of the neutral system from the VASP calculation (default: <tt class="docutils literal">CHGCAR.N</tt>)</li>
+<li>CHGCAR of the charged system from the VASP calculation (default: <tt class="docutils literal">CHGCAR.C</tt>)</li>
+<li>LOCPOT of the neutral system from the VASP calculation (default: <tt class="docutils literal">LOCPOT.N</tt>)</li>
+<li>LOCPOT of the charged system from the VASP calculation (default: <tt class="docutils literal">LOCPOT.C</tt>)</li>
+</ul>
+<p>Input parameters file for a slab should minimally include (all in relative scale [0 1]):</p>
+<ul class="simple">
+<li><tt class="docutils literal">charge_position</tt>: position of the localized charge</li>
+<li><tt class="docutils literal">diel_in</tt>: dielectric tensor of the slab</li>
+<li><tt class="docutils literal">normal_direction</tt>: direction normal to the surface</li>
+<li><tt class="docutils literal">interfaces</tt>: position of the surfaces of the slab (in the normal direction)</li>
+</ul>
+<div class="section" id="example">
+<h2><a class="toc-backref" href="#toc-entry-4">2.1&nbsp;&nbsp;&nbsp;Example</a></h2>
+<p>The following examples list the <a class="reference internal" href="#input-parameters">input parameters</a> to be defined in <tt class="docutils literal">slabcc.in</tt> file, assuming the VASP outputs (LOCPOT and CHGCAR files) are in the same directory.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Minimum input</strong>: The program models the extra charge with a Gaussian charge distribution localized around the position (<tt class="docutils literal">charge_position= 0.24&nbsp; 0.56&nbsp; 0.65</tt>) in a slab model with a normal direction of (<tt class="docutils literal">normal_direction = y</tt>) and surfaces at (<tt class="docutils literal">interfaces = 0.25&nbsp; 0.75</tt>). The dielectric tensor inside the slab is assumed to be isotropic (<tt class="docutils literal">diel_in = 4.8</tt>):</p>
+<pre class="literal-block">
+charge_position = 0.24  0.56  0.65
+diel_in = 4.8
+normal_direction = y
+interfaces = 0.25 0.75
+</pre>
+</li>
+</ol>
+<blockquote>
+<p>The program will use the default values for the other parameters to:</p>
+<ul class="simple">
+<li>Load the CHGCAR of charged and neutralized systems.</li>
+<li>Load the LOCPOT of charged and neutralized systems.</li>
+<li>Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.</li>
+<li>Optimize the <tt class="docutils literal">charge_position</tt>, <tt class="docutils literal">interfaces</tt> and <tt class="docutils literal">charge_sigma</tt>.</li>
+<li>Calculate the total energy correction for the charged system.</li>
+<li>Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.</li>
+</ul>
+</blockquote>
+<ol class="arabic" start="2">
+<li><p class="first"><strong>Correction with multiple localized Gaussian charges:</strong> If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge, as shown in the example below:</p>
+<pre class="literal-block">
+LOCPOT_charged = CHARGED_LOCPOT
+LOCPOT_neutral = UNCHARGED_LOCPOT
+CHGCAR_charged = CHARGED_CHGCAR
+CHGCAR_neutral = UNCHARGED_CHGCAR
+charge_position = 0.24  0.56  0.65; 0.20  0.50  0.65
+diel_in = 4.8
+normal_direction = a
+interfaces = 0.25 0.75
+</pre>
+</li>
+<li><p class="first"><strong>Correction for the uniform dielectric medium, e.g., bulk models:</strong> You must have the same dielectric tensor inside and outside:</p>
+<pre class="literal-block">
+LOCPOT_charged = CHARGED_LOCPOT
+LOCPOT_neutral = UNCHARGED_LOCPOT
+CHGCAR_charged = CHARGED_CHGCAR
+CHGCAR_neutral = UNCHARGED_CHGCAR
+charge_position = 0.24  0.56  0.65
+diel_in = 4.8
+diel_out = 4.8
+</pre>
+</li>
+<li><p class="first"><strong>Correction for the monolayers, i.e., 2D models (without extrapolation):</strong> To use the Bessel expansion of the Poisson equation for calculating the isolated energy of the 2D models, the in-plane dielectric constants must be equal and the model must be surrounded by a vacuum. Use the extrapolation method (<tt class="docutils literal">extrapolate=yes</tt>) for more general cases:</p>
+<pre class="literal-block">
+LOCPOT_charged = CHARGED_LOCPOT
+LOCPOT_neutral = UNCHARGED_LOCPOT
+CHGCAR_charged = CHARGED_CHGCAR
+CHGCAR_neutral = UNCHARGED_CHGCAR
+2D_model = yes
+charge_position = 0.5 0.4 0.56
+interfaces = 0.66 0.46
+normal_direction = z
+diel_in = 6.28 6.28 1.83
+diel_out = 1
+</pre>
+</li>
+<li><p class="first"><strong>Correction for the monolayers, i.e., 2D models (with extrapolation):</strong> To calculate the isolated energy by fitting the extrapolation results with the non-linear formula, extrapolation to relatively large cell sizes (1/α &lt; 0.2) is necessary. To avoid large discretization errors, the size of the extrapolation grid will be automatically increased:</p>
+<pre class="literal-block">
+LOCPOT_charged = CHARGED_LOCPOT
+LOCPOT_neutral = UNCHARGED_LOCPOT
+CHGCAR_charged = CHARGED_CHGCAR
+CHGCAR_neutral = UNCHARGED_CHGCAR
+2D_model = yes
+extrapolate = yes
+charge_position = 0.5 0.4 0.56
+interfaces = 0.66 0.46
+normal_direction = z
+diel_in = 6.28 6.28 1.83
+</pre>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="installation">
+<h1><a class="toc-backref" href="#toc-entry-5">3&nbsp;&nbsp;&nbsp;Installation</a></h1>
+<ol class="arabic simple">
+<li><strong>Prerequisites:</strong></li>
+</ol>
+<blockquote>
+<ol class="arabic simple">
+<li><strong>Compiler:</strong> You need a C++ compiler with <a class="reference external" href="https://en.cppreference.com/w/cpp/compiler_support#C.2B.2B14_features">C++14 standard support</a> (e.g. <a class="reference external" href="https://gcc.gnu.org/">g++</a> 5.0 or later)</li>
+<li><strong>BLAS/OpenBLAS/MKL:</strong> You can use BLAS+LAPACK for the matrix operations inside the slabcc but it is highly recommended to use one of the high performance replacements, e.g., the <a class="reference external" href="https://github.com/xianyi/OpenBLAS/releases">OpenBLAS</a>/<a class="reference external" href="https://software.intel.com/en-us/mkl">MKL</a> instead. If you don't have OpenBLAS installed on your system, follow the guide on the <a class="reference external" href="https://www.openblas.net">OpenBLAS website</a>. Please refer to the <a class="reference external" href="https://gitlab.com/conradsnicta/armadillo-code/-/blob/9.900.x/README.md">Armadillo documentation</a> for linking to other BLAS replacements.</li>
+<li><strong>FFTW:</strong> If you don't have FFTW installed on your system, follow the guide on the <a class="reference external" href="https://www.fftw.org/download.html">FFTW website</a>. Alternatively, you can use the FFTW interface of the MKL.</li>
+</ol>
+</blockquote>
+<ol class="arabic simple" start="2">
+<li><strong>Configuration:</strong> Set compilation parameters through environment variables.</li>
+</ol>
+<blockquote>
+<ol class="arabic simple">
+<li><strong>$CC:</strong> C compiler (default: gcc)</li>
+<li><strong>$CXX:</strong> C++ compiler (default: g++)</li>
+<li><strong>$FFTW_HOME:</strong> path to FFTW library home</li>
+<li><strong>$FFTW_LIB:</strong> FFTW library flag (default: -lfftw3)</li>
+<li><strong>$BLAS_HOME:</strong> path to BLAS library home</li>
+<li><strong>$BLAS_LIB:</strong> BLAS library flags (default: -lblas -llapack -lpthread)</li>
+<li><strong>$EXTRA_FLAGS:</strong> extra compiler flags for CC and CXX</li>
+<li><strong>$LD_EXTRA_FLAGS:</strong> extra linker flags</li>
+</ol>
+</blockquote>
+<ol class="arabic simple" start="3">
+<li><strong>Compilation:</strong> Run the command <tt class="docutils literal">make</tt> in the <tt class="docutils literal">bin/</tt> to compile the slabcc.</li>
+<li><strong>Cleanup:</strong> You can run <tt class="docutils literal">make clean</tt> to remove the compiled objects. <tt class="docutils literal">make distclean</tt> additionally removes all the compiled objects of the bundled external libraries.</li>
+</ol>
+</div>
+<div class="section" id="validation">
+<h1><a class="toc-backref" href="#toc-entry-6">4&nbsp;&nbsp;&nbsp;Validation</a></h1>
+<p>We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
+The current version of the slabcc has been <a class="reference external" href="https://ci.codeberg.org/meisam/slabcc/branches/master">build and validated</a> on:</p>
+<ul class="simple">
+<li>Ubuntu Linux 16.04</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>with GNU C/C++ compilers (5), OpenBLAS, FFTW</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li>Ubuntu Linux 22.04</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>with GNU C/C++ compilers (9,11), OpenBLAS, FFTW</li>
+<li>with GNU C/C++ compilers (11), MKL (2023)</li>
+<li>with Intel oneAPI DPC++/C++ Compiler (2023), MKL (2023)</li>
+<li>with LLVM Clang (14), OpenBLAS, FFTW</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li>AlmaLinux 8.7</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>with GNU C/C++ compilers (8), BLAS, FFTW</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li>openSUSE Leap 15.4</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>with GNU C/C++ compilers (10), BLAS, FFTW</li>
+</ul>
+</blockquote>
+<div class="section" id="test-set">
+<h2><a class="toc-backref" href="#toc-entry-7">4.1&nbsp;&nbsp;&nbsp;Test set</a></h2>
+<p>You can download a complete test set including input files, input parameters, and expected output <a class="reference external" href="https://doi.org/10.5281/zenodo.1323558">here</a>!
+You can also run the regression tests and verify their results with <tt class="docutils literal">make test</tt>. You'll need <a class="reference external" href="https://www.nongnu.org/numdiff/">numdiff</a> for these tests.</p>
+</div>
+</div>
+<div class="section" id="command-line-parameters">
+<h1><a class="toc-backref" href="#toc-entry-8">5&nbsp;&nbsp;&nbsp;Command-line parameters</a></h1>
+<p>You can run slabcc without any additional options. Alternatively, you can use the following options to modify its behavior:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="62%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">-h,</span> <span class="pre">--help</span></tt></td>
+<td>display usage information (this list)</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-i,</span> <span class="pre">--input</span> &lt;input_file&gt;</tt></td>
+<td>slabcc input file name</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-o,</span> <span class="pre">--output</span> &lt;output_file&gt;</tt></td>
+<td>slabcc output file name</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-l,</span> <span class="pre">--log</span> &lt;log_file&gt;</tt></td>
+<td>slabcc log file name</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-d,</span> <span class="pre">--diff</span></tt></td>
+<td>calculate charge and potential differences only</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-m,</span> <span class="pre">--man</span></tt></td>
+<td>show quick start guide</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-v,</span> <span class="pre">--version</span></tt></td>
+<td>show slabcc version</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">-c,</span> <span class="pre">--copyright</span></tt></td>
+<td>show copyright information</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="input-parameters">
+<h1><a class="toc-backref" href="#toc-entry-9">6&nbsp;&nbsp;&nbsp;Input parameters</a></h1>
+<p>slabcc reads all its parameters from the input file (by default, <tt class="docutils literal">slabcc.in</tt>). You can change the input file's name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>.
+The input file is processed as follows:</p>
+<ul class="simple">
+<li>Lines starting with # will be treated as comments. Inline comments are also allowed.</li>
+<li>Double quotation marks will be removed from the strings.</li>
+<li>A warning will be issued for any unidentified parameter.</li>
+<li>A warning will be issued for the use of the deprecated parameters.</li>
+<li>All the coordinates must be in fractional form [0-1].</li>
+<li>Boolean (True/False) parameters can also be declared as 0/1, on/off, yes/no, .true./.false.</li>
+<li>Parameter names can be written in the small or capital letters.</li>
+<li>For vectors and matrices, columns are separated by a &quot; &quot;(space), while the rows are separated by a &quot;;&quot; (semicolon).</li>
+<li>Lines starting with a space &quot; &quot; will be treated as the continuation of the last parameter's value.</li>
+<li>Subsequent definitions for any parameter will be concatenated with the existing definition.</li>
+</ul>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Parameter</th>
+<th class="head">Description and the options / <tt class="docutils literal">example</tt></th>
+<th class="head">Default value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">2d_model</tt></td>
+<td>Calculate the charge correction for a 2D model</td>
+<td>false</td>
+</tr>
+<tr><td><tt class="docutils literal">charge_fraction</tt></td>
+<td><p class="first">Fraction of the total extra charge in each localized
+Gaussian model charge (in the case of multiple Gaussian
+charges)</p>
+<p class="last"><tt class="docutils literal">charge_fraction = 0.4 0.6</tt></p>
+</td>
+<td><em>The extra
+charge will be
+equally divided
+among all
+positions</em></td>
+</tr>
+<tr><td><tt class="docutils literal">charge_position</tt></td>
+<td><p class="first">Center of the model Gaussian charges</p>
+<p><tt class="docutils literal">charge_position = 0.2 0.5 0.3</tt></p>
+<p class="last"><tt class="docutils literal">charge_position = 0.2 0.2 0.2; 0.3 0.4 0.3</tt></p>
+</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal">charge_rotation</tt></td>
+<td><p class="first">Rotation angles around each axis for the trivariate
+Gaussian charges in arc degree (-90, 90)</p>
+<p><tt class="docutils literal">charge_rotation = 0 45 0</tt></p>
+<p class="last"><tt class="docutils literal">charge_rotation = 45 0 0; 0 <span class="pre">-10</span> 0</tt></p>
+</td>
+<td>0</td>
+</tr>
+<tr><td><tt class="docutils literal">charge_sigma</tt></td>
+<td><p class="first">width of each localized Gaussian charge. It can be 1
+or in case of trivariate models, 3 parameters per
+localized Gaussian charge. For trivariate Gaussian
+models, defining a single parameter per charge, sets
+the sigma values to be equal in all directions.</p>
+<p>for a single Gaussian charge
+<tt class="docutils literal">charge_sigma = 1</tt></p>
+<p>for multiple Gaussian charges
+<tt class="docutils literal">charge_sigma = 1 1.5</tt></p>
+<p class="last">for two trivariate Gaussian charges
+<tt class="docutils literal">charge_sigma = 1 2 3; 1.5 2.5 3.5;</tt></p>
+</td>
+<td>1 (for each
+charge in each
+direction)</td>
+</tr>
+<tr><td><tt class="docutils literal">charge_trivariate</tt></td>
+<td>Use trivariate Gaussian model along the main axis</td>
+<td>false</td>
+</tr>
+<tr><td><tt class="docutils literal">CHGCAR_charged</tt></td>
+<td><p class="first">Charge density file (CHGCAR) of the charged system</p>
+<p class="last"><tt class="docutils literal">CHGCAR_charged = CHGCAR1</tt></p>
+</td>
+<td>CHGCAR.C</td>
+</tr>
+<tr><td><tt class="docutils literal">CHGCAR_neutral</tt></td>
+<td><p class="first">Charge density file (CHGCAR) of the neutral system</p>
+<p class="last"><tt class="docutils literal">CHGCAR_neutral = CHGCAR2</tt></p>
+</td>
+<td>CHGCAR.N</td>
+</tr>
+<tr><td><tt class="docutils literal">diel_in</tt></td>
+<td><p class="first">Diagonal elements of the static dielectric tensor
+inside of the slab. If only a single value is given,
+all of them will be assumed to be equal.</p>
+<p><tt class="docutils literal">diel_in = 3</tt></p>
+<p class="last"><tt class="docutils literal">diel_in = 3 4 5</tt></p>
+</td>
+<td>1</td>
+</tr>
+<tr><td><tt class="docutils literal">diel_out</tt></td>
+<td>Diagonal elements of the static dielectric tensor
+outside of the slab</td>
+<td>1</td>
+</tr>
+<tr><td><tt class="docutils literal">diel_taper</tt></td>
+<td>The steepness of the transition between diel_in and
+diel_out (β in the dielectric profile formula)</td>
+<td>1</td>
+</tr>
+<tr><td><tt class="docutils literal">extrapolate</tt></td>
+<td>Calculate the isolated energy using the extrapolation
+method</td>
+<td>opposite of the
+<tt class="docutils literal">2d_model</tt>
+parameter</td>
+</tr>
+<tr><td><tt class="docutils literal">extrapolate_grid_x</tt></td>
+<td><p class="first">Extrapolation grid size multiplier. The number of the
+grid points in each direction will be multiplied by
+this value.</p>
+<p>extrapolate_grid_x &gt; 1 will use a larger grid in the
+extrapolations which will increase its accuracy but
+will requires more memory and the computational power.</p>
+<p>extrapolate_grid_x = 1 will use the same grid size as
+the VASP input files in the extrapolation.</p>
+<p>extrapolate_grid_x &lt; 1 will use a smaller grid for the
+extrapolations which increases the speed and decreases
+the memory usage but the energies for the higher orders
+of the extrapolation may not be accurate!</p>
+<p class="last"><tt class="docutils literal">extrapolate_grid_x = 1.8</tt></p>
+</td>
+<td>1</td>
+</tr>
+<tr><td><tt class="docutils literal">extrapolate_steps_number</tt></td>
+<td>Number of the extrapolation steps in calculation of
+E<sub>isolated</sub> </td>
+<td><p class="first">10: for 2D
+models</p>
+<p class="last">4: for the rest</p>
+</td>
+</tr>
+<tr><td><tt class="docutils literal">extrapolate_steps_size</tt></td>
+<td>Size of extrapolation steps with respect to the initial
+supercell size</td>
+<td><p class="first">1: for 2D
+models</p>
+<p class="last">0.5: for the
+rest</p>
+</td>
+</tr>
+<tr><td><tt class="docutils literal">interfaces</tt></td>
+<td><p class="first">Interfaces of the slab in normal direction</p>
+<p class="last"><tt class="docutils literal">interfaces = 0.11 0.40</tt></p>
+</td>
+<td>0.25 0.75</td>
+</tr>
+<tr><td><tt class="docutils literal">LOCPOT_charged</tt></td>
+<td><p class="first">Local potential file (LOCPOT) of the charged system</p>
+<p class="last"><tt class="docutils literal">LOCPOT_charged = LOCPOT1</tt></p>
+</td>
+<td>LOCPOT.C</td>
+</tr>
+<tr><td><tt class="docutils literal">LOCPOT_neutral</tt></td>
+<td><p class="first">Local potential file (LOCPOT) of the neutral system</p>
+<p class="last"><tt class="docutils literal">LOCPOT_neutral = LOCPOT2</tt></p>
+</td>
+<td>LOCPOT.N</td>
+</tr>
+<tr><td><tt class="docutils literal">normal_direction</tt></td>
+<td><p class="first">Normal direction of the slab: one of x/y/z or a/b/c
+corresponding to the 1st, 2nd and 3rd vectors in the
+input file's cell vectors</p>
+<p class="last"><tt class="docutils literal">normal_direction = b</tt></p>
+</td>
+<td>z</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize</tt></td>
+<td><p class="first">Optimizer master switch. Upon deactivation, it takes
+precedence over all the other optimization options:
+<tt class="docutils literal">optimize_charge_fraction</tt>,
+<tt class="docutils literal">optimize_charge_position</tt>,
+<tt class="docutils literal">optimize_charge_rotation</tt>,
+<tt class="docutils literal">optimize_charge_sigma</tt>, and <tt class="docutils literal">optimize_interfaces</tt></p>
+<p><strong>true</strong>: evaluate each of the optimization switches
+individually</p>
+<p class="last"><strong>false</strong>: deactivate all optimization switches</p>
+</td>
+<td>true</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_algorithm</tt></td>
+<td><p class="first">Optimization algorithm in the NLOPT library</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/BOBYQA">BOBYQA</a> :
+Bound Optimization BY Quadratic Approximation <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a></p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/COBYLA">COBYLA</a>:
+Constrained Optimization BY Linear Approximation <a class="footnote-reference" href="#footnote-2" id="footnote-reference-2">[2]</a></p>
+<p>SBPLX: S.G. Johnson's implementation of the
+Subplex (subspace-searching simplex) algorithm <a class="footnote-reference" href="#footnote-3" id="footnote-reference-3">[3]</a></p>
+<p class="last"><tt class="docutils literal">optimize_algorithm = SBPLX</tt></p>
+</td>
+<td>BOBYQA</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_charge_fraction</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_fraction parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the charge_fraction parameter</p>
+</td>
+<td>true</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_charge_position</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_position parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the charge_position parameter</p>
+</td>
+<td>true</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_charge_rotation</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_rotation parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation. This can only be used for the
+trivariate Gaussian models.</p>
+<p class="last"><strong>false</strong>: do not change the charge_rotation parameter</p>
+</td>
+<td>false</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_charge_sigma</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+charge_sigma parameter to construct the best model
+charge which mimics the potential obtained from the
+VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the charge_sigma parameter</p>
+</td>
+<td>true</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_grid_x</tt></td>
+<td><p class="first">Optimization grid size multiplier. The number of the
+grid points in each direction will be multiplied by
+this value.</p>
+<p>optimize_grid_x &gt; 1 will use a larger grid in the
+optimization which will increase its accuracy but will
+requires more memory and the computational power.
+[usually this is not necessary]</p>
+<p>optimize_grid_x = 1 will use the same grid as the
+VASP input files in the optimization</p>
+<p class="last">optimize_grid_x &lt; 1 will use a smaller grid for the
+optimization which increases the speed and decreases
+the memory usage but the parameters obtained using very
+small grid sizes may be inaccurate!</p>
+</td>
+<td>0.8</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_interfaces</tt></td>
+<td><p class="first"><strong>true</strong>: find the optimal values for the model's
+interfaces to construct the best model which mimics
+the potential obtained from the VASP calculation</p>
+<p class="last"><strong>false</strong>: do not change the position of interfaces in
+the model charge</p>
+</td>
+<td>true</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_maxsteps</tt></td>
+<td><p class="first">Maximum number of optimization steps</p>
+<p class="last"><tt class="docutils literal">optimize_maxsteps = 2000</tt></p>
+</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_maxtime</tt></td>
+<td><p class="first">Maximum time for optimization in minutes</p>
+<p class="last"><tt class="docutils literal">optimize_maxtime = 1440</tt></p>
+</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><tt class="docutils literal">optimize_tolerance</tt></td>
+<td>Relative optimization tolerance (convergence criteria)
+for root mean square error of the model potential</td>
+<td>0.01</td>
+</tr>
+<tr><td><tt class="docutils literal">slab_center</tt></td>
+<td><p class="first">Center of the slab. During the calculations, everything
+will be shifted to keep this point at the center. This
+point must be inside of the slab.</p>
+<p class="last"><tt class="docutils literal">slab_center = 0.2 0.7 0.5</tt></p>
+</td>
+<td>0.5 0.5 0.5</td>
+</tr>
+<tr><td><tt class="docutils literal">verbosity</tt></td>
+<td><p class="first">Verbosity of the program <a class="footnote-reference" href="#footnote-4" id="footnote-reference-4">[4]</a></p>
+<p><strong>0</strong>: No extra info. Only write the output file.
+Logging is disabled.</p>
+<p><strong>1</strong>: Display calculated energy correction terms.
+Write the planar averaged potential and charge for the
+Gaussian model charge and the extra-charge of QM
+calculations in the direction normal to the slab
+surface.</p>
+<p><strong>2</strong>: Write extra-charge density, extra-charge
+potential and dielectric profiles. Display debug info
+including the compilation machine info and a few
+important enviroment variables.</p>
+<p><strong>3</strong>: Write the planar averaged files in all
+directions.</p>
+<p class="last"><strong>4</strong>: Display the time passed since the start of
+slabcc (in seconds) and a description of each
+calculation step (trace mode)</p>
+</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>M.J.D. Powell, <a class="reference external" href="https://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf">The BOBYQA algorithm for bound constrained optimization without derivatives</a>, Department of Applied Mathematics and Theoretical Physics, Cambridge England, technical report NA2009/06 (2009).</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td>M.J.D. Powell, <a class="reference external" href="https://doi.org/10.1017/S0962492900002841">Direct search algorithms for optimization calculations</a>, Acta Numerica, Vol. 7(1998) pp. 287-336</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-3">[3]</a></td><td>T.H. Rowan, <a class="reference external" href="https://dl.acm.org/doi/book/10.5555/100816">Functional Stability Analysis of Numerical Algorithms</a>, Ph.D. thesis, Department of Computer Sciences, University of Texas at Austin, 1990.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-4">[4]</a></td><td>Each verbosity level includes all the outputs from the lower verbosity options. Check <a class="reference internal" href="#the-files-table">the files table</a> for complete list of the output files.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="results-and-the-generated-files">
+<h1><a class="toc-backref" href="#toc-entry-10">7&nbsp;&nbsp;&nbsp;Results and the generated files</a></h1>
+<p>slabcc writes its calculated energy correction values to the standard output as well as the output file. All reported energy values are in eV.</p>
+<p>Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files.</p>
+<div class="section" id="output-files">
+<h2><a class="toc-backref" href="#toc-entry-11">7.1&nbsp;&nbsp;&nbsp;Output files</a></h2>
+<p>The parsed input variables or their default values and the calculation results will be written to the output file (by default: slabcc.out) You can change this file’s name using the <a class="reference internal" href="#command-line-parameters">command-line parameters</a>. A typical output file is shown below:</p>
+<pre class="literal-block">
+# Parameters read from the file or their default values:
+2d_model = no
+charge_fraction = 1
+charge_position = 0.5 0.5 0.37;
+charge_rotation = 0 0 0;
+charge_sigma = 1;
+charge_trivariate = no
+CHGCAR_charged = ../03-V_Cl_pos/CHGCAR
+CHGCAR_neutral = ../02-V_Cl/CHGCAR
+diel_in = 2.45
+diel_out = 1
+diel_taper = 1
+extrapolate = yes
+extrapolate_grid_x = 1
+extrapolate_steps_number = 4
+extrapolate_steps_size = 0.5
+interfaces = 0 0.375
+LOCPOT_charged = ../03-V_Cl_pos/LOCPOT
+LOCPOT_neutral = ../02-V_Cl/LOCPOT
+normal_direction = z
+optimize_algorithm = COBYLA
+optimize_charge_fraction = yes
+optimize_charge_position = yes
+optimize_charge_rotation = no
+optimize_charge_sigma = yes
+optimize_grid_x = 0.8
+optimize_interfaces = yes
+optimize_maxsteps = 0
+optimize_maxtime = 0
+optimize_tolerance = 0.01
+slab_center = 0.5 0.5 0.25
+verbosity = 5
+
+[Optimized_model_parameters]
+interfaces_optimized = 0.942000748357 0.455672787711
+charge_sigma_optimized = 1.4132676877
+charge_position_optimized = 0.501460639345 0.50145532106 0.385476689493;
+
+[Results]
+dV = -0.00291385176718
+E_periodic of the model charge = 2.0404453156f
+E_isolated of the model charge = 2.59716677886
+Energy correction for the model charge (E_iso-E_per-q*dV) = 0.559635314929
+</pre>
+<p>Planar average files are written as the double column in plain text format. The first column represents the coordinates along the axis (in Angstrom) and the second column is the planar average value. The files are named as: &quot;slabcc_{1}{2}{XXX}.dat&quot; where:</p>
+<ul class="simple">
+<li>{1}: <strong>N</strong>: Neutral system, <strong>C</strong>: Charged system, <strong>D</strong>: Difference</li>
+<li>{2}: <strong>X</strong>/<strong>Y</strong>/<strong>Z</strong>: Corresponds to the 1st, 2nd, and the 3rd axis in the input files</li>
+<li>{XXX}: <strong>CHG</strong>: CHGCAR, <strong>POT</strong>: LOCPOT</li>
+</ul>
+<p id="the-files-table">All the possible output files and the minimum value of the verbosity parameter for activation of each are listed in the table below:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="59%" />
+<col width="16%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">file name</th>
+<th class="head">Description</th>
+<th class="head">verbosity</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><cite>slabcc_CXCHG.dat</cite></td>
+<td>Planar average of charged CHGCAR file in X direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_CXPOT.dat</cite></td>
+<td>Planar average of charged LOCPOT file in X direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_CYCHG.dat</cite></td>
+<td>Planar average of charged CHGCAR file in Y direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_CYPOT.dat</cite></td>
+<td>Planar average of charged LOCPOT file in Y direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_CZCHG.dat</cite></td>
+<td>Planar average of charged CHGCAR file in Z direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_CZPOT.dat</cite></td>
+<td>Planar average of charged LOCPOT file in Z direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_D.CHGCAR</cite></td>
+<td>Difference in the neutral and charged CHGCAR files</td>
+<td>2</td>
+</tr>
+<tr><td><cite>slabcc_D.LOCPOT</cite></td>
+<td>Difference in the neutral and charged LOCPOT files</td>
+<td>2</td>
+</tr>
+<tr><td><cite>slabcc_DIEL.dat</cite></td>
+<td>Generated dielectric profile (ε<sub>11</sub> ε<sub>22</sub>
+ε<sub>33</sub>) along the normal axis to the surface</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_DXCHG.dat</cite></td>
+<td>Planar average of extra charge (neutral and charged
+difference) CHGCAR file in X direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_DXPOT.dat</cite></td>
+<td>Planar average of extra charge (neutral and charged
+difference) LOCPOT file in X direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_DYCHG.dat</cite></td>
+<td>Planar average of extra charge (neutral and charged
+difference) CHGCAR file in Y direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_DYPOT.dat</cite></td>
+<td>Planar average of extra charge (neutral and charged
+difference) LOCPOT file in Y direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_DZCHG.dat</cite></td>
+<td>Planar average of extra charge (neutral and charged
+difference) CHGCAR file in Z direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_DZPOT.dat</cite></td>
+<td>Planar average of extra charge (neutral and charged
+difference) LOCPOT file in Z direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_M.CHGCAR</cite></td>
+<td>CHGCAR of the Gaussian model</td>
+<td>2</td>
+</tr>
+<tr><td><cite>slabcc_M.LOCPOT</cite></td>
+<td>LOCPOT of the Gaussian model</td>
+<td>2</td>
+</tr>
+<tr><td><cite>slabcc_MXCHG.dat</cite></td>
+<td>Planar average of model charge in X direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_MXPOT.dat</cite></td>
+<td>Planar average of model potential in X direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_MYCHG.dat</cite></td>
+<td>Planar average of model charge in Y direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_MYPOT.dat</cite></td>
+<td>Planar average of model potential in Y direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_MZCHG.dat</cite></td>
+<td>Planar average of model charge in Z direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_MZPOT.dat</cite></td>
+<td>Planar average of model potential in Z direction</td>
+<td><a class="reference internal" href="#avg-note">3</a></td>
+</tr>
+<tr><td><cite>slabcc_NXCHG.dat</cite></td>
+<td>Planar average of neutral CHGCAR file in X direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_NXPOT.dat</cite></td>
+<td>Planar average of neutral LOCPOT file in X direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_NYCHG.dat</cite></td>
+<td>Planar average of neutral CHGCAR file in Y direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_NYPOT.dat</cite></td>
+<td>Planar average of neutral LOCPOT file in Y direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_NZCHG.dat</cite></td>
+<td>Planar average of neutral CHGCAR file in Z direction</td>
+<td>3</td>
+</tr>
+<tr><td><cite>slabcc_NZPOT.dat</cite></td>
+<td>Planar average of neutral LOCPOT file in Z direction</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p id="avg-note"><strong>Note:</strong> The planar averaged potential and charge files corresponding to the normal direction will be written in verbosity = 1</p>
+</div>
+</div>
+<div class="section" id="faq">
+<h1><a class="toc-backref" href="#toc-entry-12">8&nbsp;&nbsp;&nbsp;FAQ</a></h1>
+<ol class="arabic">
+<li><p class="first"><strong>How do I obtain the CHGCAR and LOCPOT files from VASP calculations?</strong> You can add the following tags to your INCAR file to get the LOCPOT and CHGCAR files:</p>
+<pre class="literal-block">
+LVTOT = .TRUE.
+LVHAR = .TRUE.
+LCHARG = .TRUE.
+</pre>
+</li>
+</ol>
+<blockquote>
+After obtaining the files for your charged system, do the calculation again <em>without relaxing (changing) the geometry</em> to get the necessary files for the neutralized system.</blockquote>
+<ol class="arabic simple" start="2">
+<li><strong>Do I need to perform spin-polarized calculations in VASP?</strong>  Although the slabcc only reads the sum of both spins, for a proper description of the charge distribution in your system, you may need to perform a spin-polarized calculation.</li>
+<li><strong>How can I speed up the model parameter optimization process?</strong> You can try using a different optimization algorithm or improving the initial guess for the model parameters to speed up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (<tt class="docutils literal">optimize_grid_x &lt; 1</tt>), or increase the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) to speed up the process, but the accuracy of the obtained results in these cases must always be checked.</li>
+<li><strong>Why do I need to provide an initial guess for the parameters that will be optimized?</strong> The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.</li>
+<li><strong>How should I decide on the initial guess for the parameters that will be optimized?</strong> As a rule of thumb, start with a single Gaussian charge as your model. Set its position to the expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the &quot;-d&quot; switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT files for the extra charge and their planar averages without shifting the input files to the <cite>slab_center</cite>. These files will guide you on how to provide the initial guess for the input parameters.</li>
+<li><strong>Can I turn off the optimization for the input parameters?</strong> Yes. But optimization ensures the model charge mimics the original localized charge at large distances as closely as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely <a class="reference internal" href="#check">check your results</a>.</li>
+</ol>
+<ol class="arabic simple" start="7">
+<li><strong>Can I run the slabcc on a computational cluster?</strong> Yes. BUT… Although slabcc hugely benefits from the multicore architecture of the computation nodes using OpenMP, it has not yet been parallelized using MPI. Therefore, it won’t use more than one machine at a time.</li>
+<li><strong>Is the slabcc free? Can I use its source code in my own software?</strong> slabcc is released under the 2-Clause BSD <a class="reference internal" href="#license">license</a> which permits this software to be modified, redistributed, and/or used for commercial purposes provided that the source retains the original copyright owner's name (University of Bremen, M. Farzalipour Tabriz) and full text of the license (LICENSE.txt)</li>
+<li><strong>How accurate are the slabcc results?</strong> The accuracy of the final results depends on various factors, including the accuracy and grid size of the input files and the provided input parameters. The optimization algorithm used for parameter estimation is a non-linear local optimizer, which means that the result will highly depend on its initial conditions. Models with different numbers of Gaussian charges have different accuracy and may be compared with caution. In the case of models with multiple charges, the results must be vigorously checked. You must always do your own testing before using the results. There are a few <a class="reference internal" href="#known-issues-and-limitations">known issues and limitations</a> to the slabcc code and its algorithm. Also keep in mind that this is free software, and as the <a class="reference internal" href="#license">license</a> explicitly mentions, there is absolutely no warranty for its fitness for any particular purpose.</li>
+</ol>
+<ol class="arabic simple" id="check" start="10">
+<li><strong>How can I check the slabcc results?</strong> slabcc can calculate the planar averaged potential and charge files for the extra charge in the input files and the model Gaussian charge. You should compare the model charge distribution and potential, especially in the direction normal to the surface, and compare them to the original VASP results. For example, if z is the normal direction in your slab model (<tt class="docutils literal">normal_direction = z</tt>), then you should compare <tt class="docutils literal">slabcc_MZCHG.dat</tt> and <tt class="docutils literal">slabcc_MZPOT.dat</tt>, with <tt class="docutils literal">slabcc_DZCHG.dat</tt> and <tt class="docutils literal">slabcc_DZPOT.dat</tt>, respectively. Check <a class="reference internal" href="#the-files-table">the files table</a> for a complete list of the output files.</li>
+</ol>
+<blockquote>
+Another method to test the effectiveness of the charge correction is to increase the thickness of the vacuum in your slab model and check the charge-corrected total energies. If the charge correction is done properly, the energy values must be independent of the (adequately large) vacuum thickness.</blockquote>
+<ol class="arabic simple" id="cite" start="11">
+<li><strong>How should I cite the slabcc?</strong> Please cite the slabcc as: (You can <a class="reference external" href="https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&amp;format=application%2Fx-research-info-systems&amp;withabstract=true">download the citation in the RIS format from here</a>!)</li>
+</ol>
+<blockquote>
+Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, <em>SLABCC: Total energy correction code for charged periodic slab models</em>, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: <a class="reference external" href="https://doi.org/10.1016/j.cpc.2019.02.018">10.1016/j.cpc.2019.02.018</a></blockquote>
+<ol class="arabic" start="12">
+<li><p class="first"><strong>How can I extract the files in slabcc_data.tar.xz?</strong> You can use <a class="reference external" href="https://www.gnu.org/software/tar/">Tar</a> + <a class="reference external" href="https://tukaani.org/xz/">XZ Utils</a> as:</p>
+<p>tar -xvf slabcc_data.tar.xz</p>
+</li>
+</ol>
+<blockquote>
+Alternatively, you can use <a class="reference external" href="https://www.rarlab.com">WinRAR</a> or <a class="reference external" href="https://www.7-zip.org">7zip</a>.</blockquote>
+<ol class="arabic simple" start="13">
+<li><strong>Something is not working! What should I do?</strong></li>
+</ol>
+<blockquote>
+<ul class="simple">
+<li>If you need help with compiling the code or running it on a cluster, please contact your <a class="reference external" href="https://en.wikipedia.org/wiki/System_administrator">system administrator</a>.</li>
+<li>If you have found a bug in the code, please report it <a class="reference external" href="https://codeberg.org/meisam/slabcc/issues/new">here</a>.</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="known-issues-and-limitations">
+<h1><a class="toc-backref" href="#toc-entry-13">9&nbsp;&nbsp;&nbsp;Known issues and limitations</a></h1>
+<ul class="simple">
+<li>Only orthogonal cells are supported.</li>
+<li>Maximum line length of the input file (slabcc.in) is 4000 bytes.</li>
+<li>Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models that are not surrounded by the vacuum (diel_out &gt; 1). The extrapolation method must be used in these cases.</li>
+</ul>
+</div>
+<div class="section" id="release-history-highlights">
+<h1><a class="toc-backref" href="#toc-entry-14">10&nbsp;&nbsp;&nbsp;Release history highlights</a></h1>
+<ul class="simple">
+<li>2019-06-13: version 0.8 - OO redesign</li>
+<li>2019-05-14: version 0.7 - Added discretization error mitigation</li>
+<li>2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support</li>
+<li>2019-03-18: version 0.5 - Added 2D model support</li>
+<li>2018-10-10: version 0.4 - Added spdlog and several user interface and performance improvements</li>
+<li>2018-07-29: version 0.3 - First public release</li>
+</ul>
+</div>
+<div class="section" id="copyright-and-attributions">
+<h1><a class="toc-backref" href="#toc-entry-15">11&nbsp;&nbsp;&nbsp;Copyright and attributions</a></h1>
+<p>Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz</p>
+<p>The source code and all the documentation are available under the 2-Clause BSD License. For more information, see <a class="reference internal" href="#license">license</a>.</p>
+<div class="line-block">
+<div class="line">This code uses several open-source components, each of which is located under a separate sub-directory of <tt class="docutils literal">src/</tt>. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.</div>
+<div class="line">The attributions are also present in the binary file and can be accessed by using <tt class="docutils literal"><span class="pre">--copyright</span></tt> flag.</div>
+</div>
+<div class="section" id="included-third-party-components">
+<h2><a class="toc-backref" href="#toc-entry-16">11.1&nbsp;&nbsp;&nbsp;Included third-party components</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://arma.sourceforge.net">Armadillo C++ Linear Algebra Library</a> licensed under the Apache License 2.0</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>Copyright 2008-2018, Conrad Sanderson</li>
+<li>Copyright 2008-2016, National ICT Australia (NICTA)</li>
+<li>Copyright 2017-2018, Arroyo Consortium</li>
+<li>Copyright 2017-2018, Data61, CSIRO</li>
+<li>This product includes software developed by Conrad Sanderson</li>
+<li>This product includes software developed at National ICT Australia (NICTA)</li>
+<li>This product includes software developed at Arroyo Consortium</li>
+<li>This product includes software developed at Data61, CSIRO</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/benhoyt/inih">inih</a> (INI Not Invented Here) licensed under the 3-clause BSD license</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2009, Ben Hoyt, <a class="reference external" href="https://github.com/benhoyt/inih/contributors">et al.</a></li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/catchorg/Clara">clara</a> licensed under the Boost Software License 1.0</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2014, Phil Nash, Martin Hořeňovský, <a class="reference external" href="https://github.com/catchorg/Clara/contributors">et al.</a></li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/">spline</a> (Cubic Spline Interpolation) licensed under the Beer-Ware License 42</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2011, Devin Lane</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://nlopt.readthedocs.io">NLOPT</a> licensed under the GNU LGPL</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2007-2014, Massachusetts Institute of Technology</li>
+<li>© 2007-2014, Steven G. Johnson <a class="reference external" href="https://github.com/stevengj/nlopt/contributors">et al.</a></li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/gabime/spdlog">spdlog</a> licensed under the MIT License</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2016, Gabi Melman, <a class="reference external" href="https://github.com/gabime/spdlog/contributors">et al.</a></li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/boostorg/predef">Boost.Predef</a> licensed under the Boost Software License 1.0</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>© 2005-2018 Rene Rivera</li>
+<li>© 2015 Charly Chevalier</li>
+<li>© 2015 Joel Falcou, <a class="reference external" href="https://github.com/boostorg/predef/contributors">et al.</a></li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="license">
+<h2><a class="toc-backref" href="#toc-entry-17">11.2&nbsp;&nbsp;&nbsp;License</a></h2>
+<p>Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz</p>
+<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+<ol class="arabic simple">
+<li>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>
+<li>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</li>
+</ol>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr class="footer" />
+<a class="reference external" href="https://codeberg.org/meisam/slabcc/compare/d5919f4f357b3fd752cf59992cde06f537739beb...b5887a2c83009e159b2d82e23f2f0faf511c4fe3">View document source</a>.
+Generated by <a class="reference external" href="https://docutils.sourceforge.io/">Docutils</a> from <a class="reference external" href="https://docutils.sourceforge.io/rst.html">reStructuredText</a> source.
+
+</div>
+</body>
+</html>
