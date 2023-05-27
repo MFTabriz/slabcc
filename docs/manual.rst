@@ -12,21 +12,21 @@ Introduction
 SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:
 
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
- 
+
 This method estimates the error in the total energy of the charged models under 3D PBC due to the excess charge in the real system using Gaussian models.
 The model charge is assumed to be embedded in a medium with a dielectric-tensor profile ε(k) depending only on a single Cartesian space axis (k) that is orthogonal to the slab.
 The energy correction is calculated as:
 
     E\ :sub:`corr` \  = E\ :sub:`isolated` \ - E\ :sub:`periodic` \ - qΔV
 
-where E\ :sub:`corr` \ is the total energy correction for the model; 
+where E\ :sub:`corr` \ is the total energy correction for the model;
 E\ :sub:`periodic` \ is the energy of the model charge, calculated by solving the periodic Poisson equation. E\ :sub:`isolated` \ is the energy of the model charge embedded in the dielectric medium and can be determined by extrapolation.
 q is the total extra charge, and ΔV is the difference between the potential of the Gaussian model charge system and the DFT calculations.
 
 The code can also calculate the charge correction for the 2D models under PBC. The isolated energies for the 2D models are calculated by extrapolation based on the method proposed in:
 
- Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: `10.1103/PhysRevX.4.031044 <https://doi.org/10.1103/PhysRevX.4.031044>`_ `(Erratum) <https://doi.org/10.1103/PhysRevX.8.039902>`_ 
- 
+ Hannu-Pekka Komsa, Natalia Berseneva, Arkady V. Krasheninnikov, and Risto M. Nieminen, Charged Point Defects in the Flatland: Accurate Formation Energy Calculations in Two-Dimensional Materials, Physical Review X 4, 031044 (2014) DOI: `10.1103/PhysRevX.4.031044 <https://doi.org/10.1103/PhysRevX.4.031044>`_ `(Erratum) <https://doi.org/10.1103/PhysRevX.8.039902>`_
+
 And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
  Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
@@ -40,12 +40,12 @@ Algorithm
 
 .. math::
 
- \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right ) 
-  
+ \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i}^{3}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i}^{2}}{2\sigma_{i}^{2}} } \right )
+
 or `trivariate Gaussian <https://mathworld.wolfram.com/TrivariateNormalDistribution.html>`_ charge distributions as:
 
 .. math::
- 
+
  \rho(r) = \sum_{i}\frac{q_i}{\sigma_{i,x}\sigma_{i,y}\sigma_{i,z}(2\pi)^{3/2}} \exp \left ({- \frac{r_{i,x}^{2}}{2\sigma_{i,x}^{2}} - \frac{r_{i,y}^{2}}{2\sigma_{i,y}^{2}}- \frac{r_{i,z}^{2}}{2\sigma_{i,z}^{2}} } \right )
 
 which gives a charge distribution normalized to q\ :sub:`i` \ with a standard deviation of σ\ :sub:`i` \ (``charge_sigma``) for each Gaussian distribution i centered at r\ :sub:`i` \ (``charge_position``).
@@ -58,7 +58,7 @@ which gives a charge distribution normalized to q\ :sub:`i` \ with a standard de
 where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub:`1` \ and ε\ :sub:`2` \ are dielectric tensors on either side of the interface (``diel_in`` & ``diel_out``) and β (``diel_taper``) defines the smoothness of transition assuming anisotropic dielectric tensor as:
 
 .. math::
- \epsilon = 
+ \epsilon =
   \left | \begin{matrix}
     \epsilon_{11} & 0 & 0 \\
     0 & \epsilon_{22} & 0 \\
@@ -68,24 +68,24 @@ where k\ :sub:`0` \ is the interface position in Cartesian k-direction, ε\ :sub
 * The potential due to the charge distribution ρ under 3D PBC embedded in the dielectric medium ε(k) is calculated by solving the Poisson equation in Fourier space:
 
 .. math::
-	 \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
+  \epsilon(k) \nabla^2 V(r)+\frac{\partial}{\partial k} \epsilon(k)\frac{\partial}{\partial k}V(r) = -\rho(r)
 
 * A non-linear optimization routine minimizes the difference between our calculated V(r) for the model charge and the V resulted from the VASP calculation by changing the position of the model Gaussian charge, its width, and the position of the slab interfaces.
 
 * The E\ :sub:`periodic` is calculated as:
 
 .. math::
-	E = \frac{1}{2} \int V(r) \rho(r) \, dr
+  E = \frac{1}{2} \int V(r) \rho(r) \, dr
 
 * E\ :sub:`isolated` is calculated the same way as E\ :sub:`periodic` but with extrapolation of the fixed model charge embedded in an infinitely large dielectric medium. For the bulk and slab models, the extrapolation is done linearly. For the monolayer models (2D systems), the following equation is used for the extrapolation [`10.1103/PhysRevX.8.039902 <https://doi.org/10.1103/PhysRevX.8.039902>`_]:
 
 .. math::
-	E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
+  E = c_0 + c_1 x + c_2 x^2 + d e^{-c_3 x}
 
-where c\ :sub:`i` are the fitting parameters and 
+where c\ :sub:`i` are the fitting parameters and
 
 .. math::
-	d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
+  d =  \frac{c_1 - \frac{\partial E_M}{\partial x}}{c_3}
 
 guarantees the correct energy gradient at x(=1/α)→0. E\ :sub:`M` being the Madelung energy.
 
@@ -127,8 +127,8 @@ The following examples list the `input parameters`_ to be defined in ``slabcc.in
 
  The program will use the default values for the other parameters to:
 
- - Load the CHGCAR of charged and neutralized systems. 
- - Load the LOCPOT of charged and neutralized systems.  
+ - Load the CHGCAR of charged and neutralized systems.
+ - Load the LOCPOT of charged and neutralized systems.
  - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
  - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
  - Calculate the total energy correction for the charged system.
@@ -207,8 +207,8 @@ Installation
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components. 
-The current version of the slabcc has been `build/validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
+The current version of the slabcc has been `build and validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
 
@@ -233,21 +233,30 @@ Test set
 --------
 
 You can download a complete test set including input files, input parameters, and expected output `here <https://doi.org/10.5281/zenodo.1323558>`__!
-You can also run the regression tests and verify their results with ``make test``.
+You can also run the regression tests and verify their results with ``make test``. You'll need `numdiff <https://www.nongnu.org/numdiff/>`__ for these tests.
 
 =======================
 Command-line parameters
 =======================
 You can run slabcc without any additional options. Alternatively, you can use the following options to modify its behavior:
 
--h, --help						Display the usage information (this list)
--i, --input <input_file>			slabcc input file name
--o, --output <input_file>			slabcc output file name
--l, --log <log_file>			slabcc log file name
--d, --diff						Calculate the charge and the potential differences only
--m, --man                       Show the quick start guide
--v, --version					Show the slabcc version and its compilation date
--c, --copyright					Show the copyright information and the attributions
++--------------------------------+-----------------------------------------------------+
+| ``-h, --help``                 | display usage information (this list)               |
++--------------------------------+-----------------------------------------------------+
+| ``-i, --input <input_file>``   | slabcc input file name                              |
++--------------------------------+-----------------------------------------------------+
+| ``-o, --output <output_file>`` | slabcc output file name                             |
++--------------------------------+-----------------------------------------------------+
+| ``-l, --log <log_file>``       | slabcc log file name                                |
++--------------------------------+-----------------------------------------------------+
+| ``-d, --diff``                 | calculate charge and potential differences only     |
++--------------------------------+-----------------------------------------------------+
+| ``-m, --man``                  | show quick start guide                              |
++--------------------------------+-----------------------------------------------------+
+| ``-v, --version``              | show slabcc version                                 |
++--------------------------------+-----------------------------------------------------+
+| ``-c, --copyright``            | show copyright information                          |
++--------------------------------+-----------------------------------------------------+
 
 ======================
 Input parameters
@@ -266,7 +275,7 @@ The input file is processed as follows:
 - Lines starting with a space " " will be treated as the continuation of the last parameter's value.
 - Subsequent definitions for any parameter will be concatenated with the existing definition.
 
- 
+
 +------------------------------+-------------------------------------------------------+---------------+
 | Parameter                    | Description and the options / ``example``             | Default value |
 +==============================+=======================================================+===============+
@@ -515,56 +524,56 @@ Results and the generated files
 ===============================
 slabcc writes its calculated energy correction values to the standard output as well as the output file. All reported energy values are in eV.
 
-Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files. 
+Depending on the verbosity level of your choice, you may get additional reports from each part of the calculation in the standard output and/or extra output files.
 
 
 Output files
 ------------------
 The parsed input variables or their default values and the calculation results will be written to the output file (by default: slabcc.out) You can change this file’s name using the `command-line parameters`_. A typical output file is shown below::
 
-	# Parameters read from the file or their default values:
-	2d_model = no
-	charge_fraction = 1
-	charge_position = 0.5 0.5 0.37; 
-	charge_rotation = 0 0 0;
-	charge_sigma = 1;
-	charge_trivariate = no
-	CHGCAR_charged = ../03-V_Cl_pos/CHGCAR
-	CHGCAR_neutral = ../02-V_Cl/CHGCAR
-	diel_in = 2.45
-	diel_out = 1
-	diel_taper = 1
-	extrapolate = yes
-	extrapolate_grid_x = 1
-	extrapolate_steps_number = 4
-	extrapolate_steps_size = 0.5
-	interfaces = 0 0.375
-	LOCPOT_charged = ../03-V_Cl_pos/LOCPOT
-	LOCPOT_neutral = ../02-V_Cl/LOCPOT
-	normal_direction = z
-	optimize_algorithm = COBYLA
-	optimize_charge_fraction = yes
-	optimize_charge_position = yes
-	optimize_charge_rotation = no
-	optimize_charge_sigma = yes
-	optimize_grid_x = 0.8
-	optimize_interfaces = yes
-	optimize_maxsteps = 0
-	optimize_maxtime = 0
-	optimize_tolerance = 0.01
-	slab_center = 0.5 0.5 0.25
-	verbosity = 5
+  # Parameters read from the file or their default values:
+  2d_model = no
+  charge_fraction = 1
+  charge_position = 0.5 0.5 0.37;
+  charge_rotation = 0 0 0;
+  charge_sigma = 1;
+  charge_trivariate = no
+  CHGCAR_charged = ../03-V_Cl_pos/CHGCAR
+  CHGCAR_neutral = ../02-V_Cl/CHGCAR
+  diel_in = 2.45
+  diel_out = 1
+  diel_taper = 1
+  extrapolate = yes
+  extrapolate_grid_x = 1
+  extrapolate_steps_number = 4
+  extrapolate_steps_size = 0.5
+  interfaces = 0 0.375
+  LOCPOT_charged = ../03-V_Cl_pos/LOCPOT
+  LOCPOT_neutral = ../02-V_Cl/LOCPOT
+  normal_direction = z
+  optimize_algorithm = COBYLA
+  optimize_charge_fraction = yes
+  optimize_charge_position = yes
+  optimize_charge_rotation = no
+  optimize_charge_sigma = yes
+  optimize_grid_x = 0.8
+  optimize_interfaces = yes
+  optimize_maxsteps = 0
+  optimize_maxtime = 0
+  optimize_tolerance = 0.01
+  slab_center = 0.5 0.5 0.25
+  verbosity = 5
 
-	[Optimized_model_parameters]
-	interfaces_optimized = 0.942000748357 0.455672787711
-	charge_sigma_optimized = 1.4132676877
-	charge_position_optimized = 0.501460639345 0.50145532106 0.385476689493;
+  [Optimized_model_parameters]
+  interfaces_optimized = 0.942000748357 0.455672787711
+  charge_sigma_optimized = 1.4132676877
+  charge_position_optimized = 0.501460639345 0.50145532106 0.385476689493;
 
-	[Results]
-	dV = -0.00291385176718
-	E_periodic of the model charge = 2.0404453156
-	E_isolated of the model charge = 2.59716677886
-	Energy correction for the model charge (E_iso-E_per-q*dV) = 0.559635314929
+  [Results]
+  dV = -0.00291385176718
+  E_periodic of the model charge = 2.0404453156f
+  E_isolated of the model charge = 2.59716677886
+  Energy correction for the model charge (E_iso-E_per-q*dV) = 0.559635314929
 
 Planar average files are written as the double column in plain text format. The first column represents the coordinates along the axis (in Angstrom) and the second column is the planar average value. The files are named as: "slabcc_{1}{2}{XXX}.dat" where:
 
@@ -708,13 +717,13 @@ __ check_
 11. **How should I cite the slabcc?** Please cite the slabcc as: (You can `download the citation in the RIS format from here <https://www.sciencedirect.com/sdfe/arp/cite?pii=S0010465519300700&format=application%2Fx-research-info-systems&withabstract=true>`_!)
 
  Meisam Farzalipour Tabriz, Bálint Aradi, Thomas Frauenheim, Peter Deák, *SLABCC: Total energy correction code for charged periodic slab models*, Computer Physics Communications, Vol. 240C (2019), pp. 101-105, DOI: `10.1016/j.cpc.2019.02.018 <https://doi.org/10.1016/j.cpc.2019.02.018>`_
-  
-12. **How can I extract the files in slabcc_data.tar.xz?** You can use `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:  
+
+12. **How can I extract the files in slabcc_data.tar.xz?** You can use `Tar <https://www.gnu.org/software/tar/>`_ + `XZ Utils <https://tukaani.org/xz/>`_ as:
 
     tar -xvf slabcc_data.tar.xz
 
  Alternatively, you can use `WinRAR <https://www.rarlab.com>`_ or `7zip <https://www.7-zip.org>`_.
- 
+
 13. **Something is not working! What should I do?**
 
  * If you need help with compiling the code or running it on a cluster, please contact your `system administrator <https://en.wikipedia.org/wiki/System_administrator>`_.
@@ -751,7 +760,7 @@ Included third-party components
 -------------------------------
 
 - `Armadillo C++ Linear Algebra Library <https://arma.sourceforge.net>`_ licensed under the Apache License 2.0
- 
+
  - Copyright 2008-2018, Conrad Sanderson
  - Copyright 2008-2016, National ICT Australia (NICTA)
  - Copyright 2017-2018, Arroyo Consortium
@@ -761,7 +770,7 @@ Included third-party components
  - This product includes software developed at Arroyo Consortium
  - This product includes software developed at Data61, CSIRO
 
-- `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license 
+- `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license
 
  - © 2009, Ben Hoyt, `et al. <https://github.com/benhoyt/inih/contributors>`__
 
@@ -794,7 +803,8 @@ Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+

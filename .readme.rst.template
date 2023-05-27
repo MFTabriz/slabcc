@@ -1,0 +1,41 @@
+.. |Version| image:: https://img.shields.io/badge/version-0.8.5-blue.svg
+   :alt: Version 0.8.5
+   :target: https://codeberg.org/meisam/slabcc/releases
+.. |Manual| image:: https://img.shields.io/badge/Manual-HTML-informational
+   :alt: HTML Manual
+   :target: https://meisam.codeberg.page/slabcc
+.. |Standard| image:: https://img.shields.io/badge/c%2B%2B-%3E%3D14-informational
+   :alt: C++ Standard
+   :target: https://en.cppreference.com/w/cpp/compiler_support#cpp14
+.. |Style| image:: https://img.shields.io/badge/code%20style-LLVM-black
+   :alt: Code style
+   :target: https://llvm.org/docs/CodingStandards.html
+.. |Woodpecker| image:: https://ci.codeberg.org/api/badges/meisam/slabcc/status.svg
+   :alt: Build Status
+   :target: https://ci.codeberg.org/meisam/slabcc/branches/master
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1323558.svg
+   :alt: Test Set
+   :target: https://doi.org/10.5281/zenodo.1323558
+.. |License| image:: https://img.shields.io/badge/License-BSD--2--Clause-blue
+   :alt: License: BSD-2-Clause
+   :target: https://opensource.org/licenses/BSD-2-Clause
+
+|Version| |Manual| |Standard| |Style| |Woodpecker| |Zenodo| |License|
+
+.. sectnum::
+
+.. contents::
+
+.. include:: docs/intro.rst
+
+.. include:: docs/quick_start.rst
+
+.. include:: docs/install.rst
+
+.. include:: docs/validate.rst
+
+.. include:: docs/issues.rst
+
+.. include:: docs/release.rst
+
+.. include:: docs/copyright.rst
