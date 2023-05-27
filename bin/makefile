@@ -3,7 +3,6 @@
 # See the accompanying LICENSE.txt file for terms.
 
 # todo: debug option
-# test mkl
 
 # these variable are read from the environment:
 # $CC: C compiler (default: gcc)
@@ -85,6 +84,14 @@ endif
 # these flags are also used by the NLOPT configure/makefile
 COMMON_FLAGS = $(strip $(OMP) $(OPT) $(EXTRA_FLAGS)) -g
 
+ifneq (,$(findstring clang,$(CXX)))
+  WARN_FLAGS := -Wall -Wextra -Wno-unused-parameter -Wno-tautological-constant-compare -Werror
+else ifneq (,$(findstring icpx,$(CXX)))
+  WARN_FLAGS := -Wall -Wextra -Wno-unused-parameter -Wno-tautological-constant-compare -Werror
+else
+  WARN_FLAGS := -Wall -Wextra -Wno-unused-parameter -Werror
+endif
+
 ifneq (,$(findstring ic,$(CXX)))
   OMP := -qopenmp
 endif
@@ -96,7 +103,7 @@ endif
 LD_EXTRA_FLAGS :=  $(strip $(LD_EXTRA_FLAGS) $(OMP))
 
 CFLAGS   = $(COMMON_FLAGS) 
-CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD) -Wall -Wextra -Wno-unused-parameter -Werror
+CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD) $(WARN_FLAGS)
 
 ##included libraries
 NLOPT_SRC_PATH := $(shell realpath ../src/nlopt/nlopt-2.4.2)
