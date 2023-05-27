@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -274,6 +276,35 @@ log10(const BaseCube<typename T1::elem_type,T1>& A)
 
 
 //
+// log1p
+
+template<typename T1>
+arma_warn_unused
+arma_inline
+typename enable_if2< (is_arma_type<T1>::value && is_cx<typename T1::elem_type>::no), const eOp<T1, eop_log1p> >::result
+log1p(const T1& A)
+  {
+  arma_extra_debug_sigprint();
+  
+  return eOp<T1, eop_log1p>(A);
+  }
+
+
+
+template<typename T1>
+arma_warn_unused
+arma_inline
+typename enable_if2< is_cx<typename T1::elem_type>::no, const eOpCube<T1, eop_log1p> >::result
+log1p(const BaseCube<typename T1::elem_type,T1>& A)
+  {
+  arma_extra_debug_sigprint();
+  
+  return eOpCube<T1, eop_log1p>(A.get_ref());
+  }
+
+
+
+//
 // exp
 
 template<typename T1>
@@ -358,6 +389,34 @@ exp10(const BaseCube<typename T1::elem_type,T1>& A)
 
 
 
+// expm1
+
+template<typename T1>
+arma_warn_unused
+arma_inline
+typename enable_if2< (is_arma_type<T1>::value && is_cx<typename T1::elem_type>::no), const eOp<T1, eop_expm1> >::result
+expm1(const T1& A)
+  {
+  arma_extra_debug_sigprint();
+  
+  return eOp<T1, eop_expm1>(A);
+  }
+
+
+
+template<typename T1>
+arma_warn_unused
+arma_inline
+typename enable_if2< is_cx<typename T1::elem_type>::no, const eOpCube<T1, eop_expm1> >::result
+expm1(const BaseCube<typename T1::elem_type,T1>& A)
+  {
+  arma_extra_debug_sigprint();
+  
+  return eOpCube<T1, eop_expm1>(A.get_ref());
+  }
+
+
+
 //
 // abs
 
@@ -379,7 +438,7 @@ template<typename T1>
 arma_warn_unused
 arma_inline
 const eOpCube<T1, eop_abs>
-abs(const BaseCube<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = 0)
+abs(const BaseCube<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   
@@ -407,7 +466,7 @@ template<typename T1>
 arma_warn_unused
 inline
 const mtOpCube<typename T1::pod_type, T1, op_abs>
-abs(const BaseCube< std::complex<typename T1::pod_type>,T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = 0)
+abs(const BaseCube< std::complex<typename T1::pod_type>,T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   
@@ -422,7 +481,7 @@ template<typename T1>
 arma_warn_unused
 arma_inline
 const SpOp<T1, spop_abs>
-abs(const SpBase<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = 0)
+abs(const SpBase<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
@@ -436,7 +495,7 @@ template<typename T1>
 arma_warn_unused
 arma_inline
 const mtSpOp<typename T1::pod_type, T1, spop_cx_abs>
-abs(const SpBase< std::complex<typename T1::pod_type>, T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = 0)
+abs(const SpBase< std::complex<typename T1::pod_type>, T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
@@ -467,7 +526,7 @@ template<typename T1>
 arma_warn_unused
 arma_inline
 const eOpCube<T1, eop_arg>
-arg(const BaseCube<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = 0)
+arg(const BaseCube<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   
@@ -495,7 +554,7 @@ template<typename T1>
 arma_warn_unused
 inline
 const mtOpCube<typename T1::pod_type, T1, op_arg>
-arg(const BaseCube< std::complex<typename T1::pod_type>,T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = 0)
+arg(const BaseCube< std::complex<typename T1::pod_type>,T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   
@@ -510,7 +569,7 @@ template<typename T1>
 arma_warn_unused
 arma_inline
 const SpOp<T1, spop_arg>
-arg(const SpBase<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = 0)
+arg(const SpBase<typename T1::elem_type,T1>& X, const typename arma_not_cx<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
@@ -524,7 +583,7 @@ template<typename T1>
 arma_warn_unused
 arma_inline
 const mtSpOp<typename T1::pod_type, T1, spop_cx_arg>
-arg(const SpBase< std::complex<typename T1::pod_type>, T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = 0)
+arg(const SpBase< std::complex<typename T1::pod_type>, T1>& X, const typename arma_cx_only<typename T1::elem_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
@@ -930,6 +989,19 @@ trunc(const SpBase<typename T1::elem_type,T1>& X)
 //
 // sign
 
+template<typename eT>
+arma_warn_unused
+arma_inline
+typename arma_scalar_only<eT>::result
+sign(const eT x)
+  {
+  arma_extra_debug_sigprint();
+  
+  return arma_sign(x);
+  }
+
+
+
 template<typename T1>
 arma_warn_unused
 arma_inline
@@ -1052,6 +1124,35 @@ lgamma(const BaseCube<typename T1::elem_type,T1>& A)
   arma_extra_debug_sigprint();
   
   return eOpCube<T1, eop_lgamma>(A.get_ref());
+  }
+
+
+
+//
+// tgamma
+
+template<typename T1>
+arma_warn_unused
+arma_inline
+typename enable_if2< (is_arma_type<T1>::value && is_cx<typename T1::elem_type>::no), const eOp<T1, eop_tgamma> >::result
+tgamma(const T1& A)
+  {
+  arma_extra_debug_sigprint();
+  
+  return eOp<T1, eop_tgamma>(A);
+  }
+
+
+
+template<typename T1>
+arma_warn_unused
+arma_inline
+typename enable_if2< is_cx<typename T1::elem_type>::no, const eOpCube<T1, eop_tgamma> >::result
+tgamma(const BaseCube<typename T1::elem_type,T1>& A)
+  {
+  arma_extra_debug_sigprint();
+  
+  return eOpCube<T1, eop_tgamma>(A.get_ref());
   }
 
 

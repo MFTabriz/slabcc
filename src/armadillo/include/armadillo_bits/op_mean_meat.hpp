@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -134,7 +136,6 @@ op_mean::apply_noalias_unwrap(Mat<typename T1::elem_type>& out, const Proxy<T1>&
 
 
 template<typename T1>
-arma_hot
 inline
 void
 op_mean::apply_noalias_proxy(Mat<typename T1::elem_type>& out, const Proxy<T1>& P, const uword dim)
@@ -363,7 +364,6 @@ op_mean::apply_noalias_unwrap(Cube<typename T1::elem_type>& out, const ProxyCube
 
 
 template<typename T1>
-arma_hot
 inline
 void
 op_mean::apply_noalias_proxy(Cube<typename T1::elem_type>& out, const ProxyCube<T1>& P, const uword dim)
@@ -672,8 +672,8 @@ op_mean::mean_all(const Base<typename T1::elem_type, T1>& X)
   
   typedef typename T1::elem_type eT;
   
-  const unwrap<T1>   tmp(X.get_ref());
-  const Mat<eT>& A = tmp.M;
+  const quasi_unwrap<T1> tmp(X.get_ref());
+  const Mat<eT>&     A = tmp.M;
   
   const uword A_n_elem = A.n_elem;
   

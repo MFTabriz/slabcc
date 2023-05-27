@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -28,7 +30,11 @@ op_roots::apply(Mat< std::complex<typename T1::pod_type> >& out, const mtOp<std:
   
   const bool status = op_roots::apply_direct(out, expr.m);
   
-  if(status == false)  { arma_stop_runtime_error("roots(): eigen decomposition failed"); }
+  if(status == false)
+    {
+    out.soft_reset();
+    arma_stop_runtime_error("roots(): eigen decomposition failed");
+    }
   }
 
 
@@ -58,8 +64,6 @@ op_roots::apply_direct(Mat< std::complex<typename T1::pod_type> >& out, const Ba
     {
     status = op_roots::apply_noalias(out, U.M);
     }
-  
-  if(status == false)  { out.soft_reset(); }
   
   return status;
   }

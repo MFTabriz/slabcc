@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -25,8 +27,8 @@ arma_inline
 typename
 enable_if2
   <
-  (is_arma_type<T1>::value),
-  const Op<T1, op_shift_default>
+  is_arma_type<T1>::value && resolves_to_vector<T1>::yes,
+  const Op<T1, op_shift_vec>
   >::result
 shift
   (
@@ -39,19 +41,52 @@ shift
   const uword len = (N < 0) ? uword(-N) : uword(N);
   const uword neg = (N < 0) ? uword( 1) : uword(0);
   
-  return Op<T1, op_shift_default>(X, len, neg, uword(0), 'j');
+  return Op<T1, op_shift_vec>(X, len, neg);
   }
 
 
 
 template<typename T1>
 arma_warn_unused
-arma_inline
+inline
+typename
+enable_if2
+  <
+  is_arma_type<T1>::value && resolves_to_vector<T1>::no,
+  Mat<typename T1::elem_type>
+  >::result
+shift
+  (
+  const T1&   X,
+  const sword N
+  )
+  {
+  arma_extra_debug_sigprint();
+  
+  typedef typename T1::elem_type eT;
+  
+  const uword len = (N < 0) ? uword(-N) : uword(N);
+  const uword neg = (N < 0) ? uword( 1) : uword(0);
+  
+  quasi_unwrap<T1> U(X);
+  
+  Mat<eT> out;
+  
+  op_shift::apply_noalias(out, U.M, len, neg, 0);
+  
+  return out;
+  }
+
+
+
+template<typename T1>
+arma_warn_unused
+inline
 typename
 enable_if2
   <
   (is_arma_type<T1>::value),
-  const Op<T1, op_shift>
+  Mat<typename T1::elem_type>
   >::result
 shift
   (
@@ -62,10 +97,20 @@ shift
   {
   arma_extra_debug_sigprint();
   
+  typedef typename T1::elem_type eT;
+  
+  arma_debug_check( (dim > 1), "shift(): parameter 'dim' must be 0 or 1" );
+  
   const uword len = (N < 0) ? uword(-N) : uword(N);
   const uword neg = (N < 0) ? uword( 1) : uword(0);
   
-  return Op<T1, op_shift>(X, len, neg, dim, 'j');
+  quasi_unwrap<T1> U(X);
+  
+  Mat<eT> out;
+  
+  op_shift::apply_noalias(out, U.M, len, neg, dim);
+  
+  return out;
   }
 
 

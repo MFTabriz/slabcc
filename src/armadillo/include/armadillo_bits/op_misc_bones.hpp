@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class op_real
+  : public traits_op_passthru
   {
   public:
   
@@ -33,6 +36,7 @@ class op_real
 
 
 class op_imag
+  : public traits_op_passthru
   {
   public:
   
@@ -46,6 +50,7 @@ class op_imag
 
 
 class op_abs
+  : public traits_op_passthru
   {
   public:
   
@@ -59,6 +64,7 @@ class op_abs
 
 
 class op_arg
+  : public traits_op_passthru
   {
   public:
   

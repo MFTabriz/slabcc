@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -19,7 +21,7 @@
 
 
 //! Class for storing data required to construct or apply operations to a subfield
-//! (i.e. where the subfield starts and ends as well as a reference/pointer to the original field),
+//! (ie. where the subfield starts and ends as well as a reference/pointer to the original field),
 template<typename oT>
 class subview_field
   {
@@ -48,6 +50,7 @@ class subview_field
   public:
   
   inline ~subview_field();
+  inline  subview_field() = delete;
   
   inline void operator= (const field<oT>& x);
   inline void operator= (const subview_field& x);
@@ -85,13 +88,7 @@ class subview_field
   inline static void extract(field<oT>& out, const subview_field& in);
   
   
-  private:
-  
   friend class field<oT>;
-  
-  
-  subview_field();
-  //subview_field(const subview_field&);
   };
 
 

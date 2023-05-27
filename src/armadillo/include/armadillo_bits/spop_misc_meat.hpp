@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -46,6 +48,47 @@ spop_scalar_times::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_
   if(in.aux != eT(0))
     {
     out.init_xform(in.m, priv::functor_scalar_times<eT>(in.aux));
+    }
+  else
+    {
+    const SpProxy<T1> P(in.m);
+    
+    out.zeros( P.get_n_rows(), P.get_n_cols() );
+    }
+  }
+
+
+
+namespace priv
+  {
+  template<typename T>
+  struct functor_cx_scalar_times
+    {
+    typedef std::complex<T> out_eT;
+    
+    const out_eT k;
+    
+    functor_cx_scalar_times(const out_eT in_k) : k(in_k) {}
+    
+    arma_inline out_eT operator()(const T val) const { return val * k; }
+    };
+  }
+
+
+
+template<typename T1>
+inline
+void
+spop_cx_scalar_times::apply(SpMat< std::complex<typename T1::pod_type> >& out, const mtSpOp< std::complex<typename T1::pod_type>, T1, spop_cx_scalar_times >& in)
+  {
+  arma_extra_debug_sigprint();
+  
+  typedef typename T1::pod_type         T;
+  typedef typename std::complex<T> out_eT;
+  
+  if(in.aux_out_eT != out_eT(0))
+    {
+    out.init_xform_mt(in.m, priv::functor_cx_scalar_times<T>(in.aux_out_eT));
     }
   else
     {
@@ -285,8 +328,8 @@ spop_repelem::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_repe
   
   if( (out_n_rows > 0) && (out_n_cols > 0) && (out_nnz > 0) )
     {
-    umat    locs(2, out_nnz);
-    Col<eT> vals(   out_nnz);
+    umat    locs(2, out_nnz, arma_nozeros_indicator());
+    Col<eT> vals(   out_nnz, arma_nozeros_indicator());
     
     uword* locs_mem = locs.memptr();
     eT*    vals_mem = vals.memptr();
@@ -446,7 +489,7 @@ namespace priv
   struct functor_sign
     {
     template<typename eT>
-    arma_inline eT operator()(const eT val) const { return eop_aux::sign(val); }
+    arma_inline eT operator()(const eT val) const { return arma_sign(val); }
     };
   }
 
@@ -483,7 +526,7 @@ spop_diagvec::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_diagv
   const uword row_offset = (b >  0) ? a : 0;
   const uword col_offset = (b == 0) ? a : 0;
   
-  arma_debug_check
+  arma_debug_check_bounds
     (
     ((row_offset > 0) && (row_offset >= X.n_rows)) || ((col_offset > 0) && (col_offset >= X.n_cols)),
     "diagvec(): requested diagonal out of bounds"
@@ -491,7 +534,7 @@ spop_diagvec::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_diagv
   
   const uword len = (std::min)(X.n_rows - row_offset, X.n_cols - col_offset);
   
-  Col<eT> cache(len);
+  Col<eT> cache(len, arma_nozeros_indicator());
   eT* cache_mem = cache.memptr();
   
   uword n_nonzero = 0;
@@ -505,9 +548,7 @@ spop_diagvec::apply(SpMat<typename T1::elem_type>& out, const SpOp<T1,spop_diagv
     n_nonzero += (val != eT(0)) ? uword(1) : uword(0);
     }
   
-  out.set_size(len, 1);
-  
-  out.mem_resize(n_nonzero);
+  out.reserve(len, 1, n_nonzero);
   
   uword count = 0;
   for(uword i=0; i < len; ++i)

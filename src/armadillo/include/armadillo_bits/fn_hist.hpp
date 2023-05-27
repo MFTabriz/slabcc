@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -24,7 +26,7 @@ arma_inline
 typename
 enable_if2
   <
-  (is_arma_type<T1>::value) && (is_not_complex<typename T1::elem_type>::value),
+  is_arma_type<T1>::value && is_cx<typename T1::elem_type>::no,
   const mtOp<uword,T1,op_hist>
   >::result
 hist(const T1& A, const uword n_bins = 10)
@@ -42,7 +44,7 @@ arma_inline
 typename
 enable_if2
   <
-  (is_arma_type<T1>::value) && (is_arma_type<T2>::value) && (is_not_complex<typename T1::elem_type>::value) && (is_same_type<typename T1::elem_type, typename T2::elem_type>::value),
+  is_arma_type<T1>::value && is_arma_type<T2>::value && is_cx<typename T1::elem_type>::no && is_same_type<typename T1::elem_type, typename T2::elem_type>::value,
   const mtGlue<uword,T1,T2,glue_hist_default>
   >::result
 hist(const T1& X, const T2& Y)
@@ -60,7 +62,7 @@ arma_inline
 typename
 enable_if2
   <
-  (is_arma_type<T1>::value) && (is_arma_type<T2>::value) && (is_not_complex<typename T1::elem_type>::value) && (is_same_type<typename T1::elem_type, typename T2::elem_type>::value),
+  is_arma_type<T1>::value && is_arma_type<T2>::value && is_cx<typename T1::elem_type>::no && is_same_type<typename T1::elem_type, typename T2::elem_type>::value,
   const mtGlue<uword,T1,T2,glue_hist>
   >::result
 hist(const T1& X, const T2& Y, const uword dim)

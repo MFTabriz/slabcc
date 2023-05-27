@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class op_flipud
+  : public traits_op_passthru
   {
   public:
   
@@ -37,6 +40,7 @@ class op_flipud
 
 
 class op_fliplr
+  : public traits_op_passthru
   {
   public:
   

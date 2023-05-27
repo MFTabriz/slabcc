@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -22,6 +24,14 @@
 class spglue_kron
   {
   public:
+  
+  template<typename T1, typename T2>
+  struct traits
+    {
+    static constexpr bool is_row  = (T1::is_row && T2::is_row);
+    static constexpr bool is_col  = (T1::is_col && T2::is_col);
+    static constexpr bool is_xvec = false;
+    };
   
   template<typename T1, typename T2>
   inline static void apply(SpMat<typename T1::elem_type>& out, const SpGlue<T1,T2,spglue_kron>& X);

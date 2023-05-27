@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -21,11 +23,12 @@
 //! dot product operation 
 
 class op_dot
+  : public traits_op_default
   {
   public:
   
   template<typename eT>
-  arma_hot arma_inline static
+  arma_inline static
   typename arma_not_cx<eT>::result
   direct_dot_arma(const uword n_elem, const eT* const A, const eT* const B);
   
@@ -66,6 +69,7 @@ class op_dot
 //! normalised dot product operation 
 
 class op_norm_dot
+  : public traits_op_default
   {
   public:
   
@@ -79,6 +83,7 @@ class op_norm_dot
 //! complex conjugate dot product operation
 
 class op_cdot
+  : public traits_op_default
   {
   public:
   
@@ -101,6 +106,7 @@ class op_cdot
 
 
 class op_dot_mixed
+  : public traits_op_default
   {
   public:
   

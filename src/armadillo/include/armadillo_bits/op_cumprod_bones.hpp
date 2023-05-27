@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class op_cumprod
+  : public traits_op_default
   {
   public:
   
@@ -32,12 +35,13 @@ class op_cumprod
 
 
 
-class op_cumprod_default
+class op_cumprod_vec
+  : public traits_op_passthru
   {
   public:
   
   template<typename T1>
-  inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_cumprod_default>& in);
+  inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_cumprod_vec>& in);
   };
 
 

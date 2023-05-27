@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class op_sort_index
+  : public traits_op_col
   {
   public:
   
@@ -33,6 +36,7 @@ class op_sort_index
 
 
 class op_stable_sort_index
+  : public traits_op_col
   {
   public:
   

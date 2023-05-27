@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class glue_rel_lt
+  : public traits_glue_or
   {
   public:
   
@@ -33,6 +36,7 @@ class glue_rel_lt
 
 
 class glue_rel_gt
+  : public traits_glue_or
   {
   public:
   
@@ -46,6 +50,7 @@ class glue_rel_gt
 
 
 class glue_rel_lteq
+  : public traits_glue_or
   {
   public:
   
@@ -59,6 +64,7 @@ class glue_rel_lteq
 
 
 class glue_rel_gteq
+  : public traits_glue_or
   {
   public:
   
@@ -72,6 +78,7 @@ class glue_rel_gteq
 
 
 class glue_rel_eq
+  : public traits_glue_or
   {
   public:
   
@@ -85,6 +92,7 @@ class glue_rel_eq
 
 
 class glue_rel_noteq
+  : public traits_glue_or
   {
   public:
   
@@ -98,6 +106,7 @@ class glue_rel_noteq
 
 
 class glue_rel_and
+  : public traits_glue_or
   {
   public:
   
@@ -111,6 +120,7 @@ class glue_rel_and
 
 
 class glue_rel_or
+  : public traits_glue_or
   {
   public:
   

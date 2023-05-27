@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -46,12 +48,12 @@ class eop_core
   
   // common
   
-  template<typename eT> arma_hot arma_inline static eT process(const eT val, const eT k);
+  template<typename eT> arma_inline static eT process(const eT val, const eT k);
   };
 
 
-struct eop_use_mp_true  { static const bool use_mp = true;  };
-struct eop_use_mp_false { static const bool use_mp = false; };
+struct eop_use_mp_true  { static constexpr bool use_mp = true;  };
+struct eop_use_mp_false { static constexpr bool use_mp = false; };
 
 
 class eop_neg               : public eop_core<eop_neg>               , public eop_use_mp_false {};
@@ -68,10 +70,12 @@ class eop_log               : public eop_core<eop_log>               , public eo
 class eop_log2              : public eop_core<eop_log2>              , public eop_use_mp_true  {};
 class eop_log10             : public eop_core<eop_log10>             , public eop_use_mp_true  {};
 class eop_trunc_log         : public eop_core<eop_trunc_log>         , public eop_use_mp_true  {};
+class eop_log1p             : public eop_core<eop_log1p>             , public eop_use_mp_true  {};
 class eop_exp               : public eop_core<eop_exp>               , public eop_use_mp_true  {};
 class eop_exp2              : public eop_core<eop_exp2>              , public eop_use_mp_true  {};
 class eop_exp10             : public eop_core<eop_exp10>             , public eop_use_mp_true  {};
 class eop_trunc_exp         : public eop_core<eop_trunc_exp>         , public eop_use_mp_true  {};
+class eop_expm1             : public eop_core<eop_expm1>             , public eop_use_mp_true  {};
 class eop_cos               : public eop_core<eop_cos>               , public eop_use_mp_true  {};
 class eop_sin               : public eop_core<eop_sin>               , public eop_use_mp_true  {};
 class eop_tan               : public eop_core<eop_tan>               , public eop_use_mp_true  {};
@@ -84,6 +88,7 @@ class eop_tanh              : public eop_core<eop_tanh>              , public eo
 class eop_acosh             : public eop_core<eop_acosh>             , public eop_use_mp_true  {};
 class eop_asinh             : public eop_core<eop_asinh>             , public eop_use_mp_true  {};
 class eop_atanh             : public eop_core<eop_atanh>             , public eop_use_mp_true  {};
+class eop_sinc              : public eop_core<eop_sinc>              , public eop_use_mp_true  {};
 class eop_eps               : public eop_core<eop_eps>               , public eop_use_mp_true  {};
 class eop_abs               : public eop_core<eop_abs>               , public eop_use_mp_false {};
 class eop_arg               : public eop_core<eop_arg>               , public eop_use_mp_false {};
@@ -96,6 +101,7 @@ class eop_sign              : public eop_core<eop_sign>              , public eo
 class eop_erf               : public eop_core<eop_erf>               , public eop_use_mp_true  {};
 class eop_erfc              : public eop_core<eop_erfc>              , public eop_use_mp_true  {};
 class eop_lgamma            : public eop_core<eop_lgamma>            , public eop_use_mp_true  {};
+class eop_tgamma            : public eop_core<eop_tgamma>            , public eop_use_mp_true  {};
 
 
 

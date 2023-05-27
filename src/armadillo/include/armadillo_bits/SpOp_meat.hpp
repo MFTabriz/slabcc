@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -57,6 +59,16 @@ inline
 SpOp<T1, op_type>::~SpOp()
   {
   arma_extra_debug_sigprint();
+  }
+
+
+
+template<typename T1, typename op_type>
+arma_inline
+bool
+SpOp<T1, op_type>::is_alias(const SpMat<typename T1::elem_type>& X) const
+  {
+  return m.is_alias(X);
   }
 
 

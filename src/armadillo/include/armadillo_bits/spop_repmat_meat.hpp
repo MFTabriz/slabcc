@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -56,13 +58,11 @@ spop_repmat::apply_noalias(SpMat<eT>& out, const uword A_n_rows, const uword A_n
   const uword B_n_rows = B.n_rows;
   const uword B_n_cols = B.n_cols;
   
-  out.zeros(A_n_rows * B_n_rows, A_n_cols * B_n_cols);
-  
   const uword out_n_nonzero = A_n_rows * A_n_cols * B.n_nonzero;
   
-  if(out_n_nonzero == 0)  { return; }
+  out.reserve(A_n_rows * B_n_rows, A_n_cols * B_n_cols, out_n_nonzero);
   
-  out.mem_resize(out_n_nonzero);
+  if(out_n_nonzero == 0)  { return; }
   
   access::rw(out.col_ptrs[0]) = 0;
   
@@ -128,8 +128,8 @@ spop_repmat::apply_noalias(SpMat<eT>& out, const uword A_n_rows, const uword A_n
 //   
 //   if( (out_n_rows > 0) && (out_n_cols > 0) && (out_nnz > 0) )
 //     {
-//     umat    locs(2, out_nnz);
-//     Col<eT> vals(   out_nnz);
+//     umat    locs(2, out_nnz, arma_nozeros_indicator());
+//     Col<eT> vals(   out_nnz, arma_nozeros_indicator());
 //     
 //     uword* locs_mem = locs.memptr();
 //     eT*    vals_mem = vals.memptr();

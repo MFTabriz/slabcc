@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class op_rel_lt_pre
+  : public traits_op_passthru
   {
   public:
   
@@ -33,6 +36,7 @@ class op_rel_lt_pre
 
 
 class op_rel_lt_post
+  : public traits_op_passthru
   {
   public:
   
@@ -46,6 +50,7 @@ class op_rel_lt_post
 
 
 class op_rel_gt_pre
+  : public traits_op_passthru
   {
   public:
   
@@ -59,6 +64,7 @@ class op_rel_gt_pre
 
 
 class op_rel_gt_post
+  : public traits_op_passthru
   {
   public:
   
@@ -72,6 +78,7 @@ class op_rel_gt_post
 
 
 class op_rel_lteq_pre
+  : public traits_op_passthru
   {
   public:
   
@@ -85,6 +92,7 @@ class op_rel_lteq_pre
 
 
 class op_rel_lteq_post
+  : public traits_op_passthru
   {
   public:
   
@@ -98,6 +106,7 @@ class op_rel_lteq_post
 
 
 class op_rel_gteq_pre
+  : public traits_op_passthru
   {
   public:
   
@@ -111,6 +120,7 @@ class op_rel_gteq_pre
 
 
 class op_rel_gteq_post
+  : public traits_op_passthru
   {
   public:
   
@@ -124,6 +134,7 @@ class op_rel_gteq_post
 
 
 class op_rel_eq
+  : public traits_op_passthru
   {
   public:
   
@@ -137,6 +148,7 @@ class op_rel_eq
 
 
 class op_rel_noteq
+  : public traits_op_passthru
   {
   public:
   

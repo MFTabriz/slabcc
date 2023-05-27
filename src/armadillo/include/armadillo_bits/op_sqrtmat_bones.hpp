@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class op_sqrtmat
+  : public traits_op_default
   {
   public:
   
@@ -36,6 +39,7 @@ class op_sqrtmat
 
 
 class op_sqrtmat_cx
+  : public traits_op_default
   {
   public:
   
@@ -58,6 +62,7 @@ class op_sqrtmat_cx
 
 
 class op_sqrtmat_sympd
+  : public traits_op_default
   {
   public:
   

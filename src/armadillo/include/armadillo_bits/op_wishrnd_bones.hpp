@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -19,40 +21,42 @@
 
 
 class op_wishrnd
-   {
-   public:
-   
-   template<typename T1>
-   inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_wishrnd>& expr);
-   
-   template<typename T1>
-   inline static bool apply_direct(Mat<typename T1::elem_type>& out, const Base<typename T1::elem_type,T1>& X, const typename T1::elem_type df, const uword mode);
-   
-   template<typename eT>
-   inline static bool apply_noalias_mode1(Mat<eT>& out, const Mat<eT>& S, const eT df);
-   
-   template<typename eT>
-   inline static bool apply_noalias_mode2(Mat<eT>& out, const Mat<eT>& D, const eT df);
-   };
+  : public traits_op_default
+  {
+  public:
+
+  template<typename T1>
+  inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_wishrnd>& expr);
+
+  template<typename T1>
+  inline static bool apply_direct(Mat<typename T1::elem_type>& out, const Base<typename T1::elem_type,T1>& X, const typename T1::elem_type df, const uword mode);
+
+  template<typename eT>
+  inline static bool apply_noalias_mode1(Mat<eT>& out, const Mat<eT>& S, const eT df);
+
+  template<typename eT>
+  inline static bool apply_noalias_mode2(Mat<eT>& out, const Mat<eT>& D, const eT df);
+  };
 
 
 
 class op_iwishrnd
-   {
-   public:
-   
-   template<typename T1>
-   inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_iwishrnd>& expr);
-   
-   template<typename T1>
-   inline static bool apply_direct(Mat<typename T1::elem_type>& out, const Base<typename T1::elem_type,T1>& X, const typename T1::elem_type df, const uword mode);
-   
-   template<typename eT>
-   inline static bool apply_noalias_mode1(Mat<eT>& out, const Mat<eT>& T, const eT df);
-   
-   template<typename eT>
-   inline static bool apply_noalias_mode2(Mat<eT>& out, const Mat<eT>& Dinv, const eT df);
-   };
+  : public traits_op_default
+  {
+  public:
+
+  template<typename T1>
+  inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_iwishrnd>& expr);
+
+  template<typename T1>
+  inline static bool apply_direct(Mat<typename T1::elem_type>& out, const Base<typename T1::elem_type,T1>& X, const typename T1::elem_type df, const uword mode);
+
+  template<typename eT>
+  inline static bool apply_noalias_mode1(Mat<eT>& out, const Mat<eT>& T, const eT df);
+
+  template<typename eT>
+  inline static bool apply_noalias_mode2(Mat<eT>& out, const Mat<eT>& Dinv, const eT df);
+  };
 
 
 

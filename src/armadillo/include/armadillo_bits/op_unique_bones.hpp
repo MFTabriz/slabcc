@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -21,14 +23,26 @@
 
 
 class op_unique
+  : public traits_op_col
   {
   public:
   
   template<typename T1>
-  inline static bool apply_helper(Mat<typename T1::elem_type>& out, const Proxy<T1>& P);
+  inline static bool apply_helper(Mat<typename T1::elem_type>& out, const Proxy<T1>& P, const bool P_is_row);
   
   template<typename T1>
   inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_unique>& in);
+  };
+
+
+
+class op_unique_vec
+  : public traits_op_passthru
+  {
+  public:
+  
+  template<typename T1>
+  inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_unique_vec>& in);
   };
 
 

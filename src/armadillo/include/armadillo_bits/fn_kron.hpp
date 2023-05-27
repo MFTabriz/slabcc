@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -44,8 +46,8 @@ kron(const Base<std::complex<T>,T1>& X, const Base<T,T2>& Y)
 
   promote_type<eT1,T>::check();
   
-  const unwrap<T1> tmp1(X.get_ref());
-  const unwrap<T2> tmp2(Y.get_ref());
+  const quasi_unwrap<T1> tmp1(X.get_ref());
+  const quasi_unwrap<T2> tmp2(Y.get_ref());
   
   const Mat<eT1>& A = tmp1.M;
   const Mat<T  >& B = tmp2.M;
@@ -71,8 +73,8 @@ kron(const Base<T,T1>& X, const Base<std::complex<T>,T2>& Y)
 
   promote_type<T,eT2>::check();
   
-  const unwrap<T1> tmp1(X.get_ref());
-  const unwrap<T2> tmp2(Y.get_ref());
+  const quasi_unwrap<T1> tmp1(X.get_ref());
+  const quasi_unwrap<T2> tmp2(Y.get_ref());
   
   const Mat<T  >& A = tmp1.M;
   const Mat<eT2>& B = tmp2.M;

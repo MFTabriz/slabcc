@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -20,6 +22,7 @@
 
 
 class spop_symmat
+  : public traits_op_default
   {
   public:
   
@@ -30,6 +33,7 @@ class spop_symmat
 
 
 class spop_symmat_cx
+  : public traits_op_default
   {
   public:
   

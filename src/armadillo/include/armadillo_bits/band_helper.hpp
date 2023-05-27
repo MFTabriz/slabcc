@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -31,13 +33,13 @@ is_band(uword& out_KL, uword& out_KU, const Mat<eT>& A, const uword N_min)
   arma_extra_debug_sigprint();
   
   // NOTE: assuming that A has a square size
-  // NOTE  assuming that N_min is >= 4
+  // NOTE: assuming that N_min is >= 4
   
   const uword N = A.n_rows;
   
   if(N < N_min)  { return false; }
   
-  // first, quickly check bottom-right and top-left corners
+  // first, quickly check bottom-left and top-right corners
   
   const eT eT_zero = eT(0);
   
@@ -109,13 +111,13 @@ is_band_lower(uword& out_KD, const Mat<eT>& A, const uword N_min)
   arma_extra_debug_sigprint();
   
   // NOTE: assuming that A has a square size
-  // NOTE  assuming that N_min is >= 4
+  // NOTE: assuming that N_min is >= 4
   
   const uword N = A.n_rows;
   
   if(N < N_min)  { return false; }
   
-  // first, quickly check bottom-right corner
+  // first, quickly check bottom-left corner
   
   const eT eT_zero = eT(0);
   
@@ -172,13 +174,13 @@ is_band_upper(uword& out_KD, const Mat<eT>& A, const uword N_min)
   arma_extra_debug_sigprint();
   
   // NOTE: assuming that A has a square size
-  // NOTE  assuming that N_min is >= 4
+  // NOTE: assuming that N_min is >= 4
   
   const uword N = A.n_rows;
   
   if(N < N_min)  { return false; }
   
-  // first, quickly check top-left corner
+  // first, quickly check top-right corner
   
   const eT eT_zero = eT(0);
   

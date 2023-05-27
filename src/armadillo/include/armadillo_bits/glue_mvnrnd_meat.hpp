@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -28,6 +30,24 @@
 template<typename T1, typename T2>
 inline
 void
+glue_mvnrnd_vec::apply(Mat<typename T1::elem_type>& out, const Glue<T1,T2,glue_mvnrnd_vec>& expr)
+  {
+  arma_extra_debug_sigprint();
+  
+  const bool status = glue_mvnrnd::apply_direct(out, expr.A, expr.B, uword(1));
+  
+  if(status == false)
+    {
+    out.soft_reset();
+    arma_stop_runtime_error("mvnrnd(): given covariance matrix is not symmetric positive semi-definite");
+    }
+  }
+
+
+
+template<typename T1, typename T2>
+inline
+void
 glue_mvnrnd::apply(Mat<typename T1::elem_type>& out, const Glue<T1,T2,glue_mvnrnd>& expr)
   {
   arma_extra_debug_sigprint();
@@ -36,6 +56,7 @@ glue_mvnrnd::apply(Mat<typename T1::elem_type>& out, const Glue<T1,T2,glue_mvnrn
   
   if(status == false)
     {
+    out.soft_reset();
     arma_stop_runtime_error("mvnrnd(): given covariance matrix is not symmetric positive semi-definite");
     }
   }
@@ -64,6 +85,11 @@ glue_mvnrnd::apply_direct(Mat<typename T1::elem_type>& out, const Base<typename 
     return true;
     }
   
+  if((arma_config::debug) && (auxlib::rudimentary_sym_check(UC.M) == false))
+    {
+    arma_debug_warn_level(1, "mvnrnd(): given matrix is not symmetric");
+    }
+  
   bool status = false;
   
   if(UM.is_alias(out) || UC.is_alias(out))
@@ -78,8 +104,6 @@ glue_mvnrnd::apply_direct(Mat<typename T1::elem_type>& out, const Base<typename 
     {
     status = glue_mvnrnd::apply_noalias(out, UM.M, UC.M, N);
     }
-  
-  if(status == false)  { out.soft_reset(); }
   
   return status;
   }
@@ -104,7 +128,7 @@ glue_mvnrnd::apply_noalias(Mat<eT>& out, const Mat<eT>& M, const Mat<eT>& C, con
     Col<eT> eigval;  // NOTE: eT is constrained to be real (ie. float or double) in fn_mvnrnd.hpp
     Mat<eT> eigvec;
     
-    const bool eig_status = auxlib::eig_sym_dc(eigval, eigvec, C);
+    const bool eig_status = eig_sym_helper(eigval, eigvec, C, 'd', "mvnrnd()");
     
     if(eig_status == false)  { return false; }
     

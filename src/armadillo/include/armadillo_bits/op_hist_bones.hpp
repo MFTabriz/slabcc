@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -21,11 +23,12 @@
 
 
 class op_hist
+  : public traits_op_passthru
   {
   public:
   
   template<typename eT>
-  inline static void apply_noalias(Mat<uword>& out, const Mat<eT>& A, const uword n_bins, const bool A_is_row);
+  inline static void apply_noalias(Mat<uword>& out, const Mat<eT>& A, const uword n_bins, const uword dim);
   
   template<typename T1>
   inline static void apply(Mat<uword>& out, const mtOp<uword, T1, op_hist>& X);

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -21,6 +23,7 @@
 
 
 class op_expmat
+  : public traits_op_default
   {
   public:
   
@@ -34,6 +37,7 @@ class op_expmat
 
 
 class op_expmat_sym
+  : public traits_op_default
   {
   public:
   

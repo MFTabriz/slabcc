@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -19,11 +21,12 @@
 
 
 class spop_sum
+  : public traits_op_xvec
   {
   public:
   
   template<typename T1>
-  arma_hot inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_sum>& in);
+  inline static void apply(SpMat<typename T1::elem_type>& out, const SpOp<T1, spop_sum>& in);
   };
 
 

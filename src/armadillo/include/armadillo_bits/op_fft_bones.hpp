@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -21,6 +23,7 @@
 
 
 class op_fft_real
+  : public traits_op_passthru
   {
   public:
   
@@ -31,23 +34,21 @@ class op_fft_real
 
 
 class op_fft_cx
+  : public traits_op_passthru
   {
   public:
   
   template<typename T1>
   inline static void apply( Mat<typename T1::elem_type>& out, const Op<T1,op_fft_cx>& in );
   
-  template<typename T1, bool inverse>
-  inline static void apply_noalias(Mat<typename T1::elem_type>& out, const Proxy<T1>& P, const uword a, const uword b);
-
-  template<typename T1> arma_hot inline static void copy_vec       (typename Proxy<T1>::elem_type* dest, const Proxy<T1>& P, const uword N);
-  template<typename T1> arma_hot inline static void copy_vec_proxy (typename Proxy<T1>::elem_type* dest, const Proxy<T1>& P, const uword N);
-  template<typename T1> arma_hot inline static void copy_vec_unwrap(typename Proxy<T1>::elem_type* dest, const Proxy<T1>& P, const uword N);
+  template<typename eT, bool inverse>
+  inline static void apply_noalias(Mat<eT>& out, const Mat<eT>& X, const uword a, const uword b);
   };
 
 
 
 class op_ifft_cx
+  : public traits_op_passthru
   {
   public:
   

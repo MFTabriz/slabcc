@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -413,6 +415,118 @@ accu(const mtOp<uword,T1,op_rel_eq>& X)
 
 
 
+template<typename T1, typename T2>
+arma_warn_unused
+inline
+uword
+accu(const mtGlue<uword,T1,T2,glue_rel_noteq>& X)
+  {
+  arma_extra_debug_sigprint();
+  
+  const Proxy<T1> PA(X.A);
+  const Proxy<T2> PB(X.B);
+  
+  arma_debug_assert_same_size(PA, PB, "operator!=");
+  
+  uword n_nonzero = 0;
+  
+  if( (Proxy<T1>::use_at == false) && (Proxy<T2>::use_at == false) )
+    {
+    typedef typename Proxy<T1>::ea_type PA_ea_type;
+    typedef typename Proxy<T2>::ea_type PB_ea_type;
+    
+          PA_ea_type A      = PA.get_ea();
+          PB_ea_type B      = PB.get_ea();
+    const uword      n_elem = PA.get_n_elem();
+    
+    for(uword i=0; i < n_elem; ++i)
+      {
+      n_nonzero += (A[i] != B[i]) ? uword(1) : uword(0);
+      }
+    }
+  else
+    {
+    const uword PA_n_cols = PA.get_n_cols();
+    const uword PA_n_rows = PA.get_n_rows();
+    
+    if(PA_n_rows == 1)
+      {
+      for(uword col=0; col < PA_n_cols; ++col)
+        {
+        n_nonzero += (PA.at(0,col) != PB.at(0,col)) ? uword(1) : uword(0);
+        }
+      }
+    else
+      {
+      for(uword col=0; col < PA_n_cols; ++col)
+      for(uword row=0; row < PA_n_rows; ++row)
+        {
+        n_nonzero += (PA.at(row,col) != PB.at(row,col)) ? uword(1) : uword(0);
+        }
+      }
+    }
+  
+  return n_nonzero;
+  }
+
+
+
+template<typename T1, typename T2>
+arma_warn_unused
+inline
+uword
+accu(const mtGlue<uword,T1,T2,glue_rel_eq>& X)
+  {
+  arma_extra_debug_sigprint();
+  
+  const Proxy<T1> PA(X.A);
+  const Proxy<T2> PB(X.B);
+  
+  arma_debug_assert_same_size(PA, PB, "operator==");
+  
+  uword n_nonzero = 0;
+  
+  if( (Proxy<T1>::use_at == false) && (Proxy<T2>::use_at == false) )
+    {
+    typedef typename Proxy<T1>::ea_type PA_ea_type;
+    typedef typename Proxy<T2>::ea_type PB_ea_type;
+    
+          PA_ea_type A      = PA.get_ea();
+          PB_ea_type B      = PB.get_ea();
+    const uword      n_elem = PA.get_n_elem();
+    
+    for(uword i=0; i < n_elem; ++i)
+      {
+      n_nonzero += (A[i] == B[i]) ? uword(1) : uword(0);
+      }
+    }
+  else
+    {
+    const uword PA_n_cols = PA.get_n_cols();
+    const uword PA_n_rows = PA.get_n_rows();
+    
+    if(PA_n_rows == 1)
+      {
+      for(uword col=0; col < PA_n_cols; ++col)
+        {
+        n_nonzero += (PA.at(0,col) == PB.at(0,col)) ? uword(1) : uword(0);
+        }
+      }
+    else
+      {
+      for(uword col=0; col < PA_n_cols; ++col)
+      for(uword row=0; row < PA_n_rows; ++row)
+        {
+        n_nonzero += (PA.at(row,col) == PB.at(row,col)) ? uword(1) : uword(0);
+        }
+      }
+    }
+  
+  return n_nonzero;
+  }
+
+
+
 //! accumulate the elements of a subview (submatrix)
 template<typename eT>
 arma_warn_unused
@@ -426,29 +540,35 @@ accu(const subview<eT>& X)
   const uword X_n_rows = X.n_rows;
   const uword X_n_cols = X.n_cols;
   
-  eT val = eT(0);
-  
   if(X_n_rows == 1)
     {
-    typedef subview_row<eT> sv_type;
+    const Mat<eT>& m = X.m;
     
-    const sv_type& sv = reinterpret_cast<const sv_type&>(X);  // subview_row<eT> is a child class of subview<eT> and has no extra data
+    const uword col_offset = X.aux_col1;
+    const uword row_offset = X.aux_row1;
     
-    const Proxy<sv_type> P(sv);
+    eT val1 = eT(0);
+    eT val2 = eT(0);
     
-    val = accu_proxy_linear(P);
-    }
-  else
-  if(X_n_cols == 1)
-    {
-    val = arrayops::accumulate( X.colptr(0), X_n_rows );
-    }
-  else
-    {
-    for(uword col=0; col < X_n_cols; ++col)
+    uword i,j;
+    for(i=0, j=1; j < X_n_cols; i+=2, j+=2)
       {
-      val += arrayops::accumulate( X.colptr(col), X_n_rows );
+      val1 += m.at(row_offset, col_offset + i);
+      val2 += m.at(row_offset, col_offset + j);
       }
+    
+    if(i < X_n_cols)  { val1 += m.at(row_offset, col_offset + i); }
+    
+    return val1 + val2;
+    }
+  
+  if(X_n_cols == 1)  { return arrayops::accumulate( X.colptr(0), X_n_rows ); }
+  
+  eT val = eT(0);
+  
+  for(uword col=0; col < X_n_cols; ++col)
+    {
+    val += arrayops::accumulate( X.colptr(col), X_n_rows );
     }
   
   return val;
@@ -465,7 +585,7 @@ accu(const subview_col<eT>& X)
   {
   arma_extra_debug_sigprint();  
   
-  return arrayops::accumulate( X.colptr(0), X.n_rows );
+  return arrayops::accumulate( X.colmem, X.n_rows );
   }
 
 
@@ -704,7 +824,7 @@ accu(const eGlueCube<T1,T2,eglue_schur>& expr)
 template<typename T>
 arma_warn_unused
 inline
-const typename arma_scalar_only<T>::result &
+typename arma_scalar_only<T>::result
 accu(const T& x)
   {
   return x;
@@ -725,23 +845,156 @@ accu(const SpBase<typename T1::elem_type,T1>& expr)
   
   const SpProxy<T1> P(expr.get_ref());
   
+  const uword N = P.get_n_nonzero();
+  
+  if(N == 0)  { return eT(0); }
+  
   if(SpProxy<T1>::use_iterator == false)
     {
     // direct counting
-    return arrayops::accumulate(P.get_values(), P.get_n_nonzero());
+    return arrayops::accumulate(P.get_values(), N);
     }
-  else
+  
+  if(is_SpSubview<typename SpProxy<T1>::stored_type>::value)
     {
-    typename SpProxy<T1>::const_iterator_type it = P.begin();
+    const SpSubview<eT>& sv = reinterpret_cast< const SpSubview<eT>& >(P.Q);
     
-    const uword P_n_nz = P.get_n_nonzero();
-    
-    eT val = eT(0);
-    
-    for(uword i=0; i < P_n_nz; ++i)  { val += (*it); ++it; }
-    
-    return val;
+    if(sv.n_rows == sv.m.n_rows)
+      {
+      const SpMat<eT>& m   = sv.m;
+      const uword      col = sv.aux_col1;
+      
+      return arrayops::accumulate(&(m.values[ m.col_ptrs[col] ]), N);
+      }
     }
+  
+  typename SpProxy<T1>::const_iterator_type it = P.begin();
+  
+  eT val = eT(0);
+  
+  for(uword i=0; i < N; ++i)  { val += (*it); ++it; }
+  
+  return val;
+  }
+
+
+
+//! explicit handling of accu(A + B), where A and B are sparse matrices
+template<typename T1, typename T2>
+arma_warn_unused
+inline
+typename T1::elem_type
+accu(const SpGlue<T1,T2,spglue_plus>& expr)
+  {
+  arma_extra_debug_sigprint();
+  
+  const unwrap_spmat<T1> UA(expr.A);
+  const unwrap_spmat<T2> UB(expr.B);
+  
+  arma_debug_assert_same_size(UA.M.n_rows, UA.M.n_cols, UB.M.n_rows, UB.M.n_cols, "addition");
+  
+  return (accu(UA.M) + accu(UB.M));
+  }
+
+
+
+//! explicit handling of accu(A - B), where A and B are sparse matrices
+template<typename T1, typename T2>
+arma_warn_unused
+inline
+typename T1::elem_type
+accu(const SpGlue<T1,T2,spglue_minus>& expr)
+  {
+  arma_extra_debug_sigprint();
+  
+  const unwrap_spmat<T1> UA(expr.A);
+  const unwrap_spmat<T2> UB(expr.B);
+  
+  arma_debug_assert_same_size(UA.M.n_rows, UA.M.n_cols, UB.M.n_rows, UB.M.n_cols, "subtraction");
+  
+  return (accu(UA.M) - accu(UB.M));
+  }
+
+
+
+//! explicit handling of accu(A % B), where A and B are sparse matrices
+template<typename T1, typename T2>
+arma_warn_unused
+inline
+typename T1::elem_type
+accu(const SpGlue<T1,T2,spglue_schur>& expr)
+  {
+  arma_extra_debug_sigprint();
+  
+  typedef typename T1::elem_type eT;
+  
+  const SpProxy<T1> px(expr.A);
+  const SpProxy<T2> py(expr.B);
+  
+  typename SpProxy<T1>::const_iterator_type x_it     = px.begin();
+  typename SpProxy<T1>::const_iterator_type x_it_end = px.end();
+  
+  typename SpProxy<T2>::const_iterator_type y_it     = py.begin();
+  typename SpProxy<T2>::const_iterator_type y_it_end = py.end();
+  
+  eT acc = eT(0);
+  
+  while( (x_it != x_it_end) || (y_it != y_it_end) )
+    {
+    if(x_it == y_it)
+      {
+      acc += ((*x_it) * (*y_it));
+      
+      ++x_it;
+      ++y_it;
+      }
+    else
+      {
+      const uword x_it_col = x_it.col();
+      const uword x_it_row = x_it.row();
+      
+      const uword y_it_col = y_it.col();
+      const uword y_it_row = y_it.row();
+      
+      if((x_it_col < y_it_col) || ((x_it_col == y_it_col) && (x_it_row < y_it_row))) // if y is closer to the end
+        {
+        ++x_it;
+        }
+      else // x is closer to the end
+        {
+        ++y_it;
+        }
+      }
+    }
+  
+  return acc;
+  }
+
+
+
+template<typename T1, typename spop_type>
+arma_warn_unused
+inline
+typename T1::elem_type
+accu(const SpOp<T1, spop_type>& expr)
+  {
+  arma_extra_debug_sigprint();
+  
+  typedef typename T1::elem_type eT;
+  
+  const bool is_vectorise = \
+       (is_same_type<spop_type, spop_vectorise_row>::yes)
+    || (is_same_type<spop_type, spop_vectorise_col>::yes)
+    || (is_same_type<spop_type, spop_vectorise_all>::yes);
+  
+  if(is_vectorise)
+    {
+    return accu(expr.m);
+    }
+  
+  const SpMat<eT> tmp = expr;
+  
+  return accu(tmp);
   }
 
 

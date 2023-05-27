@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -77,7 +79,7 @@ spop_mean::apply_noalias_fast
   
   if(dim == 0) // find the mean in each column
     {
-    Row<eT> acc(p_n_cols, fill::zeros);
+    Row<eT> acc(p_n_cols, arma_zeros_indicator());
     
     eT* acc_mem = acc.memptr();
     
@@ -108,7 +110,7 @@ spop_mean::apply_noalias_fast
   else
   if(dim == 1)  // find the mean in each row
     {
-    Col<eT> acc(p_n_rows, fill::zeros);
+    Col<eT> acc(p_n_rows, arma_zeros_indicator());
     
     eT* acc_mem = acc.memptr();
     
@@ -289,6 +291,32 @@ spop_mean::mean_all(const SpBase<typename T1::elem_type, T1>& X)
 
 
 
+template<typename T1, typename spop_type>
+inline
+typename T1::elem_type
+spop_mean::mean_all(const SpOp<T1, spop_type>& expr)
+  {
+  arma_extra_debug_sigprint();
+  
+  typedef typename T1::elem_type eT;
+  
+  const bool is_vectorise = \
+       (is_same_type<spop_type, spop_vectorise_row>::yes)
+    || (is_same_type<spop_type, spop_vectorise_col>::yes)
+    || (is_same_type<spop_type, spop_vectorise_all>::yes);
+  
+  if(is_vectorise)
+    {
+    return spop_mean::mean_all(expr.m);
+    }
+  
+  const SpMat<eT> tmp = expr;
+  
+  return spop_mean::mean_all(tmp);
+  }
+
+
+
 template<typename T1, typename eT>
 inline
 eT
@@ -305,7 +333,7 @@ spop_mean::iterator_mean(T1& it, const T1& end, const uword n_zero, const eT jun
   
   const uword it_begin_pos = it.pos();
   
-  while (it != end)
+  while(it != end)
     {
     acc += (*it);
     ++it;
@@ -334,7 +362,7 @@ spop_mean::iterator_mean_robust(T1& it, const T1& end, const uword n_zero, const
 
   const uword it_begin_pos = it.pos();
 
-  while (it != end)
+  while(it != end)
     {
     r_mean += ((*it - r_mean) / T(n_zero + (it.pos() - it_begin_pos) + 1));
     ++it;

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -22,7 +24,7 @@
 struct span_alt {};
 
 
-template<typename Dummy = int>
+template<typename junk = int>
 class span_base
   {
   public:
@@ -30,8 +32,8 @@ class span_base
   };
 
 
-template<typename Dummy>
-const span_alt span_base<Dummy>::all = span_alt();
+template<typename junk>
+const span_alt span_base<junk>::all = span_alt();
 
 
 class span : public span_base<>
@@ -44,14 +46,18 @@ class span : public span_base<>
   
   inline
   span()
-    : whole(true)
+    : a(0)
+    , b(0)
+    , whole(true)
     {
     }
   
   
   inline
   span(const span_alt&)
-    : whole(true)
+    : a(0)
+    , b(0)
+    , whole(true)
     {
     }
   
@@ -66,8 +72,8 @@ class span : public span_base<>
     }
   
   
-  // the "explicit" keyword is required here to prevent a C++11 compiler
-  // automatically converting {a,b} into an instance of span() when submatrices are specified
+  // the "explicit" keyword is required here to prevent automatic conversion of {a,b}
+  // into an instance of span() when submatrices are specified
   inline
   explicit
   span(const uword in_a, const uword in_b)

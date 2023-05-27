@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -30,6 +32,8 @@ op_cumprod::apply_noalias(Mat<eT>& out, const Mat<eT>& X, const uword dim)
   uword n_cols = X.n_cols;
   
   out.set_size(n_rows,n_cols);
+  
+  if(out.n_elem == 0)  { return; }
   
   if(dim == 0)
     {
@@ -140,7 +144,7 @@ op_cumprod::apply(Mat<typename T1::elem_type>& out, const Op<T1,op_cumprod>& in)
 template<typename T1>
 inline
 void
-op_cumprod_default::apply(Mat<typename T1::elem_type>& out, const Op<T1,op_cumprod_default>& in)
+op_cumprod_vec::apply(Mat<typename T1::elem_type>& out, const Op<T1,op_cumprod_vec>& in)
   {
   arma_extra_debug_sigprint();
   
@@ -148,7 +152,7 @@ op_cumprod_default::apply(Mat<typename T1::elem_type>& out, const Op<T1,op_cumpr
   
   const quasi_unwrap<T1> U(in.m);
   
-  const uword dim = (T1::is_row) ? 1 : 0;
+  const uword dim = (T1::is_xvec) ? uword(U.M.is_rowvec() ? 1 : 0) : uword((T1::is_row) ? 1 : 0);
   
   if(U.is_alias(out))
     {

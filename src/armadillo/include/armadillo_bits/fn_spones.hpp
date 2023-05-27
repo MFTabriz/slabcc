@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -31,7 +33,9 @@ spones(const SpBase<typename T1::elem_type, T1>& X)
   
   typedef typename T1::elem_type eT;
   
-  SpMat<eT> out( X.get_ref() );
+  const unwrap_spmat<T1> U(X.get_ref());
+  
+  SpMat<eT> out(arma_layout_indicator(), U.M);
   
   arrayops::inplace_set( access::rwp(out.values), eT(1), out.n_nonzero );
   

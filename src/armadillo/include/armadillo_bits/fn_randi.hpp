@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -23,7 +25,7 @@ template<typename obj_type>
 arma_warn_unused
 inline
 obj_type
-randi(const uword n_rows, const uword n_cols, const distr_param& param = distr_param(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk = 0)
+randi(const uword n_rows, const uword n_cols, const distr_param& param = distr_param(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
@@ -40,29 +42,14 @@ randi(const uword n_rows, const uword n_cols, const distr_param& param = distr_p
     arma_debug_check( (n_rows != 1), "randi(): incompatible size" );
     }
   
-  obj_type out(n_rows, n_cols);
+  int a = 0;
+  int b = arma_rng::randi<eT>::max_val();
   
-  int a;
-  int b;
+  param.get_int_vals(a,b);
   
-  if(param.state == 0)
-    {
-    a = 0;
-    b = arma_rng::randi<eT>::max_val();
-    }
-  else
-  if(param.state == 1)
-    {
-    a = param.a_int;
-    b = param.b_int;
-    }
-  else
-    {
-    a = int(param.a_double);
-    b = int(param.b_double);
-    }
+  arma_debug_check( (a > b), "randi(): incorrect distribution parameters; a must be less than b" );
   
-  arma_debug_check( (a > b), "randi(): incorrect distribution parameters: a must be less than b" );
+  obj_type out(n_rows, n_cols, arma_nozeros_indicator());
   
   arma_rng::randi<eT>::fill(out.memptr(), out.n_elem, a, b);
   
@@ -75,7 +62,7 @@ template<typename obj_type>
 arma_warn_unused
 inline
 obj_type
-randi(const SizeMat& s, const distr_param& param = distr_param(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk = 0)
+randi(const SizeMat& s, const distr_param& param = distr_param(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
@@ -89,7 +76,7 @@ template<typename obj_type>
 arma_warn_unused
 inline
 obj_type
-randi(const uword n_elem, const distr_param& param = distr_param(), const arma_empty_class junk1 = arma_empty_class(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk2 = 0)
+randi(const uword n_elem, const distr_param& param = distr_param(), const arma_empty_class junk1 = arma_empty_class(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk2 = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk1);
@@ -189,36 +176,21 @@ template<typename cube_type>
 arma_warn_unused
 inline
 cube_type
-randi(const uword n_rows, const uword n_cols, const uword n_slices, const distr_param& param = distr_param(), const typename arma_Cube_only<cube_type>::result* junk = 0)
+randi(const uword n_rows, const uword n_cols, const uword n_slices, const distr_param& param = distr_param(), const typename arma_Cube_only<cube_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);
   
   typedef typename cube_type::elem_type eT;
   
-  cube_type out(n_rows, n_cols, n_slices);
+  int a = 0;
+  int b = arma_rng::randi<eT>::max_val();
   
-  int a;
-  int b;
+  param.get_int_vals(a,b);
   
-  if(param.state == 0)
-    {
-    a = 0;
-    b = arma_rng::randi<eT>::max_val();
-    }
-  else
-  if(param.state == 1)
-    {
-    a = param.a_int;
-    b = param.b_int;
-    }
-  else
-    {
-    a = int(param.a_double);
-    b = int(param.b_double);
-    }
+  arma_debug_check( (a > b), "randi(): incorrect distribution parameters; a must be less than b" );
   
-  arma_debug_check( (a > b), "randi(): incorrect distribution parameters: a must be less than b" );
+  cube_type out(n_rows, n_cols, n_slices, arma_nozeros_indicator());
   
   arma_rng::randi<eT>::fill(out.memptr(), out.n_elem, a, b);
   
@@ -231,7 +203,7 @@ template<typename cube_type>
 arma_warn_unused
 inline
 cube_type
-randi(const SizeCube& s, const distr_param& param = distr_param(), const typename arma_Cube_only<cube_type>::result* junk = 0)
+randi(const SizeCube& s, const distr_param& param = distr_param(), const typename arma_Cube_only<cube_type>::result* junk = nullptr)
   {
   arma_extra_debug_sigprint();
   arma_ignore(junk);

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -21,6 +23,7 @@
 
 
 class op_shuffle
+  : public traits_op_default
   {
   public:
   
@@ -31,11 +34,12 @@ class op_shuffle
 
 
 
-class op_shuffle_default
+class op_shuffle_vec
+  : public traits_op_passthru
   {
   public:
   
-  template<typename T1> inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_shuffle_default>& in);
+  template<typename T1> inline static void apply(Mat<typename T1::elem_type>& out, const Op<T1,op_shuffle_vec>& in);
   };
 
 

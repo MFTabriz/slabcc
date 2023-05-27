@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -178,7 +180,7 @@ operator*
   
   arma_debug_assert_mul_size(A.n_rows, A.n_cols, B.n_rows, B.n_cols, "matrix multiplication");
   
-  Mat<out_eT> out(A.n_rows, B.n_cols, fill::zeros);
+  Mat<out_eT> out(A.n_rows, B.n_cols, arma_zeros_indicator());
   
   const uword A_length = (std::min)(A.n_rows, A.n_cols);
   const uword B_length = (std::min)(B.n_rows, B.n_cols);
@@ -286,10 +288,53 @@ operator*
 
 
 
+//! non-complex sparse * complex scalar
+template<typename T1>
+arma_inline
+typename
+enable_if2
+  <
+  (is_arma_sparse_type<T1>::value && is_cx<typename T1::elem_type>::no),
+  const mtSpOp<typename std::complex<typename T1::pod_type>, T1, spop_cx_scalar_times>
+  >::result
+operator*
+  (
+  const T1&                                  X,
+  const std::complex<typename T1::pod_type>& k
+  )
+  {
+  arma_extra_debug_sigprint();
+  
+  return mtSpOp<typename std::complex<typename T1::pod_type>, T1, spop_cx_scalar_times>('j', X, k);
+  }
+
+
+
+//! complex scalar * non-complex sparse
+template<typename T1>
+arma_inline
+typename
+enable_if2
+  <
+  (is_arma_sparse_type<T1>::value && is_cx<typename T1::elem_type>::no),
+  const mtSpOp<typename std::complex<typename T1::pod_type>, T1, spop_cx_scalar_times>
+  >::result
+operator*
+  (
+  const std::complex<typename T1::pod_type>& k,
+  const T1&                                  X
+  )
+  {
+  arma_extra_debug_sigprint();
+  
+  return mtSpOp<typename std::complex<typename T1::pod_type>, T1, spop_cx_scalar_times>('j', X, k);
+  }
+
+
+
 //! multiplication of two sparse objects
 template<typename T1, typename T2>
 inline
-arma_hot
 typename
 enable_if2
   <
@@ -305,152 +350,6 @@ operator*
   arma_extra_debug_sigprint();
 
   return SpGlue<T1,T2,spglue_times>(x, y);
-  }
-
-
-
-//! convert "(sparse + sparse) * scalar" to specialised operation "scalar * (sparse + sparse)"
-template<typename T1, typename T2>
-inline
-const SpGlue<T1,T2,spglue_plus2>
-operator*
-  (
-  const SpGlue<T1,T2,spglue_plus>& X,
-  const typename T1::elem_type k
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_plus2>(X.A, X.B, k);
-  }
-
-
-
-//! convert "scalar * (sparse + sparse)" to specialised operation 
-template<typename T1, typename T2>
-inline
-const SpGlue<T1,T2,spglue_plus2>
-operator*
-  (
-  const typename T1::elem_type k,
-  const SpGlue<T1,T2,spglue_plus>& X
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_plus2>(X.A, X.B, k);
-  }
-
-
-
-//! convert "(sparse - sparse) * scalar" to specialised operation "scalar * (sparse - sparse)"
-template<typename T1, typename T2>
-inline
-const SpGlue<T1,T2,spglue_minus2>
-operator*
-  (
-  const SpGlue<T1,T2,spglue_minus>& X,
-  const typename T1::elem_type k
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_minus2>(X.A, X.B, k);
-  }
-
-
-
-//! convert "scalar * (sparse - sparse)" to specialised operation 
-template<typename T1, typename T2>
-inline
-const SpGlue<T1,T2,spglue_minus2>
-operator*
-  (
-  const typename T1::elem_type k,
-  const SpGlue<T1,T2,spglue_minus>& X
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_minus2>(X.A, X.B, k);
-  }
-
-
-
-//! convert "(sparse*sparse) * scalar" to specialised operation "scalar * (sparse*sparse)"
-template<typename T1, typename T2>
-inline
-const SpGlue<T1,T2,spglue_times2>
-operator*
-  (
-  const SpGlue<T1,T2,spglue_times>& X,
-  const typename T1::elem_type k
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_times2>(X.A, X.B, k);
-  }
-
-
-
-//! convert "scalar * (sparse*sparse)" to specialised operation
-template<typename T1, typename T2>
-inline
-const SpGlue<T1,T2,spglue_times2>
-operator*
-  (
-  const typename T1::elem_type k,
-  const SpGlue<T1,T2,spglue_times>& X
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_times2>(X.A, X.B, k);
-  }
-
-
-
-//! convert "(scalar*sparse) * sparse" to specialised operation "scalar * (sparse*sparse)"
-template<typename T1, typename T2>
-inline
-typename
-enable_if2
-  <
-  is_arma_sparse_type<T2>::value,
-  const SpGlue<T1,T2,spglue_times2>
-  >::result
-operator*
-  (
-  const SpOp<T1,spop_scalar_times>& X,
-  const T2& Y
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_times2>(X.m, Y, X.aux);
-  }
-
-
-
-//! convert "sparse * (scalar*sparse)" to specialised operation "scalar * (sparse*sparse)"
-template<typename T1, typename T2>
-inline
-typename
-enable_if2
-  <
-  is_arma_sparse_type<T1>::value,
-  const SpGlue<T1,T2,spglue_times2>
-  >::result
-operator*
-  (
-  const T1& X,
-  const SpOp<T2,spop_scalar_times>& Y
-  )
-  {
-  arma_extra_debug_sigprint();
-  
-  return SpGlue<T1,T2,spglue_times2>(X, Y.m, Y.aux);
   }
 
 
@@ -507,6 +406,87 @@ operator*
   spglue_times_misc::dense_times_sparse(result, x, y);
   
   return result;
+  }
+
+
+
+//! multiplication of two sparse objects with different element types
+template<typename T1, typename T2>
+inline
+typename
+enable_if2
+  <
+  (is_arma_sparse_type<T1>::value && is_arma_sparse_type<T2>::value && (is_same_type<typename T1::elem_type, typename T2::elem_type>::no)),
+  const mtSpGlue< typename promote_type<typename T1::elem_type, typename T2::elem_type>::result, T1, T2, spglue_times_mixed >
+  >::result
+operator*
+  (
+  const T1& X,
+  const T2& Y
+  )
+  {
+  arma_extra_debug_sigprint();
+  
+  typedef typename T1::elem_type eT1;
+  typedef typename T2::elem_type eT2;
+  
+  typedef typename promote_type<eT1,eT2>::result out_eT;
+  
+  promote_type<eT1,eT2>::check();
+  
+  return mtSpGlue<out_eT, T1, T2, spglue_times_mixed>( X, Y );
+  }
+
+
+
+//! multiplication of one sparse and one dense object with different element types
+template<typename T1, typename T2>
+inline
+typename
+enable_if2
+  <
+  (is_arma_sparse_type<T1>::value && is_arma_type<T2>::value && is_same_type<typename T1::elem_type, typename T2::elem_type>::no),
+  Mat< typename promote_type<typename T1::elem_type, typename T2::elem_type>::result >
+  >::result
+operator*
+  (
+  const T1& X,
+  const T2& Y
+  )
+  {
+  arma_extra_debug_sigprint();
+  
+  Mat< typename promote_type<typename T1::elem_type, typename T2::elem_type>::result > out;
+  
+  spglue_times_mixed::sparse_times_dense(out, X, Y);
+  
+  return out;
+  }
+
+
+
+//! multiplication of one dense and one sparse object with different element types
+template<typename T1, typename T2>
+inline
+typename
+enable_if2
+  <
+  (is_arma_type<T1>::value && is_arma_sparse_type<T2>::value && is_same_type<typename T1::elem_type, typename T2::elem_type>::no),
+  Mat< typename promote_type<typename T1::elem_type, typename T2::elem_type>::result >
+  >::result
+operator*
+  (
+  const T1& X,
+  const T2& Y
+  )
+  {
+  arma_extra_debug_sigprint();
+  
+  Mat< typename promote_type<typename T1::elem_type, typename T2::elem_type>::result > out;
+  
+  spglue_times_mixed::dense_times_sparse(out, X, Y);
+  
+  return out;
   }
 
 

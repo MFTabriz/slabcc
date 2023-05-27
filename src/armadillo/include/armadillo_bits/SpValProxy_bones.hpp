@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// 
 // Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
 // Copyright 2008-2016 National ICT Australia (NICTA)
 // 
@@ -36,7 +38,8 @@ class SpValProxy
    * Create the sparse value proxy.
    * Otherwise, pass a pointer to a reference of the value.
    */
-  arma_inline SpValProxy(uword row, uword col, T1& in_parent, eT* in_val_ptr = NULL);
+  arma_inline SpValProxy(uword row, uword col, T1& in_parent, eT* in_val_ptr = nullptr);
+       inline SpValProxy() = delete;
   
   //! For swapping operations.
   arma_inline SpValProxy& operator=(const SpValProxy& rhs);
@@ -66,7 +69,7 @@ class SpValProxy
   
   private:
   
-  // Deletes the element if it is zero.  Does not check if val_ptr == NULL!
+  // Deletes the element if it is zero; NOTE: does not check if val_ptr == nullptr
   arma_inline void check_zero();
   
   arma_aligned const uword row;
