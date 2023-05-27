@@ -152,6 +152,9 @@ $(NLOPT_LIB_FILE):
 test: $(EXECUTABLE)
 	$(MAKE) -C ../tests
 
+man:
+	cd .. && utils/generate_docs.sh
+
 clean:
 	rm -fr $(OBJECTS) $(EXECUTABLE)
 	$(MAKE) -C ../tests clean
