@@ -999,7 +999,7 @@ diel_in = 6.28 6.28 1.83
 <div class="section" id="validation">
 <h1><a class="toc-backref" href="#toc-entry-6">4&nbsp;&nbsp;&nbsp;Validation</a></h1>
 <p>We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
-The current version of the slabcc has been <a class="reference external" href="https://ci.codeberg.org/meisam/slabcc/branches/master">build and validated</a> on:</p>
+The current version of the slabcc has been <a class="reference external" href="https://ci.codeberg.org/meisam/slabcc/branches/master">built and validated</a> on:</p>
 <ul class="simple">
 <li>Ubuntu Linux 16.04</li>
 </ul>
@@ -1037,7 +1037,7 @@ The current version of the slabcc has been <a class="reference external" href="h
 </blockquote>
 <div class="section" id="test-set">
 <h2><a class="toc-backref" href="#toc-entry-7">4.1&nbsp;&nbsp;&nbsp;Test set</a></h2>
-<p>You can download a complete test set including input files, input parameters, and expected output <a class="reference external" href="https://doi.org/10.5281/zenodo.1323558">here</a>!
+<p>You can download a complete test set, including input files, input parameters, and expected output, <a class="reference external" href="https://doi.org/10.5281/zenodo.1323558">here</a>!
 You can also run the regression tests and verify their results with <tt class="docutils literal">make test</tt>. You'll need <a class="reference external" href="https://www.nongnu.org/numdiff/">numdiff</a> for these tests.</p>
 </div>
 </div>
@@ -1088,8 +1088,8 @@ The input file is processed as follows:</p>
 <li>A warning will be issued for the use of the deprecated parameters.</li>
 <li>All the coordinates must be in fractional form [0-1].</li>
 <li>Boolean (True/False) parameters can also be declared as 0/1, on/off, yes/no, .true./.false.</li>
-<li>Parameter names can be written in the small or capital letters.</li>
-<li>For vectors and matrices, columns are separated by a &quot; &quot;(space), while the rows are separated by a &quot;;&quot; (semicolon).</li>
+<li>Parameter names can be written in small or capital letters.</li>
+<li>For vectors and matrices, columns are separated by a &quot; &quot;(space), while rows are separated by a &quot;;&quot; (semicolon).</li>
 <li>Lines starting with a space &quot; &quot; will be treated as the continuation of the last parameter's value.</li>
 <li>Subsequent definitions for any parameter will be concatenated with the existing definition.</li>
 </ul>
@@ -1131,7 +1131,7 @@ positions</em></td>
 </tr>
 <tr><td><tt class="docutils literal">charge_rotation</tt></td>
 <td><p class="first">Rotation angles around each axis for the trivariate
-Gaussian charges in arc degree (-90, 90)</p>
+Gaussian charges in arc degrees (-90, 90)</p>
 <p><tt class="docutils literal">charge_rotation = 0 45 0</tt></p>
 <p class="last"><tt class="docutils literal">charge_rotation = 45 0 0; 0 <span class="pre">-10</span> 0</tt></p>
 </td>
@@ -1139,7 +1139,7 @@ Gaussian charges in arc degree (-90, 90)</p>
 </tr>
 <tr><td><tt class="docutils literal">charge_sigma</tt></td>
 <td><p class="first">width of each localized Gaussian charge. It can be 1
-or in case of trivariate models, 3 parameters per
+or, in the case of trivariate models, 3 parameters per
 localized Gaussian charge. For trivariate Gaussian
 models, defining a single parameter per charge, sets
 the sigma values to be equal in all directions.</p>
@@ -1172,7 +1172,7 @@ direction)</td>
 </tr>
 <tr><td><tt class="docutils literal">diel_in</tt></td>
 <td><p class="first">Diagonal elements of the static dielectric tensor
-inside of the slab. If only a single value is given,
+inside the slab. If only a single value is given,
 all of them will be assumed to be equal.</p>
 <p><tt class="docutils literal">diel_in = 3</tt></p>
 <p class="last"><tt class="docutils literal">diel_in = 3 4 5</tt></p>
@@ -1197,24 +1197,24 @@ method</td>
 parameter</td>
 </tr>
 <tr><td><tt class="docutils literal">extrapolate_grid_x</tt></td>
-<td><p class="first">Extrapolation grid size multiplier. The number of the
+<td><p class="first">Extrapolation grid size multiplier. The number of
 grid points in each direction will be multiplied by
 this value.</p>
 <p>extrapolate_grid_x &gt; 1 will use a larger grid in the
-extrapolations which will increase its accuracy but
-will requires more memory and the computational power.</p>
+extrapolations, which will increase its accuracy but
+will requires more memory and computational power.</p>
 <p>extrapolate_grid_x = 1 will use the same grid size as
 the VASP input files in the extrapolation.</p>
 <p>extrapolate_grid_x &lt; 1 will use a smaller grid for the
-extrapolations which increases the speed and decreases
-the memory usage but the energies for the higher orders
-of the extrapolation may not be accurate!</p>
+extrapolations, which increases the speed and decreases
+the memory usage, but the energies for the higher
+orders of the extrapolation may not be accurate!</p>
 <p class="last"><tt class="docutils literal">extrapolate_grid_x = 1.8</tt></p>
 </td>
 <td>1</td>
 </tr>
 <tr><td><tt class="docutils literal">extrapolate_steps_number</tt></td>
-<td>Number of the extrapolation steps in calculation of
+<td>Number of extrapolation steps in the calculation of
 E<sub>isolated</sub> </td>
 <td><p class="first">10: for 2D
 models</p>
@@ -1632,7 +1632,7 @@ LCHARG = .TRUE.
 After obtaining the files for your charged system, do the calculation again <em>without relaxing (changing) the geometry</em> to get the necessary files for the neutralized system.</blockquote>
 <ol class="arabic simple" start="2">
 <li><strong>Do I need to perform spin-polarized calculations in VASP?</strong>  Although the slabcc only reads the sum of both spins, for a proper description of the charge distribution in your system, you may need to perform a spin-polarized calculation.</li>
-<li><strong>How can I speed up the model parameter optimization process?</strong> You can try using a different optimization algorithm or improving the initial guess for the model parameters to speed up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (<tt class="docutils literal">optimize_grid_x &lt; 1</tt>), or increase the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) to speed up the process, but the accuracy of the obtained results in these cases must always be checked.</li>
+<li><strong>How can I speed up the model parameter optimization process?</strong> You can try using a different optimization algorithm or improving the initial guess for the model parameters to speed up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (<tt class="docutils literal">optimize_grid_x &lt; 1</tt>), or increase the optimization convergence criteria (<tt class="docutils literal">optimize_tolerance</tt>) to speed up the process, but the accuracy of the obtained results may not be adequate. Ideally, you should use the optimzied parameters on a coarser grid as the initial guess for optimization on a finer (initial) grid.</li>
 <li><strong>Why do I need to provide an initial guess for the parameters that will be optimized?</strong> The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.</li>
 <li><strong>How should I decide on the initial guess for the parameters that will be optimized?</strong> As a rule of thumb, start with a single Gaussian charge as your model. Set its position to the expected position of the charge localization. Use the location of the surface atoms as the interface position. You can use the &quot;-d&quot; switch in the command line (./slabcc -d) to just generate the CHGCAR and the LOCPOT files for the extra charge and their planar averages without shifting the input files to the <cite>slab_center</cite>. These files will guide you on how to provide the initial guess for the input parameters.</li>
 <li><strong>Can I turn off the optimization for the input parameters?</strong> Yes. But optimization ensures the model charge mimics the original localized charge at large distances as closely as possible. If you turn off the optimization, you must be aware of the possible side-effects and definitely <a class="reference internal" href="#check">check your results</a>.</li>
@@ -1779,7 +1779,7 @@ Alternatively, you can use <a class="reference external" href="https://www.rarla
 </div>
 <div class="footer">
 <hr class="footer" />
-<a class="reference external" href="https://codeberg.org/meisam/slabcc/compare/d5919f4f357b3fd752cf59992cde06f537739beb...b5887a2c83009e159b2d82e23f2f0faf511c4fe3">View document source</a>.
+<a class="reference external" href="https://codeberg.org/meisam/slabcc/compare/b5887a2c83009e159b2d82e23f2f0faf511c4fe3...642876033844bcea36779bf65ad9dd1bbb868caf">View document source</a>.
 Generated by <a class="reference external" href="https://docutils.sourceforge.io/">Docutils</a> from <a class="reference external" href="https://docutils.sourceforge.io/rst.html">reStructuredText</a> source.
 
 </div>
