@@ -8,6 +8,8 @@
 
 .. include:: intro.rst
 
+.. include:: algorithm.rst
+
 .. include:: quick_start.rst
 
 .. include:: install.rst
