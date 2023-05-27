@@ -549,7 +549,7 @@ slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
     const arma::rowvec2 interface_pos =
         interfaces * cell_vectors_lengths(normal_direction);
     std::string extrapolation_info =
-        to_string(extrapol_factor) + "\t" + to_string(EperModel) + "\t" +
+        ::to_string(extrapol_factor) + "\t" + to_string(EperModel) + "\t" +
         ::to_string(total_charge) + "\t" + to_string(interface_pos);
     for (arma::uword i = 0; i < charge_position.n_rows; ++i) {
       extrapolation_info +=

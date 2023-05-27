@@ -444,9 +444,9 @@ int main(int argc, char *argv[]) {
         "Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
     const arma::rowvec2 interface_pos =
         model.interfaces * model.cell_vectors_lengths(model.normal_direction);
-    std::string extrapolation_info =
-        to_string(1.0) + "\t" + to_string(EperModel0) + "\t" +
-        to_string(model.total_charge) + "\t" + to_string(interface_pos);
+    std::string extrapolation_info = "1.0000\t" + to_string(EperModel0) + "\t" +
+                                     to_string(model.total_charge) + "\t" +
+                                     to_string(interface_pos);
     for (arma::uword i = 0; i < model.charge_position.n_rows; ++i) {
       extrapolation_info +=
           "\t" + to_string(model.charge_position(i, model.normal_direction) *

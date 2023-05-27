@@ -10,8 +10,8 @@ The input file is processed as follows:
 - A warning will be issued for the use of the deprecated parameters.
 - All the coordinates must be in fractional form [0-1].
 - Boolean (True/False) parameters can also be declared as 0/1, on/off, yes/no, .true./.false.
-- Parameter names can be written in the small or capital letters.
-- For vectors and matrices, columns are separated by a " "(space), while the rows are separated by a ";" (semicolon).
+- Parameter names can be written in small or capital letters.
+- For vectors and matrices, columns are separated by a " "(space), while rows are separated by a ";" (semicolon).
 - Lines starting with a space " " will be treated as the continuation of the last parameter's value.
 - Subsequent definitions for any parameter will be concatenated with the existing definition.
 
@@ -37,14 +37,14 @@ The input file is processed as follows:
 |                              |``charge_position = 0.2 0.2 0.2; 0.3 0.4 0.3``         |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |Rotation angles around each axis for the trivariate    |               |
-|                              |Gaussian charges in arc degree (-90, 90)               |       0       |
+|                              |Gaussian charges in arc degrees (-90, 90)              |       0       |
 | ``charge_rotation``          |                                                       |               |
 |                              |``charge_rotation = 0 45 0``                           |               |
 |                              |                                                       |               |
 |                              |``charge_rotation = 45 0 0; 0 -10 0``                  |               |
 +------------------------------+-------------------------------------------------------+---------------+
 |                              |width of each localized Gaussian charge. It can be 1   |               |
-|                              |or in case of trivariate models, 3 parameters per      |               |
+|                              |or, in the case of trivariate models, 3 parameters per |               |
 |                              |localized Gaussian charge. For trivariate Gaussian     |               |
 |                              |models, defining a single parameter per charge, sets   |               |
 |                              |the sigma values to be equal in all directions.        |               |
@@ -70,7 +70,7 @@ The input file is processed as follows:
 |                              |``CHGCAR_neutral = CHGCAR2``                           |               |
 +------------------------------+-------------------------------------------------------+---------------+
 | ``diel_in``                  |Diagonal elements of the static dielectric tensor      |       1       |
-|                              |inside of the slab. If only a single value is given,   |               |
+|                              |inside the slab. If only a single value is given,      |               |
 |                              |all of them will be assumed to be equal.               |               |
 |                              |                                                       |               |
 |                              |``diel_in = 3``                                        |               |
@@ -88,25 +88,25 @@ The input file is processed as follows:
 |                              |                                                       |parameter      |
 |                              |                                                       |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Extrapolation grid size multiplier. The number of the  |               |
+|                              |Extrapolation grid size multiplier. The number of      |               |
 |                              |grid points in each direction will be multiplied by    |               |
 |                              |this value.                                            |               |
 |                              |                                                       |               |
 |                              |extrapolate_grid_x > 1 will use a larger grid in the   |               |
-|``extrapolate_grid_x``        |extrapolations which will increase its accuracy but    |       1       |
-|                              |will requires more memory and the computational power. |               |
+|``extrapolate_grid_x``        |extrapolations, which will increase its accuracy but   |       1       |
+|                              |will requires more memory and computational power.     |               |
 |                              |                                                       |               |
 |                              |extrapolate_grid_x = 1 will use the same grid size as  |               |
 |                              |the VASP input files in the extrapolation.             |               |
 |                              |                                                       |               |
 |                              |extrapolate_grid_x < 1 will use a smaller grid for the |               |
-|                              |extrapolations which increases the speed and decreases |               |
-|                              |the memory usage but the energies for the higher orders|               |
-|                              |of the extrapolation may not be accurate!              |               |
+|                              |extrapolations, which increases the speed and decreases|               |
+|                              |the memory usage, but the energies for the higher      |               |
+|                              |orders of the extrapolation may not be accurate!       |               |
 |                              |                                                       |               |
 |                              |``extrapolate_grid_x = 1.8``                           |               |
 +------------------------------+-------------------------------------------------------+---------------+
-|                              |Number of the extrapolation steps in calculation of    |10: for 2D     |
+|                              |Number of extrapolation steps in the calculation of    |10: for 2D     |
 | ``extrapolate_steps_number`` |E\ :sub:`isolated` \                                   |models         |
 |                              |                                                       |               |
 |                              |                                                       |4: for the rest|
