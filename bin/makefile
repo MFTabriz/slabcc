@@ -154,7 +154,15 @@ $(NLOPT_LIB_FILE):
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
 
-.PHONY: clean distclean test
+$(OBJECTS): ../src/compilerinfo.inc
+
+COMPILER_VER:=$(shell $(CXX) --version | head -n 1)
+COMPILER_INFO:="const char *cxx_compiler=\"$(CXX)\", *cxx_compilerver=\"$(COMPILER_VER)\", *cxx_compilerflags=\"$(CXXFLAGS)\";"
+
+.PHONY: clean distclean test force
+
+../src/compilerinfo.inc: force
+	echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
 
 test: $(EXECUTABLE)
 	$(MAKE) -C ../tests

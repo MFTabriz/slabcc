@@ -59,6 +59,10 @@ void INIReader::dump_compilation_info() const {
   log->debug("OS: {}", BOOST_OS_LINUX_NAME);
 #endif
 
+#include "compilerinfo.inc"
+log->debug("CXX: {}", cxx_compiler);
+log->debug("CXX version: {}", cxx_compilerver);
+log->debug("CXX flags: {}", cxx_compilerflags);
 }
 
 void INIReader::dump_env_info() const {

@@ -2,6 +2,7 @@
 bin/slabcc
 bin/slabcc_obj
 bin/nlopt
+src/compilerinfo.inc
 
 # ci artifacts
 utils/.env
