@@ -36,7 +36,7 @@ void cli_params::parse(int argc, char *argv[]) {
   if (showVer) {
     std::cout << "SLAB Charge Correction (slabcc) (version "
               << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "."
-              << SLABCC_VERSION_PATCH << ')\n';
+              << SLABCC_VERSION_PATCH << ")\n";
     std::cout << "Linked libraries: " << '\n';
     std::cout << "Armadillo: version " << ARMA_VERSION_MAJOR << "."
               << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << '\n';
