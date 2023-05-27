@@ -93,7 +93,7 @@ ifneq (,$(findstring g++,$(CXX)))
   OMP := -fopenmp
 endif
 
-LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) $(OMP)
+LD_EXTRA_FLAGS :=  $(strip $(LD_EXTRA_FLAGS) $(OMP))
 
 CFLAGS   = $(COMMON_FLAGS) 
 CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD) -Wall -Wextra -Wno-unused-parameter -Werror
@@ -110,7 +110,7 @@ NLOPT_LIB := -lnlopt
 CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER $(DMKL)
 
 LIB_PATH_FLAGS = $(addprefix -L,$(strip $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)))
-LD_LIBS := $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS)
+LD_LIBS := $(strip $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS))
 
 SOURCE_INC_PATHS := $(addprefix ../src/,$(strip . armadillo/include inih/cpp clara/single_include spline spdlog))
 INC_FLAGS = $(addprefix -I,$(strip $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)))
