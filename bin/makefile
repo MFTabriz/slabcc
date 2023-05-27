@@ -83,7 +83,7 @@ endif
 
 ##================================================##
 # these flags are also used by the NLOPT configure/makefile
-COMMON_FLAGS = $(OMP) $(OPT) $(EXTRA_FLAGS) 
+COMMON_FLAGS = $(strip $(OMP) $(OPT) $(EXTRA_FLAGS)) -g
 
 ifneq (,$(findstring ic,$(CXX)))
   OMP := -qopenmp
@@ -96,7 +96,7 @@ endif
 LD_EXTRA_FLAGS := $(LD_EXTRA_FLAGS) $(OMP)
 
 CFLAGS   = $(COMMON_FLAGS) 
-CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD)# -Wall
+CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD) -Wall -Wextra -Wno-unused-parameter -Werror
 
 ##included libraries
 NLOPT_SRC_PATH := $(shell realpath ../src/nlopt/nlopt-2.4.2)
