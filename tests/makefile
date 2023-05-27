@@ -18,4 +18,4 @@ slabcc_M.LOCPOT  slabcc_M.CHGCAR slabcc_D.LOCPOT slabcc_D.CHGCAR
 	set -o errexit && for i in $(OUTPUTS_RAW); do numdiff -s' \t\n\\\";' -r 1e-3 -a 1e-4 $$i output/$@/$$i; done
 
 clean:
-	rm -f $(OUTPUTS_AVERAGED) $(OUTPUTS_RAW) slabcc.out.* slabcc.log
+	rm -f $(OUTPUTS_AVERAGED) $(OUTPUTS_RAW) slabcc.out.* slabcc.log *.tmp_*

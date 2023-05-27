@@ -127,13 +127,12 @@ void INIReader::dump_parsed() const {
   dump_compilation_info();
   dump_env_info();
 
-  log->info("-------------slabcc parameters-------------");
+  log->info("--------------slabcc parameters-------------");
   output_log->info("# Parameters read from the file or their default values:");
   for (const auto &i : _parsed) {
     log->info(i.at(0) + " = " + i.at(1));
     output_log->info(i.at(0) + " = " + i.at(1));
   }
-  log->info("-----------------------------------------");
   log->flush();
 
   for (const auto &i : _error_msgs) {

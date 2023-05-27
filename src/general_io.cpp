@@ -37,14 +37,16 @@ void cli_params::parse(int argc, char *argv[]) {
     std::cout << "SLAB Charge Correction (slabcc) (version "
               << SLABCC_VERSION_MAJOR << "." << SLABCC_VERSION_MINOR << "."
               << SLABCC_VERSION_PATCH << ")\n";
-    std::cout << "Linked libraries: " << '\n';
-    std::cout << "Armadillo: version " << ARMA_VERSION_MAJOR << "."
+#include "gitinfo.inc"
+    std::cout << git_info << "\n\n";
+    std::cout << "Included libraries: " << '\n';
+    std::cout << "> Armadillo " << ARMA_VERSION_MAJOR << "."
               << ARMA_VERSION_MINOR << "." << ARMA_VERSION_PATCH << '\n';
-    std::cout << "NLOPT: version " << nlopt::version_major() << "."
+    std::cout << "> NLOPT " << nlopt::version_major() << "."
               << nlopt::version_minor() << "." << nlopt::version_bugfix()
               << '\n';
-    std::cout << "SPDLOG: version " << SPDLOG_VER_MAJOR << "."
-              << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << '\n';
+    std::cout << "> SPDLOG " << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR
+              << "." << SPDLOG_VER_PATCH << '\n';
     exit(0);
   }
 

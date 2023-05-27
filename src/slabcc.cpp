@@ -96,22 +96,26 @@ int main(int argc, char *argv[]) {
                                           extrapol_steps_size};
 
   inputfile_variables.parse(input_file);
-  if (!output_diffs_only) {
-    inputfile_variables.verify();
-  }
-  model.set_input_variables(inputfile_variables);
-
-  log->debug("SLABCC: version {}.{}.{}", SLABCC_VERSION_MAJOR,
-             SLABCC_VERSION_MINOR, SLABCC_VERSION_PATCH);
+  log->info("---------------slabcc source----------------");
+  log->info("SLABCC: version {}.{}.{}", SLABCC_VERSION_MAJOR,
+            SLABCC_VERSION_MINOR, SLABCC_VERSION_PATCH);
+#include "gitinfo.inc"
+  log->info(git_info);
   log->debug("Armadillo library: version {}.{}.{}", ARMA_VERSION_MAJOR,
              ARMA_VERSION_MINOR, ARMA_VERSION_PATCH);
   log->debug("NLOPT library: version {}.{}.{}", nlopt::version_major(),
              nlopt::version_minor(), nlopt::version_bugfix());
   log->debug("SPDLOG library: version {}.{}.{}", SPDLOG_VER_MAJOR,
              SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+  log->info("--------------------------------------------");
   log->debug("SLABCC input file: {}", input_file);
   log->debug("SLABCC output file: {}", output_file);
   log->debug("SLABCC log file: {}", log_file);
+
+  if (!output_diffs_only) {
+    inputfile_variables.verify();
+  }
+  model.set_input_variables(inputfile_variables);
 
   std::vector<std::pair<std::string, std::string>> calculation_results;
 

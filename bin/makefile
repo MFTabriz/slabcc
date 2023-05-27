@@ -114,7 +114,7 @@ NLOPT_LIB_PATH = $(NLOPT_PREFIX)/lib
 NLOPT_LIB_FILE = $(NLOPT_LIB_PATH)/libnlopt.a
 NLOPT_LIB := -lnlopt
 
-CPP_DEFS = -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER $(DMKL)
+CPP_DEFS = $(strip -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER $(DMKL))
 
 LIB_PATH_FLAGS = $(addprefix -L,$(strip $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)))
 LD_LIBS := $(strip $(NLOPT_LIB) $(BLAS_LIB) $(FFTW_LIB) $(EXTRA_LIBS))
@@ -154,7 +154,7 @@ $(NLOPT_LIB_FILE):
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
 
-$(OBJECTS): ../src/compilerinfo.inc
+$(OBJECTS): ../src/compilerinfo.inc ../src/gitinfo.inc
 
 COMPILER_VER:=$(shell $(CXX) --version | head -n 1)
 COMPILER_INFO:="const char *cxx_compiler=\"$(CXX)\", *cxx_compilerver=\"$(COMPILER_VER)\", *cxx_compilerflags=\"$(CXXFLAGS)\";"
@@ -164,6 +164,9 @@ COMPILER_INFO:="const char *cxx_compiler=\"$(CXX)\", *cxx_compilerver=\"$(COMPIL
 ../src/compilerinfo.inc: force
 	echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
 
+../src/gitinfo.inc: force
+	echo "$$(../utils/git_commit.sh)" | cmp -s - $@ || echo "$$(../utils/git_commit.sh)" > $@
+
 test: $(EXECUTABLE)
 	$(MAKE) -C ../tests
 
@@ -172,6 +175,7 @@ man:
 
 clean:
 	rm -fr $(OBJECTS) $(EXECUTABLE)
+	rm -f *.inc
 	$(MAKE) -C ../tests clean
 
 distclean: clean

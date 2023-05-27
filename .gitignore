@@ -2,13 +2,15 @@
 bin/slabcc
 bin/slabcc_obj
 bin/nlopt
-src/compilerinfo.inc
+src/*.inc
 
 # ci artifacts
 utils/.env
+tests/*.tmp*
 
 # slabcc output
 slabcc.log
 
 # dev tools
 .vscode
+
