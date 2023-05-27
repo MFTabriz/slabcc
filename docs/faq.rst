@@ -12,7 +12,7 @@ FAQ
 
 2. **Do I need to perform spin-polarized calculations in VASP?**  Although the slabcc only reads the sum of both spins, for a proper description of the charge distribution in your system, you may need to perform a spin-polarized calculation.
 
-3. **How can I speed up the model parameter optimization process?** You can try using a different optimization algorithm or improving the initial guess for the model parameters to speed up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (``optimize_grid_x < 1``), or increase the optimization convergence criteria (``optimize_tolerance``) to speed up the process, but the accuracy of the obtained results in these cases must always be checked.
+3. **How can I speed up the model parameter optimization process?** You can try using a different optimization algorithm or improving the initial guess for the model parameters to speed up the optimization. As a last resort, you can also use a smaller computation grid for the optimization (``optimize_grid_x < 1``), or increase the optimization convergence criteria (``optimize_tolerance``) to speed up the process, but the accuracy of the obtained results may not be adequate. Ideally, you should use the optimzied parameters on a coarser grid as the initial guess for optimization on a finer (initial) grid.
 
 4. **Why do I need to provide an initial guess for the parameters that will be optimized?** The optimization algorithms used in slabcc are local error minimization algorithms. Their success and performance highly depend on the initial guess for the provided parameters.
 
