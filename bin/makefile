@@ -32,9 +32,9 @@ CPP_STD := c++14
 OBJ_PATH := slabcc_obj
 ## 
 TESTS_PATH := ../tests
-BUILD_INFO_PATH = ../src
+SRC_PATH := ../src
 UTILS_PATH := ../utils
-
+BUILD_INFO_PATH = $(SRC_PATH)
 ## EXTERNAL LIBRARIES
 ## 
 NLOPT_PREFIX := nlopt
@@ -112,7 +112,7 @@ CFLAGS   = $(COMMON_FLAGS)
 CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD) $(WARN_FLAGS)
 
 ##included libraries
-NLOPT_SRC_PATH := $(shell realpath ../src/nlopt)
+NLOPT_SRC_PATH := $(shell realpath $(SRC_PATH)/nlopt)
 
 NLOPT_PATH = $(shell realpath $(NLOPT_PREFIX))
 NLOPT_INC_PATH = $(NLOPT_PREFIX)/include
@@ -122,20 +122,20 @@ NLOPT_HEADER_FILES = $(NLOPT_INC_PATH)/nlopt.hpp
 NLOPT_LIB_FLAGS := -lnlopt
 
 # preprocessor flags
-CPP_DEFS = $(strip -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_FFTW3 $(DMKL))
+CPP_DEFS = $(strip -DARMA_NO_DEBUG -DARMA_DONT_USE_WRAPPER $(DMKL))
 
 LIB_PATH_FLAGS = $(addprefix -L,$(strip $(NLOPT_LIB_PATH) $(FFTW_LIB_PATH) $(BLAS_LIB_PATH)))
 LD_LIB_FLAGS := $(strip $(NLOPT_LIB_FLAGS) $(BLAS_LIB_FLAGS) $(FFTW_LIB_FLAGS))
 
-SOURCE_INC_PATHS := $(addprefix ../src/,$(strip . armadillo/include inih/cpp clara/single_include spline spdlog))
+SOURCE_INC_PATHS := $(addprefix $(SRC_PATH)/,$(strip . armadillo/include inih/cpp clara/single_include spline spdlog))
 INC_FLAGS = $(addprefix -I,$(strip $(SOURCE_INC_PATHS) $(NLOPT_INC_PATH) $(FFTW_INC_PATH) $(BLAS_INC_PATH)))
 
 CPPFLAGS = $(CPP_DEFS) $(INC_FLAGS)
 
 ##====================SOURCES=====================##
 # generate source file paths from these directories
-vpath %.cpp ../src:../src/inih/cpp
-vpath %.c ../src/inih
+vpath %.cpp $(SRC_PATH):$(SRC_PATH)/inih/cpp
+vpath %.c $(SRC_PATH)/inih
 
 SOURCES := general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
 BUILD_INFO := $(addprefix $(BUILD_INFO_PATH)/,compilerinfo.inc gitinfo.inc)
@@ -169,7 +169,6 @@ $(OBJ_PATH)/%.o: %.c
 	@mkdir -p $(shell dirname $@)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-##compile nlopt
 $(NLOPT_LIB_FILE) $(NLOPT_HEADER_FILES):
 	mkdir -p $(NLOPT_PREFIX)
 	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat config.log;

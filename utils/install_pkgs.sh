@@ -76,9 +76,10 @@ elif [[ "$_distro" == 'opensuse/leap' ]]; then
     # shellcheck disable=SC2068
     zypper install -y make ${_pkgs_array[@]}
     if ! [[ -x "numdiff" ]]; then
+        zypper install -y gzip
         zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
         zypper --gpg-auto-import-keys ref
-        zypper install -y tar gzip
+        zypper install -y tar
         install_numdiff
     fi
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
