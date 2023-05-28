@@ -20,7 +20,9 @@
    :alt: License: BSD-2-Clause
    :target: https://opensource.org/licenses/BSD-2-Clause
 
-|Version| |Manual| |Standard| |Style| |Woodpecker| |Zenodo| |License|
+- For users: |Version| |License| |Manual|
+- For developers and maintainers: |Standard| |Style| |Woodpecker|
+- Large test set: |Zenodo|
 
 .. sectnum::
 
@@ -83,14 +85,12 @@ The following examples list the `input parameters`_ to be defined in ``slabcc.in
     normal_direction = y
     interfaces = 0.25 0.75
 
- The program will use the default values for the other parameters to:
+ The program will use the default values for the other parameters. Afterwards, slabcc will:
 
- - Load the CHGCAR of charged and neutralized systems.
- - Load the LOCPOT of charged and neutralized systems.
- - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
- - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
- - Calculate the total energy correction for the charged system.
- - Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.
+- Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
+- Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
+- Calculate the total energy correction for the charged system.
+- Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.
 
 2. **Correction with multiple localized Gaussian charges:** If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge, as shown in the example below::
 
@@ -153,9 +153,9 @@ Installation
  #. **$CC:** C compiler (default: gcc)
  #. **$CXX:** C++ compiler (default: g++)
  #. **$FFTW_HOME:** path to FFTW library home
- #. **$FFTW_LIB:** FFTW library flag (default: -lfftw3)
+ #. **$FFTW_LIB_FLAG:** FFTW library flag (default: -lfftw3)
  #. **$BLAS_HOME:** path to BLAS library home
- #. **$BLAS_LIB:** BLAS library flags (default: -lblas -llapack -lpthread)
+ #. **$BLAS_LIB_FLAG:** BLAS library flags (default: -lblas -llapack -lpthread)
  #. **$EXTRA_FLAGS:** extra compiler flags for CC and CXX
  #. **$LD_EXTRA_FLAGS:** extra linker flags
 
@@ -186,6 +186,8 @@ The current version of the slabcc has been `built and validated <https://ci.code
 - openSUSE Leap 15.4
 
  - with GNU C/C++ compilers (10), BLAS, FFTW
+
+Older versions of the code were also being tested on MS Windows 10 (latest toolchains: Intel C/C++ compilers 19.0.4 and Microsoft C/C++ compilers 19.20.27508 linked to MKL 19.0.4 and FFTW 3.3.5), support for which is currently dropped.
 
 Test set
 --------

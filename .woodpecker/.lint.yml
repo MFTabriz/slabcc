@@ -1,6 +1,6 @@
 pipeline:
 
-  clang_format:
+  source_style:
     image: ubuntu:22.04
     group: nodep
     environment:
@@ -12,7 +12,7 @@ pipeline:
       path:
         include: [ 'src/**/*.cpp', 'src/**/*.hpp', 'utils/format_check.sh', '.clang-format', '.woodpecker/.lint.yml' ]
 
-  shellcheck:
+  shell_scripts:
     image: archlinux:latest
     group: nodep
     commands:
@@ -24,13 +24,13 @@ pipeline:
       path:
         include: [ 'utils/*.sh', '.woodpecker/.lint.yml' ]
 
-  gitcheck:
+  git_repository:
     image: quay.io/meisam/charliecloud:latest  ## todo: replace with ci tools container
     group: nodep
     commands:
       - ./utils/git_check.sh
 
-  rst_lint:
+  documentation:
     image: python:3
     group: nodep
     commands:
@@ -40,4 +40,15 @@ pipeline:
     when:
       path:
         include: [ 'docs/*', '.woodpecker/.lint.yml' ]
+
+  makefiles:
+    image: cytopia/checkmake:latest
+    group: nodep
+    commands:
+      - checkmake bin/makefile
+      - checkmake tests/makefile
+    when:
+      path:
+        include: [ 'bin/makefile', 'tests/makefile' ]
+
 

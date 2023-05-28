@@ -1,3 +1,5 @@
+.PHONY: all clean test
+
 all : gas gaussian
 
 OUTPUTS_AVERAGED := \

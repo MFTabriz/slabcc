@@ -28,14 +28,12 @@ The following examples list the `input parameters`_ to be defined in ``slabcc.in
     normal_direction = y
     interfaces = 0.25 0.75
 
- The program will use the default values for the other parameters to:
+ The program will use the default values for the other parameters. Afterwards, slabcc will:
 
- - Load the CHGCAR of charged and neutralized systems.
- - Load the LOCPOT of charged and neutralized systems.
- - Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
- - Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
- - Calculate the total energy correction for the charged system.
- - Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.
+- Calculate the total extra charge from the difference between the charged and neutralized CHGCARs.
+- Optimize the ``charge_position``, ``interfaces`` and ``charge_sigma``.
+- Calculate the total energy correction for the charged system.
+- Write all the input parameters used for calculation, the optimized parameters, and the results to the output file.
 
 2. **Correction with multiple localized Gaussian charges:** If a single charge cannot represent your localized charge properly, you can use multiple Gaussian charges in your model. You have to define the positions of each Gaussian charge, as shown in the example below::
 

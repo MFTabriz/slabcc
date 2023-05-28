@@ -4,7 +4,6 @@
 
 #pragma once
 #include "slabcc_math.hpp"
-#include "stdafx.h"
 
 // returns a matrix of the vectors for the repeated images which are inside the
 // radius in the lattice

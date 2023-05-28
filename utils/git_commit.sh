@@ -38,9 +38,9 @@ fi
 if [ "$GITHASH" = "?" ]; then
     [ -z "$_debug_mode" ] || echo "extracting git reposiroty information from env!"
     if [ -n "$CI_COMMIT_SHA" ]; then # gitlab ci/woodpecker ci
-       GITHASH="$CI_COMMIT_SHA (?)"
+       GITHASH="$CI_COMMIT_SHA (from CI_COMMIT_SHA)"
     fi
 fi
 
 
-echo 'const char * git_info="Git commit '"$GITHASH (status: $GIT_STATE)\";"
+echo "$GITHASH (status: $GIT_STATE)"
