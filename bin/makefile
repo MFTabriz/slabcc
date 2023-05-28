@@ -152,6 +152,8 @@ COMMIT_INFO := "const char * git_info=\"Git commit $(COMMIT_SHA)\";"
 
 ##===================================================##
 
+.PHONY: all clean distclean test man force
+
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS) $(LIBRARIES)
@@ -173,10 +175,6 @@ $(NLOPT_LIB_FILE) $(NLOPT_HEADER_FILES):
 	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat config.log;
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
-
-
-
-.PHONY: clean distclean test man force
 
 $(BUILD_INFO_PATH)/compilerinfo.inc: force
 	echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
