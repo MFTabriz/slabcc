@@ -45,9 +45,10 @@ pipeline:
     image: cytopia/checkmake:latest
     group: nodep
     commands:
-      - checkmake */**/makefile
+      - checkmake bin/makefile
+      - checkmake tests/makefile
     when:
       path:
-        include: [ '*/**/makefile' ]
+        include: [ 'bin/makefile', 'tests/makefile' ]
 
 

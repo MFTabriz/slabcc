@@ -75,7 +75,7 @@ elif [[ "$_distro" == 'opensuse/leap' ]]; then
 
     # shellcheck disable=SC2068
     zypper install -y make ${_pkgs_array[@]}
-    if [[ -x "numdiff" ]]; then
+    if ! [[ -x "numdiff" ]]; then
         zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
         zypper --gpg-auto-import-keys ref
         zypper install -y tar gzip
@@ -92,5 +92,5 @@ fi
 echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl && export PATH=$(pwd)/numdiff-5.9.0/bin:$PATH" > .env && chmod +x .env
 
 echo "installed compilers:"
-echo "CC: " && $_CC --version | head -n 1
-echo "CXX: " && $_CXX --version | head -n 1
+printf "CC: " && $_CC --version | head -n 1
+printf "CXX: " && $_CXX --version | head -n 1
