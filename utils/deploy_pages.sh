@@ -78,6 +78,7 @@ cd "$TMP_DIR"
 git config user.email "${CI_COMMIT_AUTHOR}@noreply.codeberg.org" && git config user.name "${CI_COMMIT_AUTHOR}"
 
 # cleanup the git repository, keep only the latest commits if DEPLOY_BRANCH already exists
+# .woodpecker.yml is kept as a workaround https://codeberg.org/Codeberg-CI/feedback/issues/114
 ( 
     git switch "${DEPLOY_BRANCH}" && NEW_GIT_BASE=$(git rev-list --max-parents=0 HEAD) &&\
     git checkout --orphan "${TMP_BRANCH}" "$NEW_GIT_BASE" &&\
@@ -85,7 +86,7 @@ git config user.email "${CI_COMMIT_AUTHOR}@noreply.codeberg.org" && git config u
     git rebase --onto "${TMP_BRANCH}" "$NEW_GIT_BASE" "$DEPLOY_BRANCH" &&\
     git branch -D "${TMP_BRANCH}" &&\
     git rm -fr . && \
-    git checkout HEAD -- .woodpecker.yml &&\ # workaround https://codeberg.org/Codeberg-CI/feedback/issues/114
+    git checkout HEAD -- .woodpecker.yml &&\
     git reflog expire --expire=all --all && git prune --progress && git gc --aggressive
 ) || git switch --orphan "$DEPLOY_BRANCH"
 

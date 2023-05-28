@@ -172,8 +172,8 @@ $(OBJ_PATH)/%.o: %.c
 $(NLOPT_LIB_FILE) $(NLOPT_HEADER_FILES):
 	mkdir -p $(NLOPT_PREFIX)
 	cd $(NLOPT_PREFIX) && $(NLOPT_SRC_PATH)/configure CC=$(CC) CXX=$(CXX) CFLAGS='$(COMMON_FLAGS)' CXXFLAGS='$(COMMON_FLAGS)' --prefix=$(NLOPT_PATH) || cat config.log;
-	make --directory=$(NLOPT_PATH)
-	make --directory=$(NLOPT_PATH) install
+	$(MAKE) --directory=$(NLOPT_PATH)
+	$(MAKE) --directory=$(NLOPT_PATH) install
 
 $(BUILD_INFO_PATH)/compilerinfo.inc: force
 	echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
