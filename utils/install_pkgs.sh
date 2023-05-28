@@ -68,17 +68,19 @@ if [[ "$_distro" == 'ubuntu' ]]; then
 elif [[ "$_distro" == 'almalinux' ]]; then
     yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
     # shellcheck disable=SC2068
-    dnf install -y make ${_pkgs_array[@]}
+    dnf install -y make diffutils ${_pkgs_array[@]}
     [[ -x "numdiff" ]] || install_numdiff
     
 elif [[ "$_distro" == 'opensuse/leap' ]]; then
 
     # shellcheck disable=SC2068
-    zypper install -y make gzip ${_pkgs_array[@]}
-    zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
-    zypper --gpg-auto-import-keys ref
-    zypper install -y tar
-    [[ -x "numdiff" ]] || install_numdiff
+    zypper install -y make ${_pkgs_array[@]}
+    if [[ -x "numdiff" ]]; then
+        zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
+        zypper --gpg-auto-import-keys ref
+        zypper install -y tar gzip
+        install_numdiff
+    fi
 elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     echo "Using MKL from OneAPI basekit..."
     apt update && apt install -y numdiff
@@ -89,5 +91,6 @@ fi
 
 echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl && export PATH=$(pwd)/numdiff-5.9.0/bin:$PATH" > .env && chmod +x .env
 
-$_CC --version | head -n 1
-$_CXX --version | head -n 1
+echo "installed compilers:"
+echo "CC: " && $_CC --version | head -n 1
+echo "CXX: " && $_CXX --version | head -n 1
