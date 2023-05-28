@@ -128,7 +128,7 @@ CPPFLAGS = $(CPP_DEFS) $(INC_FLAGS)
 vpath %.cpp ../src:../src/inih/cpp
 vpath %.c ../src/inih
 
-SOURCES := general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp stdafx.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
+SOURCES := general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
 OBJECTS := $(addprefix $(OBJ_PATH)/,$(patsubst %.c,%.o,$(SOURCES:.cpp=.o)))
 LIBRARIES = $(NLOPT_LIB_FILE)
 EXECUTABLE := slabcc

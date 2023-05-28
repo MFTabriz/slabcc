@@ -8,8 +8,8 @@
 #include "nlopt.hpp"
 #include "sinks/basic_file_sink.h"
 #include "sinks/stdout_color_sinks.h"
+#include "slabcc_info.hpp"
 #include "spdlog.h"
-#include "stdafx.h"
 
 extern int verbosity_level;
 

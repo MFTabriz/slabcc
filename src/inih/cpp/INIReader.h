@@ -9,11 +9,15 @@
 #define __INIREADER_H__
 
 #include "general_io.hpp"
-#include "stdafx.h"
 #include <armadillo>
 #include <boost/predef.h>
 #include <cctype>
 #include <cstdlib>
+
+#ifdef MKL
+#include "mkl_service.h"
+#include "mkl_types.h"
+#endif
 
 // Read an INI file into easy-to-access name/value pairs.
 class INIReader {

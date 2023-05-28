@@ -2,11 +2,7 @@
 // Copyrights licensed under the 2-Clause BSD License.
 // See the accompanying LICENSE.txt file for terms.
 
-#include "isolated.hpp"
-#include "slabcc_consts.hpp"
-#include "slabcc_model.hpp"
-#include "stdafx.h"
-#include "vasp.hpp"
+#include "slabcc.hpp"
 
 int verbosity_level = 0;
 
