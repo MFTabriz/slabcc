@@ -761,14 +761,12 @@ Included third-party components
 
 - `Armadillo C++ Linear Algebra Library <https://arma.sourceforge.net>`_ licensed under the Apache License 2.0
 
- - Copyright 2008-2018, Conrad Sanderson
- - Copyright 2008-2016, National ICT Australia (NICTA)
- - Copyright 2017-2018, Arroyo Consortium
- - Copyright 2017-2018, Data61, CSIRO
- - This product includes software developed by Conrad Sanderson
- - This product includes software developed at National ICT Australia (NICTA)
- - This product includes software developed at Arroyo Consortium
- - This product includes software developed at Data61, CSIRO
+- Copyright 2008-2023 Conrad Sanderson
+- Copyright 2008-2016 National ICT Australia (NICTA)
+- Copyright 2017-2023 Data61 / CSIRO
+- This product includes software developed by Conrad Sanderson
+- This product includes software developed at National ICT Australia (NICTA)
+- This product includes software developed at Data61 / CSIRO
 
 - `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license
 
