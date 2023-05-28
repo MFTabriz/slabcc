@@ -187,6 +187,8 @@ The current version of the slabcc has been `built and validated <https://ci.code
 
  - with GNU C/C++ compilers (10), BLAS, FFTW
 
+Older versions of the code were also being tested on MS Windows 10 (Intel C/C++ compilers 19.0.4 / Microsoft C/C++ compilers 19.20.27508 linked to MKL 19.0.4, FFTW 3.3.5) support for which is currently dropped.
+
 Test set
 --------
 
