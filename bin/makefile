@@ -109,7 +109,7 @@ CFLAGS   = $(COMMON_FLAGS)
 CXXFLAGS = $(COMMON_FLAGS) -std=$(CPP_STD) $(WARN_FLAGS)
 
 ##included libraries
-NLOPT_SRC_PATH := $(shell realpath ../src/nlopt/nlopt-2.4.2)
+NLOPT_SRC_PATH := $(shell realpath ../src/nlopt)
 
 NLOPT_PATH = $(shell realpath $(NLOPT_PREFIX))
 NLOPT_INC_PATH = $(NLOPT_PREFIX)/include
