@@ -2,6 +2,7 @@
 # shellcheck disable=SC2086
 
 # by default, this script commits all the files in "public" directory to "pages" branch of the present repository keeping only latest 10 commits
+# all commandline flags get passed to "cp" and "git clone" commands. typically it is set to "--verbose" for testing
 # options:
 #
 ## $PAGES_PASS (required): authorization token for pushing commits to the origin repository
@@ -51,7 +52,7 @@ if [ -z "$PAGES_USER" ]; then
     PAGES_USER="${CI_COMMIT_AUTHOR}"
 fi
 
-if [ -n "$1" ]; then # extra flags will be passed to "cp" and "git clone" commands. typically it is set to "--verbose" for testing
+if [ -n "$1" ]; then # pass extra flags and activate verbose mode
     EXTRA_FLAGS=( "$@" )
     VERBOSE_COMMIT="--allow-empty"
     set -x
@@ -83,7 +84,8 @@ git config user.email "${CI_COMMIT_AUTHOR}@noreply.codeberg.org" && git config u
     git commit --reuse-message="$NEW_GIT_BASE" &&\
     git rebase --onto "${TMP_BRANCH}" "$NEW_GIT_BASE" "$DEPLOY_BRANCH" &&\
     git branch -D "${TMP_BRANCH}" &&\
-    git rm -r . &&\
+    git rm -fr . && \
+    git checkout HEAD -- .woodpecker.yml &&\ # workaround https://codeberg.org/Codeberg-CI/feedback/issues/114
     git reflog expire --expire=all --all && git prune --progress && git gc --aggressive
 ) || git switch --orphan "$DEPLOY_BRANCH"
 
