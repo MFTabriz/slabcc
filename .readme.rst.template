@@ -20,7 +20,9 @@
    :alt: License: BSD-2-Clause
    :target: https://opensource.org/licenses/BSD-2-Clause
 
-|Version| |Manual| |Standard| |Style| |Woodpecker| |Zenodo| |License|
+- For users: |Version| |License| |Manual|
+- For developers and maintainers: |Standard| |Style| |Woodpecker|
+- Large test set: |Zenodo|
 
 .. sectnum::
 
