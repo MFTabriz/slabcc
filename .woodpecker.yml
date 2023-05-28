@@ -1,0 +1,11 @@
+# just a dummy pipeline to workaround https://codeberg.org/Codeberg-CI/feedback/issues/114
+# source https://codeberg.org/Desour/dslib/src/commit/8db6183076233612d2172f63868b43f72919681a/.woodpecker.yml
+
+pipeline:
+  do_nothing:
+    image: alpine
+    commands:
+      - echo this is fine
+
+branches:
+  exclude: [ pages ]
