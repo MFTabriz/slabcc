@@ -43,4 +43,4 @@ if [ "$GITHASH" = "?" ]; then
 fi
 
 
-echo 'const char * git_info="Git commit '"$GITHASH (status: $GIT_STATE)\";"
+echo "$GITHASH (status: $GIT_STATE)"

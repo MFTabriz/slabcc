@@ -153,9 +153,9 @@ Installation
  #. **$CC:** C compiler (default: gcc)
  #. **$CXX:** C++ compiler (default: g++)
  #. **$FFTW_HOME:** path to FFTW library home
- #. **$FFTW_LIB:** FFTW library flag (default: -lfftw3)
+ #. **$FFTW_LIB_FLAG:** FFTW library flag (default: -lfftw3)
  #. **$BLAS_HOME:** path to BLAS library home
- #. **$BLAS_LIB:** BLAS library flags (default: -lblas -llapack -lpthread)
+ #. **$BLAS_LIB_FLAG:** BLAS library flags (default: -lblas -llapack -lpthread)
  #. **$EXTRA_FLAGS:** extra compiler flags for CC and CXX
  #. **$LD_EXTRA_FLAGS:** extra linker flags
 
