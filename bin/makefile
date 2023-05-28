@@ -31,6 +31,9 @@ CPP_STD := c++14
 # compilation objects are put here
 OBJ_PATH := slabcc_obj
 ## 
+TESTS_PATH := ../tests
+BUILD_INFO_PATH = ../src
+UTILS_PATH := ../utils
 ## EXTERNAL LIBRARIES
 ## 
 NLOPT_PREFIX := nlopt
@@ -129,6 +132,7 @@ vpath %.cpp ../src:../src/inih/cpp
 vpath %.c ../src/inih
 
 SOURCES := general_io.cpp slabcc_math.cpp vasp.cpp slabcc.cpp slabcc_model.cpp slabcc_input.cpp ini.c INIReader.cpp madelung.cpp isolated.cpp
+BUILD_INFO := $(addprefix $(BUILD_INFO_PATH)/,compilerinfo.inc gitinfo.inc)
 OBJECTS := $(addprefix $(OBJ_PATH)/,$(patsubst %.c,%.o,$(SOURCES:.cpp=.o)))
 LIBRARIES = $(NLOPT_LIB_FILE)
 EXECUTABLE := slabcc
@@ -154,29 +158,29 @@ $(NLOPT_LIB_FILE):
 	make --directory=$(NLOPT_PATH)
 	make --directory=$(NLOPT_PATH) install
 
-$(OBJECTS): ../src/compilerinfo.inc ../src/gitinfo.inc
+$(OBJECTS): $(BUILD_INFO)
 
 COMPILER_VER:=$(shell $(CXX) --version | head -n 1)
 COMPILER_INFO:="const char *cxx_compiler=\"$(CXX)\", *cxx_compilerver=\"$(COMPILER_VER)\", *cxx_compilerflags=\"$(CXXFLAGS)\";"
 
 .PHONY: clean distclean test force
 
-../src/compilerinfo.inc: force
+$(BUILD_INFO_PATH)/compilerinfo.inc: force
 	echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
 
-../src/gitinfo.inc: force
-	echo "$$(../utils/git_commit.sh)" | cmp -s - $@ || echo "$$(../utils/git_commit.sh)" > $@
+$(BUILD_INFO_PATH)/gitinfo.inc: force
+	echo "$$($(UTILS_PATH)/git_commit.sh)" | cmp -s - $@ || echo "$$($(UTILS_PATH)/git_commit.sh)" > $@
 
 test: $(EXECUTABLE)
-	$(MAKE) -C ../tests
+	$(MAKE) -C $(TESTS_PATH)
 
 man:
 	cd .. && utils/generate_docs.sh
 
 clean:
 	rm -fr $(OBJECTS) $(EXECUTABLE)
-	rm -f *.inc
-	$(MAKE) -C ../tests clean
+	rm -f $(BUILD_INFO_PATH)/*.inc
+	$(MAKE) -C $(TESTS_PATH) clean
 
 distclean: clean
 	rm -fr $(NLOPT_PREFIX)
