@@ -12,8 +12,8 @@ if [ -z "$STAGE_PATH" ]; then
 fi
 
 mkdir -p "$STAGE_PATH"
-
-SOURCE_LINK="${CI_COMMIT_LINK/%commit\/${CI_COMMIT_SHA}/src\/commit\/${CI_COMMIT_SHA}\/docs/manual.rst}"
+INDEX_HTML=docs/manual.rst
+SOURCE_LINK="https://codeberg.org/meisam/slabcc/src/commit/${CI_COMMIT_SHA}/${INDEX_HTML}"
 
 echo "SOURCE LINK: $SOURCE_LINK"
-tail -n +2 < docs/manual.rst | rst2html.py --title="SLABCC" -g --source-url="$SOURCE_LINK" > "$STAGE_PATH"/index.html
+tail -n +2 < "$INDEX_HTML" | rst2html.py --title="SLABCC" -g --source-url="$SOURCE_LINK" > "$STAGE_PATH"/index.html

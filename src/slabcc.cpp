@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
   }
   log->debug("Slab normal direction index (0-2): {}", model.normal_direction);
   log->trace("Shift to center done!");
-
+  log->trace("----calculating difference of input files---");
   supercell Defect_supercell = Neutral_supercell;
   Defect_supercell.potential =
       Charged_supercell.potential - Neutral_supercell.potential;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
   model.POT_target_on_input_grid = Defect_supercell.potential;
 
   if (output_diffs_only) {
-    log->debug("Only the extra charge and the potential difference calculation "
+    log->trace("Only the extra charge and the potential difference calculation "
                "have been requested!");
     write_planar_avg(Defect_supercell.potential,
                      Defect_supercell.charge * model.voxel_vol, "D",
@@ -214,7 +214,7 @@ int main(int argc, char *argv[]) {
   model.defect_charge = accu(Defect_supercell.charge) * model.voxel_vol;
 
   if (std::abs(model.defect_charge) < 0.001) {
-    log->debug("Total extra charge: {}", model.defect_charge);
+    log->trace("Total extra charge: {}", model.defect_charge);
     log->warn("Total extra charge seems to be very small. Please make sure the "
               "path to the input CHGCAR files are "
               "set properly!");
@@ -227,6 +227,8 @@ int main(int argc, char *argv[]) {
                             optimize_charge_fraction || optimize_interfaces;
 
   if (optimize_any) {
+    log->info("--------------------optimizing model "
+              "parameters------------------------");
     const arma::rowvec2 shifted_interfaces0 = model.interfaces;
     const arma::mat charge_position0 = model.charge_position;
     const arma::urowvec3 cell_grid0 = model.cell_grid;
@@ -314,7 +316,7 @@ int main(int argc, char *argv[]) {
       model.update_V_target();
     }
   }
-
+  log->info("--------Calculating periodic energy---------");
   model.gaussian_charges_gen();
   model.dielectric_profiles_gen();
   auto local_param = model.data_packer();
@@ -322,9 +324,9 @@ int main(int argc, char *argv[]) {
   model.potential_RMSE =
       potential_error(std::get<0>(local_param), gradients, &model);
 
-  log->debug("Cell dimensions (bohr): " +
+  log->trace("Cell dimensions (bohr): " +
              to_string(model.cell_vectors_lengths));
-  log->debug("Volume (bohr^3): {}", model.cell_volume);
+  log->trace("Volume (bohr^3): {}", model.cell_volume);
 
   if (is_active(verbosity::write_defect_file)) {
     supercell Model_supercell = Neutral_supercell;
@@ -403,11 +405,12 @@ int main(int argc, char *argv[]) {
   log->debug("Difference of the charge in the input files: {}",
              to_string(model.defect_charge));
   log->debug("Total charge of the model: {}", to_string(model.total_charge));
-
+  log->info("-------calculating isolated energy----------");
   double E_isolated = 0;
   double E_correction = 0;
   if (extrapolate) {
-
+    log->debug("extrapolation steps size: {}", extrapol_steps_size);
+    log->debug("extrapolation steps number: {}", extrapol_steps_num);
     const arma::rowvec3 extrapolation_grid_size =
         extrapol_grid_x * arma::conv_to<arma::rowvec>::from(model.cell_grid);
     const arma::urowvec3 extrapolation_grid = {

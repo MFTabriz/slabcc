@@ -5,6 +5,8 @@
 #include "slabcc_model.hpp"
 
 void slabcc_model::set_input_variables(const input_data &inputfile_variables) {
+  auto log = spdlog::get("loggers");
+  log->debug("-------------initializing model-------------");
   normal_direction = inputfile_variables.normal_direction;
   interfaces = inputfile_variables.interfaces;
   diel_in = inputfile_variables.diel_in;
@@ -472,10 +474,11 @@ void slabcc_model::update_V_target() {
     const arma::rowvec new_grid_z = arma::linspace<arma::rowvec>(
         1.0, POT_target_on_input_grid.n_slices, cell_grid(2));
 
+    log->debug("Calculating target potential on grid size: " +
+               to_string(SizeVec(POT_target)));
     POT_target =
         interp3(POT_target_on_input_grid, new_grid_x, new_grid_y, new_grid_z);
     POT_target -= arma::accu(POT_target) / POT_target.n_elem;
-    log->debug("New potential grid size: " + to_string(SizeVec(POT_target)));
   }
 }
 
@@ -681,7 +684,6 @@ double slabcc_model::potential_error(const std::vector<double> &x,
     initial_potential_RMSE = potential_RMSE;
   }
 
-  log->debug("-----------------------------------------");
   if (this->type != model_type::bulk) {
     const arma::rowvec2 unshifted_interfaces =
         fmod_p(interfaces - rounded_relative_shift(normal_direction), 1);

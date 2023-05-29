@@ -43,4 +43,4 @@ if [ "$GITHASH" = "?" ]; then
 fi
 
 
-echo "$GITHASH (status: $GIT_STATE)"
+echo "$GITHASH (repo status: $GIT_STATE)"

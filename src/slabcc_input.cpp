@@ -6,6 +6,7 @@
 
 void input_data::verify() const {
   auto log = spdlog::get("loggers");
+  log->debug("----------verifying input parameters--------");
   charge_sigma = arma::abs(charge_sigma);
   max_eval = std::abs(max_eval);
   max_time = std::abs(max_time);
