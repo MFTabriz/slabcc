@@ -411,8 +411,11 @@ int main(int argc, char *argv[]) {
   if (extrapolate) {
     log->debug("extrapolation steps size: {}", extrapol_steps_size);
     log->debug("extrapolation steps number: {}", extrapol_steps_num);
+
     const arma::rowvec3 extrapolation_grid_size =
         extrapol_grid_x * arma::conv_to<arma::rowvec>::from(model.cell_grid);
+    log->debug("extrapolation grid size: {}",
+               to_string(extrapolation_grid_size));
     const arma::urowvec3 extrapolation_grid = {
         static_cast<arma::uword>(extrapolation_grid_size(0)),
         static_cast<arma::uword>(extrapolation_grid_size(1)),
@@ -443,13 +446,19 @@ int main(int argc, char *argv[]) {
     }
 
     log->debug("--------------------------------------------------------");
-    log->debug(
-        "Scaling\tE_periodic\t\tmodel charge\t\tinterfaces\t\tcharge position");
+    std::string extrapolation_header = "Scaling\tE_periodic\t\tmodel's charge";
+    if (model.type != model_type::bulk) {
+      extrapolation_header += "\t\tinterfaces";
+    }
+    extrapolation_header += "\t\tcharge position";
+    log->debug(extrapolation_header);
     const arma::rowvec2 interface_pos =
         model.interfaces * model.cell_vectors_lengths(model.normal_direction);
-    std::string extrapolation_info = "1.0000\t" + to_string(EperModel0) + "\t" +
-                                     to_string(model.total_charge) + "\t" +
-                                     to_string(interface_pos);
+    std::string extrapolation_info = "1.000\t\t" + to_string(EperModel0) +
+                                     "\t" + to_string(model.total_charge);
+    if (model.type != model_type::bulk) {
+      extrapolation_info += "\t" + to_string(interface_pos);
+    }
     for (arma::uword i = 0; i < model.charge_position.n_rows; ++i) {
       extrapolation_info +=
           "\t" + to_string(model.charge_position(i, model.normal_direction) *

@@ -551,9 +551,12 @@ slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
                            voxel_vol * Hartree_to_eV;
     const arma::rowvec2 interface_pos =
         interfaces * cell_vectors_lengths(normal_direction);
-    std::string extrapolation_info =
-        ::to_string(extrapol_factor) + "\t" + to_string(EperModel) + "\t" +
-        ::to_string(total_charge) + "\t" + to_string(interface_pos);
+    std::string extrapolation_info = ::to_string(extrapol_factor) + "\t\t" +
+                                     to_string(EperModel) + "\t" +
+                                     ::to_string(total_charge);
+    if (this->type != model_type::bulk) {
+      extrapolation_info += "\t" + to_string(interface_pos);
+    }
     for (arma::uword i = 0; i < charge_position.n_rows; ++i) {
       extrapolation_info +=
           "\t" + to_string(charge_position(i, normal_direction) *
@@ -586,7 +589,8 @@ double slabcc_model::Eiso_bessel() const {
   logger->debug("Number of k-space integration grid points: {}", K.n_elem);
 
   // eq. 7 in the SI (Supplementary Information for `First-principles
-  // electrostatic potentials for reliable alignment at interfaces and defects`)
+  // electrostatic potentials for reliable alignment at interfaces and
+  // defects`)
   const arma::rowvec integrand =
       K % arma::exp(-arma::square(K) * std::pow(charge_sigma(0, 0), 2)) % Uk(K);
   const arma::mat integral = arma::trapz(K, integrand, 1);
@@ -819,8 +823,10 @@ void slabcc_model::check_V_error() {
         "extra charge is not properly described by the model Gaussian charge "
         "or the chosen dielectric tensor is not a good representation of the "
         "actual tensor! "
-        "This can be fixed by properly optimizing the model parameters, using "
-        "multiple Gaussian charges, using trivaritate Gaussians, or using the "
+        "This can be fixed by properly optimizing the model parameters, "
+        "using "
+        "multiple Gaussian charges, using trivaritate Gaussians, or using "
+        "the "
         "dielectric tensor calculated for the same VASP model/method.");
   }
 
@@ -849,7 +855,8 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
         arma::accu(arma::real(CHG(spans[0], spans[1], spans[2]))) * voxel_vol;
     const double model_out = model_total - model_in;
 
-    // The original defect may have a different grid size than the final model!
+    // The original defect may have a different grid size than the final
+    // model!
     const arma::urowvec3 defect_grid = SizeVec(defect_charge);
     arma::rowvec2 defect_interfaces_index =
         defect_grid(normal_direction) * interfaces;
@@ -894,10 +901,11 @@ void slabcc_model::verify_CHG(const arma::cube &defect_charge) {
       log->debug("Difference of the charge inside of the slab in the defect "
                  "and the model: {}",
                  std::abs(model_in - defect_in));
-      log->warn(
-          "The amount of the charge inside and outside of the slab seems to be "
-          "different in the input files and the slabcc model. The extra charge "
-          "may be partially localized on the slab surfaces.");
+      log->warn("The amount of the charge inside and outside of the slab "
+                "seems to be "
+                "different in the input files and the slabcc model. The "
+                "extra charge "
+                "may be partially localized on the slab surfaces.");
     }
   }
 }
