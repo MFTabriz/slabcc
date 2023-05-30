@@ -29,7 +29,8 @@ OPT := -O2
 CPP_STD := c++14
 
 # compilation objects are put here
-OBJ_PATH := slabcc_obj
+OBJ_DIR := slabcc_obj
+OBJ_PATH := $(shell realpath $(OBJ_DIR))
 ## 
 TESTS_PATH := ../tests
 SRC_PATH := ../src
@@ -159,7 +160,11 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS) $(LIBRARIES)
 	$(CXX) $(OBJECTS) $(LIB_PATH_FLAGS) $(LD_LIB_FLAGS) $(LD_EXTRA_FLAGS) -o $@
 
-$(OBJECTS): $(LIBRARY_HEADERS) $(BUILD_INFO) $(SOURCES)
+$(OBJECTS): $(LIBRARY_HEADERS)
+
+$(OBJ_PATH)/INIReader.o: $(BUILD_INFO_PATH)/compilerinfo.inc
+$(OBJ_PATH)/general_io.o: $(BUILD_INFO_PATH)/gitinfo.inc
+$(OBJ_PATH)/slabcc.o: $(BUILD_INFO_PATH)/gitinfo.inc
 
 $(OBJ_PATH)/%.o: %.cpp
 	@mkdir -p $(shell dirname $@)
@@ -176,10 +181,10 @@ $(NLOPT_LIB_FILE) $(NLOPT_HEADER_FILES):
 	$(MAKE) --directory=$(NLOPT_PATH) install
 
 $(BUILD_INFO_PATH)/compilerinfo.inc: force
-	echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
+	@echo $(COMPILER_INFO) | cmp -s - $@ || echo $(COMPILER_INFO) > $@
 
 $(BUILD_INFO_PATH)/gitinfo.inc: force
-	echo $(COMMIT_INFO) | cmp -s - $@ || echo $(COMMIT_INFO) > $@
+	@echo $(COMMIT_INFO) | cmp -s - $@ || echo $(COMMIT_INFO) > $@
 
 test: $(EXECUTABLE)
 	$(MAKE) -C $(TESTS_PATH)
@@ -188,8 +193,7 @@ man:
 	cd .. && utils/generate_docs.sh
 
 clean:
-	rm -fr $(OBJECTS) $(EXECUTABLE)
-	rm -f $(BUILD_INFO_PATH)/*.inc
+	rm -fr $(OBJECTS) $(EXECUTABLE) $(BUILD_INFO)
 	$(MAKE) -C $(TESTS_PATH) clean
 
 distclean: clean
