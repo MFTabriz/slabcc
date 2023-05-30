@@ -3,22 +3,22 @@ Copyright and attributions
 ===========================
 Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
-The source code and all the documentation are available under the 2-Clause BSD License. For more information, see license_.
+The source code and all documentation are available under the 2-Clause BSD License. For more information, see license_.
 
 | This code uses several open-source components, each of which is located under a separate sub-directory of ``src/``. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.
-| The attributions are also present in the binary file and can be accessed by using ``--copyright`` flag.
+| Attributions are also present in the binary file and can be accessed by using ``--copyright`` flag.
 
 Included third-party components
 -------------------------------
 
 - `Armadillo C++ Linear Algebra Library <https://arma.sourceforge.net>`_ licensed under the Apache License 2.0
 
-- Copyright 2008-2023 Conrad Sanderson
-- Copyright 2008-2016 National ICT Australia (NICTA)
-- Copyright 2017-2023 Data61 / CSIRO
-- This product includes software developed by Conrad Sanderson
-- This product includes software developed at National ICT Australia (NICTA)
-- This product includes software developed at Data61 / CSIRO
+ - Copyright 2008-2023 Conrad Sanderson
+ - Copyright 2008-2016 National ICT Australia (NICTA)
+ - Copyright 2017-2023 Data61 / CSIRO
+ - This product includes software developed by Conrad Sanderson
+ - This product includes software developed at National ICT Australia (NICTA)
+ - This product includes software developed at Data61 / CSIRO
 
 - `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license
 

@@ -1,7 +1,7 @@
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. However, it is not possible to guarantee this due to the dependency on third-party components.
 The current version of the slabcc has been `built and validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
@@ -29,4 +29,4 @@ Test set
 --------
 
 You can download a complete test set, including input files, input parameters, and expected output, `here <https://doi.org/10.5281/zenodo.1323558>`__!
-You can also run the regression tests and verify their results with ``make test``. You'll need `numdiff <https://www.nongnu.org/numdiff/>`__ for these tests.
+You can also run regression tests and verify their results with ``make test``. You'll need `numdiff <https://www.nongnu.org/numdiff/>`__ for these tests.

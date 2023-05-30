@@ -31,7 +31,7 @@
 =============
 Introduction
 =============
-SLABCC calculates an *a posteriori* energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:
+SLABCC calculates *a posteriori* energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:
 
  Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: `10.1103/PhysRevLett.110.095505 <https://doi.org/10.1103/PhysRevLett.110.095505>`_ `(Supplements) <https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf>`_
 
@@ -165,7 +165,7 @@ Installation
 ==========
 Validation
 ==========
-We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
+We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. However, it is not possible to guarantee this due to the dependency on third-party components.
 The current version of the slabcc has been `built and validated <https://ci.codeberg.org/meisam/slabcc/branches/master>`_ on:
 
 - Ubuntu Linux 16.04
@@ -193,13 +193,13 @@ Test set
 --------
 
 You can download a complete test set, including input files, input parameters, and expected output, `here <https://doi.org/10.5281/zenodo.1323558>`__!
-You can also run the regression tests and verify their results with ``make test``. You'll need `numdiff <https://www.nongnu.org/numdiff/>`__ for these tests.
+You can also run regression tests and verify their results with ``make test``. You'll need `numdiff <https://www.nongnu.org/numdiff/>`__ for these tests.
 
 ==================================
 Known issues and limitations
 ==================================
 - Only orthogonal cells are supported.
-- Maximum line length of the input file (slabcc.in) is 4000 bytes.
+- The maximum line length of the input file (slabcc.in) is 4000 bytes.
 - Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models that are not surrounded by the vacuum (diel_out > 1). The extrapolation method must be used in these cases.
 
 ==========================
@@ -217,22 +217,22 @@ Copyright and attributions
 ===========================
 Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz
 
-The source code and all the documentation are available under the 2-Clause BSD License. For more information, see license_.
+The source code and all documentation are available under the 2-Clause BSD License. For more information, see license_.
 
 | This code uses several open-source components, each of which is located under a separate sub-directory of ``src/``. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.
-| The attributions are also present in the binary file and can be accessed by using ``--copyright`` flag.
+| Attributions are also present in the binary file and can be accessed by using ``--copyright`` flag.
 
 Included third-party components
 -------------------------------
 
 - `Armadillo C++ Linear Algebra Library <https://arma.sourceforge.net>`_ licensed under the Apache License 2.0
 
-- Copyright 2008-2023 Conrad Sanderson
-- Copyright 2008-2016 National ICT Australia (NICTA)
-- Copyright 2017-2023 Data61 / CSIRO
-- This product includes software developed by Conrad Sanderson
-- This product includes software developed at National ICT Australia (NICTA)
-- This product includes software developed at Data61 / CSIRO
+ - Copyright 2008-2023 Conrad Sanderson
+ - Copyright 2008-2016 National ICT Australia (NICTA)
+ - Copyright 2017-2023 Data61 / CSIRO
+ - This product includes software developed by Conrad Sanderson
+ - This product includes software developed at National ICT Australia (NICTA)
+ - This product includes software developed at Data61 / CSIRO
 
 - `inih <https://github.com/benhoyt/inih>`_ (INI Not Invented Here) licensed under the 3-clause BSD license
 
