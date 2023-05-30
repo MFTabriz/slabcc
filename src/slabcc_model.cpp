@@ -551,18 +551,23 @@ slabcc_model::extrapolate(int extrapol_steps_num, double extrapol_steps_size) {
                            voxel_vol * Hartree_to_eV;
     const arma::rowvec2 interface_pos =
         interfaces * cell_vectors_lengths(normal_direction);
-    std::string extrapolation_info = ::to_string(extrapol_factor) + "\t\t" +
-                                     to_string(EperModel) + "\t" +
-                                     ::to_string(total_charge);
+
+    std::stringstream extrapolation_outputstream;
+    extrapolation_outputstream
+        << std::left << std::setw(10) << std::to_string(extrapol_factor)
+        << std::setw(20) << to_string(EperModel) << std::setw(20)
+        << to_string(total_charge);
     if (this->type != model_type::bulk) {
-      extrapolation_info += "\t" + to_string(interface_pos);
+      extrapolation_outputstream << std::setw(40) << to_string(interface_pos);
     }
     for (arma::uword i = 0; i < charge_position.n_rows; ++i) {
-      extrapolation_info +=
-          "\t" + to_string(charge_position(i, normal_direction) *
-                           cell_vectors_lengths(normal_direction));
+      extrapolation_outputstream
+          << std::setw(20)
+          << to_string(charge_position(i, normal_direction) *
+                       cell_vectors_lengths(normal_direction));
     }
-    log->debug(extrapolation_info);
+    log->debug(extrapolation_outputstream.str());
+    extrapolation_outputstream.str(std::string());
     Es(step - 1) = EperModel;
     sizes(step - 1) = 1.0 / extrapol_factor;
   }

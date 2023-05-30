@@ -446,25 +446,33 @@ int main(int argc, char *argv[]) {
     }
 
     log->debug("--------------------------------------------------------");
-    std::string extrapolation_header = "Scaling\tE_periodic\t\tmodel's charge";
+    std::stringstream extrapolation_outputstream;
+    extrapolation_outputstream << std::left << std::setw(10) << "Scaling"
+                               << std::setw(20) << "E_periodic" << std::setw(20)
+                               << "model's charge";
     if (model.type != model_type::bulk) {
-      extrapolation_header += "\t\tinterfaces";
+      extrapolation_outputstream << std::setw(40) << "interfaces";
     }
-    extrapolation_header += "\t\tcharge position";
-    log->debug(extrapolation_header);
+    extrapolation_outputstream << std::setw(20) << "charge position";
+    log->debug(extrapolation_outputstream.str());
+    extrapolation_outputstream.str(std::string());
+
     const arma::rowvec2 interface_pos =
         model.interfaces * model.cell_vectors_lengths(model.normal_direction);
-    std::string extrapolation_info = "1.000\t\t" + to_string(EperModel0) +
-                                     "\t" + to_string(model.total_charge);
+    extrapolation_outputstream << std::left << std::setw(10)
+                               << std::to_string(1.0) << std::setw(20)
+                               << to_string(EperModel0) << std::setw(20)
+                               << to_string(model.total_charge);
     if (model.type != model_type::bulk) {
-      extrapolation_info += "\t" + to_string(interface_pos);
+      extrapolation_outputstream << std::setw(40) << to_string(interface_pos);
     }
     for (arma::uword i = 0; i < model.charge_position.n_rows; ++i) {
-      extrapolation_info +=
-          "\t" + to_string(model.charge_position(i, model.normal_direction) *
-                           model.cell_vectors_lengths(model.normal_direction));
+      extrapolation_outputstream
+          << std::setw(20)
+          << to_string(model.charge_position(i, model.normal_direction) *
+                       model.cell_vectors_lengths(model.normal_direction));
     }
-    log->debug(extrapolation_info);
+    log->debug(extrapolation_outputstream.str());
     arma::rowvec Es = arma::zeros<arma::rowvec>(extrapol_steps_num - 1),
                  sizes = Es;
     std::tie(Es, sizes) =
