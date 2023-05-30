@@ -49,6 +49,6 @@ pipeline:
       - checkmake tests/makefile
     when:
       path:
-        include: [ 'bin/makefile', 'tests/makefile' ]
+        include: [ 'bin/makefile', 'tests/makefile', '.woodpecker/.lint.yml' ]
 
 
