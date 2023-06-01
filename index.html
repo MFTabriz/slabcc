@@ -734,7 +734,7 @@ span.boxed, span.framebox {
 </div>
 <div class="section" id="introduction">
 <h1><a class="toc-backref" href="#toc-entry-1">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
-<p>SLABCC calculates an <em>a posteriori</em> energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:</p>
+<p>SLABCC calculates <em>a posteriori</em> energy correction for charged slab models under 3D periodic boundary conditions (PBC) based on the method proposed in:</p>
 <blockquote>
 Hannu-Pekka Komsa and Alfredo Pasquarello, Finite-Size Supercell Correction for Charged Defects at Surfaces and Interfaces, Physical Review Letters 110, 095505 (2013) DOI: <a class="reference external" href="https://doi.org/10.1103/PhysRevLett.110.095505">10.1103/PhysRevLett.110.095505</a> <a class="reference external" href="https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.095505/supplR1.pdf">(Supplements)</a></blockquote>
 <p>This method estimates the error in the total energy of the charged models under 3D PBC due to the excess charge in the real system using Gaussian models.
@@ -995,7 +995,7 @@ diel_in = 6.28 6.28 1.83
 </div>
 <div class="section" id="validation">
 <h1><a class="toc-backref" href="#toc-entry-6">4&nbsp;&nbsp;&nbsp;Validation</a></h1>
-<p>We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. But it is not possible to guarantee this due to the dependency on third-party components.
+<p>We are trying to keep the slabcc compatible with as many compilers as possible by using only the standard features of the C++ language. However, it is not possible to guarantee this due to the dependency on third-party components.
 The current version of the slabcc has been <a class="reference external" href="https://ci.codeberg.org/meisam/slabcc/branches/master">built and validated</a> on:</p>
 <ul class="simple">
 <li>Ubuntu Linux 16.04</li>
@@ -1036,7 +1036,7 @@ The current version of the slabcc has been <a class="reference external" href="h
 <div class="section" id="test-set">
 <h2><a class="toc-backref" href="#toc-entry-7">4.1&nbsp;&nbsp;&nbsp;Test set</a></h2>
 <p>You can download a complete test set, including input files, input parameters, and expected output, <a class="reference external" href="https://doi.org/10.5281/zenodo.1323558">here</a>!
-You can also run the regression tests and verify their results with <tt class="docutils literal">make test</tt>. You'll need <a class="reference external" href="https://www.nongnu.org/numdiff/">numdiff</a> for these tests.</p>
+You can also run regression tests and verify their results with <tt class="docutils literal">make test</tt>. You'll need <a class="reference external" href="https://www.nongnu.org/numdiff/">numdiff</a> for these tests.</p>
 </div>
 </div>
 <div class="section" id="command-line-parameters">
@@ -1671,7 +1671,7 @@ Alternatively, you can use <a class="reference external" href="https://www.rarla
 <h1><a class="toc-backref" href="#toc-entry-13">9&nbsp;&nbsp;&nbsp;Known issues and limitations</a></h1>
 <ul class="simple">
 <li>Only orthogonal cells are supported.</li>
-<li>Maximum line length of the input file (slabcc.in) is 4000 bytes.</li>
+<li>The maximum line length of the input file (slabcc.in) is 4000 bytes.</li>
 <li>Bessel expansion of the Poisson equation cannot be used for the calculation of isolated energies for the 2D models with anisotropic in-plane screening, trivariate Gaussian model change, or the models that are not surrounded by the vacuum (diel_out &gt; 1). The extrapolation method must be used in these cases.</li>
 </ul>
 </div>
@@ -1689,21 +1689,27 @@ Alternatively, you can use <a class="reference external" href="https://www.rarla
 <div class="section" id="copyright-and-attributions">
 <h1><a class="toc-backref" href="#toc-entry-15">11&nbsp;&nbsp;&nbsp;Copyright and attributions</a></h1>
 <p>Copyright (c) 2018-2023, University of Bremen, M. Farzalipour Tabriz</p>
-<p>The source code and all the documentation are available under the 2-Clause BSD License. For more information, see <a class="reference internal" href="#license">license</a>.</p>
+<p>The source code and all documentation are available under the 2-Clause BSD License. For more information, see <a class="reference internal" href="#license">license</a>.</p>
 <div class="line-block">
 <div class="line">This code uses several open-source components, each of which is located under a separate sub-directory of <tt class="docutils literal">src/</tt>. The copyrights of these libraries belong to their respective owners. Any modification made to those codes is also published under the same license. We acknowledge and are grateful to these developers and maintainers for their valuable contributions to this software and, more importantly, to the free software society.</div>
-<div class="line">The attributions are also present in the binary file and can be accessed by using <tt class="docutils literal"><span class="pre">--copyright</span></tt> flag.</div>
+<div class="line">Attributions are also present in the binary file and can be accessed by using <tt class="docutils literal"><span class="pre">--copyright</span></tt> flag.</div>
 </div>
 <div class="section" id="included-third-party-components">
 <h2><a class="toc-backref" href="#toc-entry-16">11.1&nbsp;&nbsp;&nbsp;Included third-party components</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://arma.sourceforge.net">Armadillo C++ Linear Algebra Library</a> licensed under the Apache License 2.0</li>
+</ul>
+<blockquote>
+<ul class="simple">
 <li>Copyright 2008-2023 Conrad Sanderson</li>
 <li>Copyright 2008-2016 National ICT Australia (NICTA)</li>
 <li>Copyright 2017-2023 Data61 / CSIRO</li>
 <li>This product includes software developed by Conrad Sanderson</li>
 <li>This product includes software developed at National ICT Australia (NICTA)</li>
 <li>This product includes software developed at Data61 / CSIRO</li>
+</ul>
+</blockquote>
+<ul class="simple">
 <li><a class="reference external" href="https://github.com/benhoyt/inih">inih</a> (INI Not Invented Here) licensed under the 3-clause BSD license</li>
 </ul>
 <blockquote>
@@ -1769,7 +1775,7 @@ Alternatively, you can use <a class="reference external" href="https://www.rarla
 </div>
 <div class="footer">
 <hr class="footer" />
-<a class="reference external" href="https://codeberg.org/meisam/slabcc/compare/f662a4aee295174aa09495eccf152232445d1e42...2973f78739cb87694c839c253b9d7a10b2c70219">View document source</a>.
+<a class="reference external" href="https://codeberg.org/meisam/slabcc/src/commit/b6f809999184954f08121b64cae66820628dab48/docs/manual.rst">View document source</a>.
 Generated by <a class="reference external" href="https://docutils.sourceforge.io/">Docutils</a> from <a class="reference external" href="https://docutils.sourceforge.io/rst.html">reStructuredText</a> source.
 
 </div>
