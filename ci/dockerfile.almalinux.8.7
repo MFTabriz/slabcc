@@ -1,0 +1,29 @@
+FROM almalinux:8.7 as build_stage
+
+ARG NUMDIFF_VERSION=5.9.0
+ARG NUMDIFF_SHA512SUM=7be7aad30afbb2a964046815807be0d9149edd18364660443220ce7032248cf83bf840eaf89e19193c8c68ad075cfa81759301574ed73151526e4eea34d33f86
+
+RUN yum install -y gcc make &&\
+    yum clean all
+
+WORKDIR /numdiff
+RUN curl -s -S -L -o numdiff-${NUMDIFF_VERSION}.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-${NUMDIFF_VERSION}.tar.gz && \
+    echo "${NUMDIFF_SHA512SUM}  numdiff-${NUMDIFF_VERSION}.tar.gz"| sha512sum -c && \
+    tar -xvf numdiff-${NUMDIFF_VERSION}.tar.gz && cd numdiff-${NUMDIFF_VERSION}  && rm -f numdiff-${NUMDIFF_VERSION}.tar.gz &&\
+    mkdir -p bin && cd bin && \
+    ../configure && make
+
+
+FROM almalinux:8.7 
+ENV TZ="Europe/Berlin"
+ENV PATH="${PATH}:/numdiff"
+RUN yum install -y dnf dnf-plugins-core && yum clean all
+RUN dnf config-manager --set-enabled powertools &&\
+    dnf install -y make diffutils gcc gcc-c++ gcc-gfortran blas-devel lapack-devel fftw-devel &&
+    dnf clean all
+
+RUN addgroup --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
+
+USER ci_tool
+ 	
+COPY --from=build_stage /numdiff /numdiff

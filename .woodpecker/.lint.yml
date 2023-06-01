@@ -51,4 +51,14 @@ pipeline:
       path:
         include: [ 'bin/makefile', 'tests/makefile', '.woodpecker/.lint.yml' ]
 
-
+  dockerfiles:
+    group: nodep
+    image: quay.io/meisam/trivy:latest
+    pull: true
+    commands:
+      - trivy -v
+      - trivy config --file-patterns 'dockerfile:dockerfile.*' --policy ci/.policy --severity "HIGH,CRITICAL" --exit-code 1 ci/
+      - trivy config --file-patterns 'dockerfile:dockerfile.*' --policy ci/.policy --severity "LOW,MEDIUM" ci/
+    when:
+      path:
+        include: [ 'ci/dockerfile.*' ]
