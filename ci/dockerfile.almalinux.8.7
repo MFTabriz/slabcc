@@ -22,9 +22,5 @@ RUN dnf config-manager --set-enabled powertools &&\
     dnf install -y make diffutils gcc gcc-c++ gcc-gfortran blas-devel lapack-devel fftw-devel &&\
     dnf clean all
 
-RUN groupadd --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
-
-USER ci_tool
- 	
 COPY --from=build_stage /numdiff /numdiff
 RUN numdiff --version

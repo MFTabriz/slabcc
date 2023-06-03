@@ -1,5 +1,6 @@
 matrix:
   TOOLCHAIN:
+    # NOTE: these containers already have the required build tools. See ci/dockerfile.* for the recipies. 
     - quay.io/meisam/ubuntu:16.04 gcc-5 g++-5 libopenblas-dev fftw3-dev
     - quay.io/meisam/ubuntu:22.04 gcc-9 g++-9 libopenblas-dev fftw3-dev
     - quay.io/meisam/ubuntu:22.04 gcc-11 g++-11 libopenblas-dev fftw3-dev
@@ -13,7 +14,7 @@ pipeline:
   build:
     image: ${TOOLCHAIN%% *}
     commands:
-      - ./utils/setup_env.sh && . ./.env
+      - source ./utils/setup_env.sh
       - cd ./bin/ && ( make || make --trace VERBOSE=1 )
       - ldd ./slabcc
       - ./slabcc --help
@@ -24,12 +25,12 @@ pipeline:
   test:
     image: ${TOOLCHAIN%% *}
     commands:
-      - ./utils/setup_env.sh && . ./.env
+      - source ./utils/setup_env.sh
       - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
 
 when:
   path:
-    include: [ 'bin/*', 'src/**', 'tests/**', '.woodpecker/.slabcc.yml', 'utils/install_pkgs.sh' ]
+    include: [ 'bin/*', 'src/**', 'tests/**', '.woodpecker/.slabcc.yml', 'utils/setup_env.sh' ]
 
 depends_on:
   - lint

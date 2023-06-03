@@ -23,10 +23,5 @@ ENV PATH="${PATH}:/numdiff/bin"
 RUN zypper install -y make gzip gcc10 gcc10-c++ blas-devel lapack-devel fftw3-devel &&\
     zypper clean
 
-
-RUN groupadd --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
-
-USER ci_tool
- 	
 COPY --from=build_stage /numdiff /numdiff
 RUN numdiff --version

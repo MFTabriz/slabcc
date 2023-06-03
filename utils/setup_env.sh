@@ -57,4 +57,4 @@ if [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     apt update && apt install -y numdiff
 fi
 
-echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl" > .env && chmod +x .env
+export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl
