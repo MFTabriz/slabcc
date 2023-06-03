@@ -1,0 +1,28 @@
+matrix:
+  CONTAINER_BASE:
+    - ubuntu.16.04
+    - ubuntu.22.04
+    - almalinux.8.7
+    - opensuse.leap.15.4
+
+pipeline:
+  build:
+    image: gcr.io/kaniko-project/executor:debug
+    commands:
+      - echo ${CONTAINER_BASE}
+      - ls -lah ci/dockerfile.${CONTAINER_BASE}
+      - /kaniko/executor --context . --dockerfile ci/dockerfile.${CONTAINER_BASE} --destination "ttl.sh/${CI_COMMIT_SHA}:1h" --reproducible
+
+  # test:
+  #   image: ${TOOLCHAIN%% *}
+  #   commands:
+  #     - ./utils/install_pkgs.sh && . ./.env
+  #     - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
+
+when:
+  path:
+    include: [ 'ci/dockerfile.*', '.woodpecker/.ci_containers.yml' ]
+#    branch: master
+
+depends_on:
+  - lint
