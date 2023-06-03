@@ -19,12 +19,12 @@ RUN curl -s -S -L -o numdiff-${NUMDIFF_VERSION}.tar.gz https://de.freedif.org/sa
 
 FROM opensuse/leap:15.4
 ENV TZ="Europe/Berlin"
-ENV PATH="${PATH}:/numdiff"
+ENV PATH="${PATH}:/numdiff/bin"
 RUN zypper install -y make gzip gcc10 gcc10-c++ blas-devel lapack-devel fftw3-devel &&\
     zypper clean
 
 
-RUN addgroup --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
+RUN groupadd --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
 
 USER ci_tool
  	

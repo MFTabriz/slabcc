@@ -16,7 +16,7 @@ RUN curl -s -S -L -o numdiff-${NUMDIFF_VERSION}.tar.gz https://de.freedif.org/sa
 
 FROM almalinux:8.7 
 ENV TZ="Europe/Berlin"
-ENV PATH="${PATH}:/numdiff"
+ENV PATH="${PATH}:/numdiff/bin"
 RUN yum install -y dnf dnf-plugins-core && yum clean all
 RUN dnf config-manager --set-enabled powertools &&\
     dnf install -y make diffutils gcc gcc-c++ gcc-gfortran blas-devel lapack-devel fftw-devel &&\
