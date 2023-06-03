@@ -6,7 +6,7 @@ pipeline:
     environment:
       - CLANG_FORMAT_EXEC=clang-format-14
     commands:
-      - apt update && apt install -y "$CLANG_FORMAT_EXEC"
+      - apt update && apt install -y --no-install-recommends "$CLANG_FORMAT_EXEC"
       - ./utils/format_check.sh
     when:
       path:
@@ -61,4 +61,4 @@ pipeline:
       - trivy config --file-patterns 'dockerfile:dockerfile.*' --policy ci/.policy --severity "LOW,MEDIUM" ci/
     when:
       path:
-        include: [ 'ci/dockerfile.*' ]
+        include: [ 'ci/dockerfile.*', '.woodpecker/.lint.yml' ]
