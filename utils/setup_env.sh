@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# reads $TOOLCHAIN from environment, installs packages and exports following variables to .env file:
+# reads $TOOLCHAIN from environment, installs packages (if required) and exports following variables to .env file:
 ## CC
 ## CXX
 ## MKL
@@ -19,15 +19,6 @@ $TOOLCHAIN string syntax:
     exit 1
 fi
 
-install_numdiff () {
-    curl -o numdiff-5.9.0.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-5.9.0.tar.gz
-    tar -xvf numdiff-5.9.0.tar.gz
-    cd numdiff-5.9.0
-    mkdir -p bin && cd bin
-    CC=$_CC ../configure
-    make
-    cd ../..
-}
 _container="${TOOLCHAIN%% *}"
 _pkgs_compilers_list="${TOOLCHAIN##"$_container" }"
 read -ra _pkgs_compilers_array <<< "$_pkgs_compilers_list"
@@ -48,50 +39,22 @@ done
 _c_pkg=${_c_pkg_compiler%:*}
 _cxx_pkg=${_cxx_pkg_compiler%:*}
 _CC=${_c_pkg_compiler#*:}
+_CC_version=$($_CC --version | head -n 1)
 _CXX=${_cxx_pkg_compiler#*:}
+_CXX_version=$($_CXX --version | head -n 1)
 
 echo "TOOLCHAIN            : $TOOLCHAIN"
 echo "Container            : $_container"
 echo "Packages             : ${_pkgs_array[*]}"
 echo "C compiler package   : $_c_pkg"
 echo "C++ compiler package : $_cxx_pkg"
-echo "CC                   : $_CC"
-echo "CXX                  : $_CXX"
+echo "CC                   : $_CC ($_CC_version)"
+echo "CXX                  : $_CXX ($_CXX_version)"
 echo "MKL                  : $_mkl"
 
 _distro=${_container%:*}
-if [[ "$_distro" == 'ubuntu' ]]; then 
-    apt update
-    # shellcheck disable=SC2068
-    apt install -y make numdiff ${_pkgs_array[@]}
-
-elif [[ "$_distro" == 'almalinux' ]]; then
-    yum install -y dnf dnf-plugins-core && dnf config-manager --set-enabled powertools
-    # shellcheck disable=SC2068
-    dnf install -y make diffutils ${_pkgs_array[@]}
-    [[ -x "numdiff" ]] || install_numdiff
-    
-elif [[ "$_distro" == 'opensuse/leap' ]]; then
-
-    # shellcheck disable=SC2068
-    zypper install -y make ${_pkgs_array[@]}
-    if ! [[ -x "numdiff" ]]; then
-        zypper install -y gzip
-        zypper addrepo https://download.opensuse.org/repositories/Base:System/standard/Base:System.repo
-        zypper --gpg-auto-import-keys ref
-        zypper install -y tar
-        install_numdiff
-    fi
-elif [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
-    echo "Using MKL from OneAPI basekit..."
+if [[ "$_distro" == 'intel/oneapi-basekit' ]]; then
     apt update && apt install -y numdiff
-else
-    echo "ERROR: unsupported environment: $_distro"
-    exit 1
 fi
 
-echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl && export PATH=$(pwd)/numdiff-5.9.0/bin:$PATH" > .env && chmod +x .env
-
-echo "installed compilers:"
-printf "CC: " && $_CC --version | head -n 1
-printf "CXX: " && $_CXX --version | head -n 1
+echo "export CC=$_CC && export CXX=$_CXX && export MKL=$_mkl" > .env && chmod +x .env
