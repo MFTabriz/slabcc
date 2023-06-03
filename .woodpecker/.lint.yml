@@ -29,6 +29,9 @@ pipeline:
     group: nodep
     commands:
       - ./utils/git_check.sh
+    when:
+      path:
+        include: [ '.gitignore', '.woodpecker/.lint.yml' ]
 
   documentation:
     image: python:3
