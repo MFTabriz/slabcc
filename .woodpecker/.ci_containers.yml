@@ -17,7 +17,6 @@ pipeline:
 when:
   path:
     include: [ 'ci/dockerfile.*', '.woodpecker/.ci_containers.yml' ]
-#    branch: master
 
 depends_on:
   - lint
