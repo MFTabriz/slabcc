@@ -11,7 +11,7 @@ RUN curl -s -S -L -o numdiff-${NUMDIFF_VERSION}.tar.gz https://de.freedif.org/sa
     echo "${NUMDIFF_SHA512SUM}  numdiff-${NUMDIFF_VERSION}.tar.gz"| sha512sum -c && \
     tar -xvf numdiff-${NUMDIFF_VERSION}.tar.gz && cd numdiff-${NUMDIFF_VERSION}  && rm -f numdiff-${NUMDIFF_VERSION}.tar.gz &&\
     mkdir -p bin && cd bin && \
-    ../configure && make
+    CC=gcc ../configure && make
 
 
 FROM almalinux:8.7 
@@ -19,10 +19,10 @@ ENV TZ="Europe/Berlin"
 ENV PATH="${PATH}:/numdiff"
 RUN yum install -y dnf dnf-plugins-core && yum clean all
 RUN dnf config-manager --set-enabled powertools &&\
-    dnf install -y make diffutils gcc gcc-c++ gcc-gfortran blas-devel lapack-devel fftw-devel &&
+    dnf install -y make diffutils gcc gcc-c++ gcc-gfortran blas-devel lapack-devel fftw-devel &&\
     dnf clean all
 
-RUN addgroup --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
+RUN groupadd --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-home ci_tool
 
 USER ci_tool
  	

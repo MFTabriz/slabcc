@@ -11,8 +11,10 @@ pipeline:
     commands:
       - echo ${CONTAINER_BASE}
       - ls -lah ci/dockerfile.${CONTAINER_BASE}
-      - /kaniko/executor --context . --dockerfile ci/dockerfile.${CONTAINER_BASE} --destination "ttl.sh/${CI_COMMIT_SHA}:1h" --reproducible
-
+      - /kaniko/executor --context . --dockerfile ci/dockerfile.${CONTAINER_BASE} --destination "ttl.sh/${CI_COMMIT_SHA}:1h" --reproducible --use-new-run
+    when:
+      path:
+        include: [ 'ci/dockerfile.${CONTAINER_BASE}' ]
   # test:
   #   image: ${TOOLCHAIN%% *}
   #   commands:
