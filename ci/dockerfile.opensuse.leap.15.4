@@ -12,9 +12,9 @@ RUN zypper install -y make gcc10 gzip && \
 WORKDIR /numdiff
 RUN curl -s -S -L -o numdiff-${NUMDIFF_VERSION}.tar.gz https://de.freedif.org/savannah/numdiff/numdiff-${NUMDIFF_VERSION}.tar.gz && \
     echo "${NUMDIFF_SHA512SUM}  numdiff-${NUMDIFF_VERSION}.tar.gz"| sha512sum -c && \
-    tar -xvf numdiff-${NUMDIFF_VERSION}.tar.gz && cd numdiff-${NUMDIFF_VERSION} && rm -f numdiff-${NUMDIFF_VERSION}.tar.gz &&\
-    mkdir -p bin && cd bin && \
-    CC=gcc-10 ../configure && make
+    tar -xvf numdiff-${NUMDIFF_VERSION}.tar.gz && rm -f numdiff-${NUMDIFF_VERSION}.tar.gz
+WORKDIR /numdiff/bin
+RUN CC=gcc-10 ../numdiff-${NUMDIFF_VERSION}/configure && make
 
 
 FROM opensuse/leap:15.4
@@ -29,3 +29,4 @@ RUN groupadd --gid 20001 ci_tools && useradd --uid 20001 --gid 20001 --create-ho
 USER ci_tool
  	
 COPY --from=build_stage /numdiff /numdiff
+RUN numdiff --version
