@@ -13,8 +13,9 @@ matrix:
 pipeline:
   build:
     image: ${TOOLCHAIN%% *}
+    pull: true
     commands:
-      - source ./utils/setup_env.sh
+      - ./utils/setup_env.sh && . ./.env
       - cd ./bin/ && ( make || make --trace VERBOSE=1 )
       - ldd ./slabcc
       - ./slabcc --help
@@ -25,7 +26,7 @@ pipeline:
   test:
     image: ${TOOLCHAIN%% *}
     commands:
-      - source ./utils/setup_env.sh
+      - ./utils/setup_env.sh && . ./.env
       - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
 
 when:
