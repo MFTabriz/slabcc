@@ -1,0 +1,8 @@
+FROM ubuntu:16.04
+
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV TZ="Europe/Berlin"
+RUN sed -e 's/archive.ubuntu.com/ftp.gwdg.de\/pub\/linux\/debian/' -i /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends gcc-5 g++-5 libopenblas-dev fftw3-dev make numdiff && \
+    apt-get clean

@@ -1,23 +1,19 @@
 pipeline:
 
   source_style:
-    image: ubuntu:22.04
+    image: quay.io/meisam/slabcc_ci:latest
+    pull: true
     group: nodep
-    environment:
-      - CLANG_FORMAT_EXEC=clang-format-14
     commands:
-      - apt update && apt install -y "$CLANG_FORMAT_EXEC"
       - ./utils/format_check.sh
     when:
       path:
         include: [ 'src/**/*.cpp', 'src/**/*.hpp', 'utils/format_check.sh', '.clang-format', '.woodpecker/.lint.yml' ]
 
   shell_scripts:
-    image: archlinux:latest
+    image: quay.io/meisam/slabcc_ci:latest
     group: nodep
     commands:
-      - pacman -Syv
-      - pacman --noconfirm -S shellcheck
       - shellcheck --version
       - ls -la utils/*.sh && shellcheck utils/*.sh
     when:
@@ -25,16 +21,18 @@ pipeline:
         include: [ 'utils/*.sh', '.woodpecker/.lint.yml' ]
 
   git_repository:
-    image: quay.io/meisam/charliecloud:latest  ## todo: replace with ci tools container
+    image: quay.io/meisam/slabcc_ci:latest
     group: nodep
     commands:
       - ./utils/git_check.sh
+    when:
+      path:
+        include: [ '.gitignore', '.woodpecker/.lint.yml' ]
 
   documentation:
-    image: python:3
+    image: quay.io/meisam/slabcc_ci:latest
     group: nodep
     commands:
-      - pip3 install --no-cache-dir --requirement=utils/requirements.txt
       - ./utils/generate_docs.sh
       - doc8 docs/manual.rst --max-line-length 8000
     when:
@@ -51,4 +49,14 @@ pipeline:
       path:
         include: [ 'bin/makefile', 'tests/makefile', '.woodpecker/.lint.yml' ]
 
-
+  dockerfiles:
+    group: nodep
+    image: quay.io/meisam/trivy:latest
+    pull: true
+    commands:
+      - trivy -v
+      - trivy config --file-patterns 'dockerfile:dockerfile.*' --policy ci/.policy --severity "HIGH,CRITICAL" --exit-code 1 ci/
+      - trivy config --file-patterns 'dockerfile:dockerfile.*' --policy ci/.policy --severity "LOW,MEDIUM" ci/
+    when:
+      path:
+        include: [ 'ci/dockerfile.*', '.woodpecker/.lint.yml' ]
