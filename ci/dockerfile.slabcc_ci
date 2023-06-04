@@ -1,0 +1,12 @@
+FROM ubuntu:22.04
+
+COPY utils/requirements.txt requirements.txt
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV TZ="Europe/Berlin"
+
+RUN sed -e 's/archive.ubuntu.com/ftp.gwdg.de\/pub\/linux\/debian/' -i /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends clang-format-14 shellcheck git git-lfs python3-minimal python3-pip && \
+    apt-get clean
+
+RUN pip3 install --no-cache-dir --progress-bar off --requirement=requirements.txt && pip3 freeze

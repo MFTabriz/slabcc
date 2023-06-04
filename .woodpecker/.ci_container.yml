@@ -4,6 +4,7 @@ matrix:
     - ubuntu.22.04
     - almalinux.8.7
     - opensuse.leap.15.4
+    - slabcc_ci
 
 pipeline:
   build:
