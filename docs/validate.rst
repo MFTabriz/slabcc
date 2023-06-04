@@ -8,7 +8,7 @@ The current version of the slabcc has been `built and validated <https://ci.code
 
  - with GNU C/C++ compilers (5), OpenBLAS, FFTW
 
-- Ubuntu Linux 22.04 (`dockerfile <https://codeberg.org/meisam/slabcc/src/branch/ci_images/ci/dockerfile.ubuntu.22.04>`__)
+- Ubuntu Linux 22.04 (dockerfiles `1 <https://codeberg.org/meisam/slabcc/src/branch/ci_images/ci/dockerfile.ubuntu.22.04>`__ `2 <https://raw.githubusercontent.com/intel/oneapi-containers/master/images/docker/basekit/Dockerfile.ubuntu-22.04>`__)
 
  - with GNU C/C++ compilers (9,11), OpenBLAS, FFTW
  - with GNU C/C++ compilers (11), MKL (2023)
