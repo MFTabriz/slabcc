@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 COPY utils/requirements.txt requirements.txt
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV TZ="Europe/Berlin"
+ENV CLANG_FORMAT_EXEC="clang-format-14"
 
 RUN sed -e 's/archive.ubuntu.com/ftp.gwdg.de\/pub\/linux\/debian/' -i /etc/apt/sources.list && \
     apt-get update && \

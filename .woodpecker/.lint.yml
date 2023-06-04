@@ -2,6 +2,7 @@ pipeline:
 
   source_style:
     image: quay.io/meisam/slabcc_ci:latest
+    pull: true
     group: nodep
     commands:
       - ./utils/format_check.sh
