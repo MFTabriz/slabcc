@@ -1,5 +1,5 @@
-.. |Version| image:: https://img.shields.io/badge/version-0.8.5-blue.svg
-   :alt: Version 0.8.5
+.. |Version| image:: https://img.shields.io/badge/version-1.0.0-blue.svg
+   :alt: Version 1.0.0
    :target: https://codeberg.org/meisam/slabcc/releases
 .. |Manual| image:: https://img.shields.io/badge/Manual-HTML-informational
    :alt: HTML Manual
@@ -205,6 +205,7 @@ Known issues and limitations
 ==========================
 Release history highlights
 ==========================
+* 2023-06-05: version 1.0 - Improved build, error mitigation, and correctness checks
 * 2019-06-13: version 0.8 - OO redesign
 * 2019-05-14: version 0.7 - Added discretization error mitigation
 * 2019-04-04: version 0.6 - Added trivariate Gaussian model charge and selective charge optimization support
