@@ -23,8 +23,18 @@ pipeline:
       - ./slabcc --copyright
       - ./slabcc --man
 
-  test:
+  test_serial:
     image: ${TOOLCHAIN%% *}
+    environment:
+      - OMP_NUM_THREADS=1
+    commands:
+      - ./utils/setup_env.sh && . ./.env
+      - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
+
+  test_parallel:
+    image: ${TOOLCHAIN%% *}
+    environment:
+      - OMP_NUM_THREADS=4
     commands:
       - ./utils/setup_env.sh && . ./.env
       - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
