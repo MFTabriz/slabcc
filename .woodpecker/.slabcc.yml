@@ -39,6 +39,13 @@ pipeline:
       - ./utils/setup_env.sh && . ./.env
       - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
 
+  # TODO: write a make target with automatic output file generation from the available tests in makefile
+  verify_parallelization:
+    image: ${TOOLCHAIN%% *}
+    commands:
+      - diff slabcc.out slabcc.out.old2
+      - diff slabcc.out.old3 slabcc.out.old1
+
 when:
   path:
     include: [ 'bin/*', 'src/**', 'tests/**', '.woodpecker/.slabcc.yml', 'utils/setup_env.sh' ]
