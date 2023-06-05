@@ -134,12 +134,19 @@ std::string tolower(std::string in_str) noexcept {
 
 void prepare_output_file(std::string &output_file) {
   if (file_exists(output_file)) {
+    const int max_file_tests = 100000;
     int counter = 1;
     std::string backup_name = output_file + ".old" + to_string(counter);
 
     while (file_exists(backup_name)) {
       counter++;
       backup_name = output_file + ".old" + to_string(counter);
+      if (counter > max_file_tests) {
+        std::cerr << "ERROR: no suitable name was found for backing-up the old "
+                     "output file: "
+                  << output_file << std::endl;
+        break;
+      }
     }
 
     if (std::rename(output_file.c_str(), backup_name.c_str())) {
@@ -149,8 +156,17 @@ void prepare_output_file(std::string &output_file) {
       while (file_exists(new_name)) {
         counter++;
         new_name = output_file + ".new" + to_string(counter);
+        if (counter > max_file_tests) {
+          // cleanup your old files
+          std::cerr << "ERROR: output file '" << output_file
+                    << "' exists and no replacement was found!" << std::endl;
+          std::exit(2);
+        }
       }
       output_file = new_name;
+    } else {
+      std::cout << "The old output file '" << output_file << "' was renamed to "
+                << backup_name << std::endl;
     }
   }
 }

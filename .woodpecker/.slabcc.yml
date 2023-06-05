@@ -43,6 +43,7 @@ pipeline:
   verify_parallelization:
     image: ${TOOLCHAIN%% *}
     commands:
+      - cd tests
       - diff slabcc.out slabcc.out.old2
       - diff slabcc.out.old3 slabcc.out.old1
 
