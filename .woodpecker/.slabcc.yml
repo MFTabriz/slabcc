@@ -23,11 +23,29 @@ pipeline:
       - ./slabcc --copyright
       - ./slabcc --man
 
-  test:
+  test_serial:
     image: ${TOOLCHAIN%% *}
+    environment:
+      - OMP_NUM_THREADS=1
     commands:
       - ./utils/setup_env.sh && . ./.env
       - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
+
+  test_parallel:
+    image: ${TOOLCHAIN%% *}
+    environment:
+      - OMP_NUM_THREADS=4
+    commands:
+      - ./utils/setup_env.sh && . ./.env
+      - cd ./bin/ && ( make test || make test --trace VERBOSE=1 )
+
+  # TODO: write a make target with automatic output file generation from the available tests in makefile
+  verify_parallelization:
+    image: ${TOOLCHAIN%% *}
+    commands:
+      - cd tests
+      - diff slabcc.out slabcc.out.old2
+      - diff slabcc.out.old3 slabcc.out.old1
 
 when:
   path:

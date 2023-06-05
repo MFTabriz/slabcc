@@ -60,9 +60,9 @@ void INIReader::dump_compilation_info() const {
 #endif
 
 #include "compilerinfo.inc"
-log->debug("CXX: {}", cxx_compiler);
-log->debug("CXX version: {}", cxx_compilerver);
-log->debug("CXX flags: {}", cxx_compilerflags);
+  log->debug("CXX: {}", cxx_compiler);
+  log->debug("CXX version: {}", cxx_compilerver);
+  log->debug("CXX flags: {}", cxx_compilerflags);
 }
 
 void INIReader::dump_env_info() const {
@@ -75,6 +75,9 @@ void INIReader::dump_env_info() const {
       "SLURM_JOB_ID", "SLURM_SUBMIT_DIR", "SLURM_NTASKS", "SLURM_JOB_NODELIST"};
   const std::vector<std::string> pbs_vars{"PBS_JOBID", "PBS_O_WORKDIR",
                                           "PBS_NP", "PBS_NODEFILE"};
+  const std::vector<std::string> ci_vars{"CI_SYSTEM_NAME", "CI_SYSTEM_LINK",
+                                         "CI_SYSTEM_HOST", "CI_SYSTEM_VERSION",
+                                         "CI_JOB_NUMBER",  "CI_BUILD_NUMBER"};
 
   if (std::getenv(slurm_vars.at(0).c_str())) {
     for (const auto &var : slurm_vars) {
@@ -86,6 +89,14 @@ void INIReader::dump_env_info() const {
 
   if (std::getenv(pbs_vars.at(0).c_str())) {
     for (const auto &var : pbs_vars) {
+      if (const char *env_p = std::getenv(var.c_str())) {
+        log->debug(">> {}={}", var, env_p);
+      }
+    }
+  }
+
+  if (std::getenv(ci_vars.at(0).c_str())) {
+    for (const auto &var : ci_vars) {
       if (const char *env_p = std::getenv(var.c_str())) {
         log->debug(">> {}={}", var, env_p);
       }
@@ -121,8 +132,8 @@ void INIReader::dump_parsed() const {
   auto output_log = spdlog::get("output");
   std::sort(_parsed.begin(), _parsed.end(),
             [](const auto &lhs, const auto &rhs) {
-    return tolower(rhs.at(0)) > tolower(lhs.at(0));
-  });
+              return tolower(rhs.at(0)) > tolower(lhs.at(0));
+            });
   update_loggers();
   dump_compilation_info();
   dump_env_info();
@@ -154,7 +165,7 @@ void INIReader::dump_parsed() const {
     }
     if (!has_parsed) {
       if (std::find(deprecated_params.begin(), deprecated_params.end(),
-               param_in_file) != deprecated_params.end()) {
+                    param_in_file) != deprecated_params.end()) {
         log->warn("The parameter \"{}\" in deprecated! Please refer to this "
                   "version of the slabcc's manual for a complete list of the "
                   "supported parameters.",
