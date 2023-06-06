@@ -23,4 +23,4 @@ And by the cylindrical Bessel expansion of the Poisson equation as proposed in:
 
  Ravishankar Sundararaman, and Yuan Ping, First-principles electrostatic potentials for reliable alignment at interfaces and defects, The Journal of Chemical Physics 146, 104109 (2017) DOI: `10.1063/1.4978238 <https://doi.org/10.1063/1.4978238>`_
 
-| SLABCC have been initially developed for the `Bremen Center for Computational Materials Science (BCCMS) <https://www.uni-bremen.de/bccms>`_
+| SLABCC have been initially developed for the `Bremen Center for Computational Materials Science (BCCMS) <https://www.uni-bremen.de/bccms>`_. The manual is accessible `online <https://meisam.codeberg.page/slabcc/>`__.
