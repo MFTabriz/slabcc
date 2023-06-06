@@ -3,7 +3,7 @@ pipeline:
   build:
     image: quay.io/meisam/slabcc_ci:latest
     environment:
-      - STAGE_PATH=docs/deploy
+      - STAGE_PATH=docs/deploy/slabcc
     commands:
       - ./utils/generate_docs.sh
       - ./utils/build_pages.sh
@@ -15,12 +15,12 @@ pipeline:
     pull: true
     commands:
       - diagnose.py --version
-      - diagnose.py -v --root="$STAGE_PATH" --check-external --warn-http --domain=meisam.codeberg.page
+      - diagnose.py -v --root="$STAGE_PATH" --entry=slabcc/index.html --check-external --warn-http --domain=meisam.codeberg.page
 
   deploy:
     image: quay.io/meisam/slabcc_ci:latest
     environment:
-      - STAGE_PATH=docs/deploy
+      - STAGE_PATH=docs/deploy/slabcc
     commands:
       - ./utils/deploy_pages.sh #--verbose
     secrets: [ pages_pass ]
@@ -28,4 +28,4 @@ pipeline:
 when:
   path:
     include: [ 'docs/*', 'utils/deploy_pages.sh', '.woodpecker/.documentation.yml' ]
-  branch: master
+    branch: master
